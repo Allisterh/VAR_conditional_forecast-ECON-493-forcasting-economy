@@ -195,5 +195,31 @@ mse <- colMeans(e^2, na.rm = T)
 data.frame(h = 1:8, MSE = mse) %>%
   ggplot(aes(x = h, y = MSE)) + geom_point()
 
+#3.7 practie
+
+#1
+#usnetelec using the population change 
+(lambda <- BoxCox.lambda(usnetelec))
+autoplot(BoxCox(usnetelec,lambda))
+
+autoplot(usnetelec)
+usele <-window(usnetelec)'
+
+#enplanements
+(lambda <- BoxCox.lambda(enplanements))
+#> [1] 0.2654
+autoplot(BoxCox(enplanements,lambda))
+
+#WWWusage
+#go for the native for one
+
+wfc <- snaive(WWWusage)
+wf2 <- naive(WWWusage)
+
+checkresiduals(wfc)
+checkresiduals(wf2)
+#there is no different between those two 
+
+
 
 
