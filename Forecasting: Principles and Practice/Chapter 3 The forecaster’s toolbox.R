@@ -48,4 +48,42 @@ autoplot(goog200) +
 
 # 3.2 Transfomations and adjustments
 #Calendar addjustments
-d阿斯顿
+#For the data that has seaoson variance 
+#like a lot of shit 
+#I guess it will be useful for 
+
+#get the data set - the dire farm 
+#cbind - bind the data toether,
+dframe <- cbind(Monthly = milk,
+                DailyAverage = milk/monthdays(milk))
+autoplot(dframe, facet=TRUE) +
+  xlab("Years") + ylab("Pounds") +
+  ggtitle("Milk production per cow")
+
+#population 
+#inflation
+# math 
+# the box-c0x
+#the bias adjustment
+#the back-transformed point forecast will not be the mean of the forecast distribution. 
+#In fact, it will usually be the median of the forecast distribution
+
+#the different between the simple bck-transformed orcast givand the mean is called the bis
+#when we use the mean, rather than the median, we say the point forecasts have been bias-adjusted
+#the bis adjustmnet is not down by defalut in the forcast package, if you want your forcasts to be
+#mean rather than the median, use the argument biasedk= ture , when you s elect your box-cso tranfomation parameter.
+fc <- rwf(eggs, drift=TRUE, lambda=0, h=50, level=80)
+fc2 <- rwf(eggs, drift=TRUE, lambda=0, h=50, level=80,
+           biasadj=TRUE)
+autoplot(eggs) +
+  autolayer(fc, series="Simple back transformation") +
+  autolayer(fc2, series="Bias adjusted", PI=FALSE) +
+  guides(colour=guide_legend(title="Forecast"))
+
+
+#3.3 risdual diagnostics 回归诊断
+# The residuals in a times series model are what is left over after fitting a mdoe . for many times seris models 
+# the residuals are equal to the difference vetween the observaation and the corresonding fitted value
+# the the different berween the the fit value - the forcasting value
+
+#Th 
