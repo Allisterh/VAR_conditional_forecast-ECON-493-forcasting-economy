@@ -216,10 +216,24 @@ autoplot(BoxCox(enplanements,lambda))
 wfc <- snaive(WWWusage)
 wf2 <- naive(WWWusage)
 
+accuracy(wfc)
+accuarcy(wf2)
+
 checkresiduals(wfc)
 checkresiduals(wf2)
 #there is no different between those two 
 
+#bricksq
+
+checkresiduals(snaive(bricksq))
+checkresiduals(naive(bricksq))
+
+accuracy(snaive(bricksq))
+accuarcy(naive(bricksq))
+#the naive method is better 
+asdasd asd
+ad asd 
+S
 
 
 
