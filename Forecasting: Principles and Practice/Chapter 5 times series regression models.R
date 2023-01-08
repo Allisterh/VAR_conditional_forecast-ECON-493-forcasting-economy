@@ -46,4 +46,40 @@ uschange %>%
 
 
 #5.2 the least squares estimation
-  
+
+#what is the least squares estimation?
+  #It give the least value for hte sum of squared errors. Finding the best estimates of the coefficients s
+  #often called "fitting" the model to the data. or somtimes "learning or traning the model. 
+
+#The tslm() function fits a linear regression model to time series data. It is similar to the lm() 
+#function which is widely used for linear models, but tslm() provides additional facilities for handling time series.
+
+
+fit.consMR <- tslm(
+  Consumption ~ Income + Production + Unemployment + Savings, 
+  #the variance off consumption, income, production, unemplotmnet and saving
+  data=uschange)
+summary(fit.consMR)
+
+autoplot(uschange[,'Consumption'], series="Data") +
+  autolayer(fitted(fit.consMR), series="Fitted") +
+  xlab("Year") + ylab("") +
+  ggtitle("Percent change in US consumption expenditure") +
+  guides(colour=guide_legend(title=" "))
+
+
+cbind(Data = uschange[,"Consumption"],
+      Fitted = fitted(fit.consMR)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Data, y=Fitted)) +
+  geom_point() +
+  ylab("Fitted (predicted values)") +
+  xlab("Data (actual values)") +
+  ggtitle("Percent change in US consumption expenditure") +
+  geom_abline(intercept=0, slope=1)
+
+# the goodness of git
+  # a common way to summariee how well a linear regression model fits the data is via the coefiicent of determination
+  #R^2 value will nevver degree when adding an extra predictor to the model and this can leand to over fitting. 
+
+# The standard error of regression. 
