@@ -83,3 +83,30 @@ cbind(Data = uschange[,"Consumption"],
   #R^2 value will nevver degree when adding an extra predictor to the model and this can leand to over fitting. 
 
 # The standard error of regression. 
+
+
+# 5.3 evaluating the regression model 
+  
+df <- as.data.frame(uschange)
+df[,"Residuals"]  <- as.numeric(residuals(fit.consMR))
+p1 <- ggplot(df, aes(x=Income, y=Residuals)) +
+  geom_point()
+p2 <- ggplot(df, aes(x=Production, y=Residuals)) +
+  geom_point()
+p3 <- ggplot(df, aes(x=Savings, y=Residuals)) +
+  geom_point()
+p4 <- ggplot(df, aes(x=Unemployment, y=Residuals)) +
+  geom_point()
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow=2)
+
+
+cbind(Fitted = fitted(fit.consMR),
+      Residuals=residuals(fit.consMR)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Fitted, y=Residuals)) + geom_point()
+
+#some useful preditors
+  # trend variable
+    # A trend variable can be specified in the tslm() function using the trend predictor.
+  # dummy variable
+    
