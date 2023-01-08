@@ -1,4 +1,6 @@
 # ECON-493-forcasting-economy
-forcasting make me happy!
-this is a yest
-222
+forcasting make me happy! 
+I love codding!
+yeeeee
+coding is most funny things ever!
+yeeee
