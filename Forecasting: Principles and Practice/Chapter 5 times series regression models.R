@@ -109,4 +109,7 @@ cbind(Fitted = fitted(fit.consMR),
   # trend variable
     # A trend variable can be specified in the tslm() function using the trend predictor.
   # dummy variable
-    
+  
+#
+
+
