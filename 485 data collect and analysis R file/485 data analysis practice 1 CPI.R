@@ -1,15 +1,7 @@
 #"“The sad truth is that most evil is done by people who never make up their minds to be good or evil.” Hannah Arendt
 
 # Packages
-library (lubridate)    # Easy date conversions
-library (cansim)       # Get data from StatsCan
-library (OECD)         # Get data from OECD
-library (WDI)          # Get data from World Bank
-library (fredr)        # Get data from FRED
-library (mFilter)      # HP Filter
-library (neverhpfilter)# Hamilton Filter
-library (ggplot2)      # For Graphs
-library (tsbox)        # Convert xts to ts
+.
 
 source("functions/ts_cansim.R")
 

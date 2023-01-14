@@ -77,8 +77,3 @@ retaildata <- readxl::read_excel("data/retail.xlsx", skip=1)
 myts <- ts(retaildata[,"A3349873A"],
            frequency=12, start=c(1982,4))
 
-autoplot(myts)
-ggseasonplot(myts)
-ggsubseriesplot(myts)
-gglagplot(myts)
-ggseasonplot(a10, polar=TRUE)
