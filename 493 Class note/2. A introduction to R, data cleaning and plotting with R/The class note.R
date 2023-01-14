@@ -92,3 +92,44 @@ ggplot(data = cars, aes(x = speed, y = dist)) + geom_point() + geom_smooth(metho
 ddd 
 # R programming 
   
+#magrittr and piple (%>%)
+#log(mean(gapminder$pop))
+#gapminder$pop %>% mean() %>% log()
+#send gapminder$pop to mean(), then send the output of that to log().”
+
+#Stuff to the left of the piple is assed to the first argument of the function on the right, other argument go on the right in the funtion. 
+#if you ever find yourself piple a function where data are not the first argument use. in the data argument instead. 
+#gapminder %>% lm(pop ~ year, data = .)
+
+#No matter how long the chain of function is, assignment is always down at the top
+  #this is just a stylistic convention, you. can do assignment at the end of the chain. 
+
+#There are five key dplyr verbs that need to learn
+  #f1 filter: Filter (i.e. subset) rows based on their values.
+  #arrange: Arrange (i.e. reorder) rows based on their values.
+  # select: Select (i.e. subset) columns by their names:
+  # mutate: Create new columns.
+  #summarize: Collapse multiple rows into a single summary value.
+
+#filer() data frames
+  #gapminder %>% filter(country == "Canada" & year > 1980)
+  #give me rows where the coutnry is Canada and the year is after 1980
+  #or using 
+    #gapminder %>% filter(country == "Canada" | year > 1980)
+      #give me rows wher the country is Canada or the year is after 1980 or the both. 
+
+#%in% 
+  # we can use %in% but for matching any element in a vector 
+former_yugoslavia <-
+  c("Bosnia and Herzegovina", "Croatia","Montenegro", "Serbia", "Slovenia")
+yugoslavia <- gapminder %>%
+  filter(country %in% former_yugoslavia)
+tail(yugoslavia, 2)
+
+  #Along with filtering the data to see cetain rows, we might want to sort it
+    yugoslavia %>%
+arrange(year, desc(pop)) %>%
+  head(4)
+  
+  #Selemct
+      
