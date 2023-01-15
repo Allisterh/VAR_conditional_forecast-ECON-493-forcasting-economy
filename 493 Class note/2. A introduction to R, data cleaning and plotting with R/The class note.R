@@ -131,5 +131,17 @@ tail(yugoslavia, 2)
 arrange(year, desc(pop)) %>%
   head(4)
   
-  #Selemct
-      
+#selection function 
+  #selection function 
+    
+    
+    ction
+     function 
+      #Not only can we subset rows, but we can inculde specific columns (and put them into hte order listed)
+      #using the slection
+  # yugoslavia %>%
+    select(country, year, pop) %>%
+      head(4)
+    
+  #Select(what())
+      #An especially useful for selecton is where(which can be used for selection colunus )
