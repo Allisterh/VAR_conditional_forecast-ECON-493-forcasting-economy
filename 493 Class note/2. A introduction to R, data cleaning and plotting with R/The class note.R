@@ -207,6 +207,7 @@ arrange(year, desc(pop)) %>%
     #categorical variables or variables from combinations of other
     #variables
     
-    #note here: ifsle 
+    #note here: ifsle
+    #ths is test
     
     
