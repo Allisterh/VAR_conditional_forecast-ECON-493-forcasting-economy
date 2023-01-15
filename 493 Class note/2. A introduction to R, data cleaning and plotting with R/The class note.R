@@ -2,6 +2,13 @@ install.packages("tidyverse")
 install.packages("lmtest")
 library("tidyverse")
 library("ggplot2")
+install.packages("gapminder")
+
+# load library
+library("gapminder")
+library("tidyverse")
+library("ggplot2")
+
 
 #the tip
   #i wantto have the same bersion of hte software as my student
@@ -132,16 +139,74 @@ arrange(year, desc(pop)) %>%
   head(4)
   
 #selection function 
-  #selection function 
+  #selection function has a variety of helper functions like start_with()
+  #end_with() and matches(), or can be given a range of contiguous columns starver:end
+  
+#Selective(where())
+    #An especially useful helper for select is where() which can be used
+    #for selecting columns based on functions that check column types.
     
-    
-    ction
-     function 
-      #Not only can we subset rows, but we can inculde specific columns (and put them into hte order listed)
-      #using the slection
-  # yugoslavia %>%
-    select(country, year, pop) %>%
+    gapminder %>%
+      select(where(is.numeric)) %>%
       head(4)
     
-  #Select(what())
-      #An especially useful for selecton is where(which can be used for selection colunus )
+  # Renaming columns with select()
+    #We can rename columns using select(), but that drops everything that isn't mentioned 
+    yugoslavia %>%
+      select(Life_Expectancy = lifeExp) %>%
+      head(4)
+      #choising the yougolsaveis, rename the life_expenctancy = life exp 
+    
+    
+  #rename colums with rename()
+    # rename() renames variables using the same syntax as select()
+      #without dropping unmentioned variables.
+    
+    yugoslavia %>%
+    select(country, year, lifeExp) %>%
+      rename(Life_Expectancy = lifeExp) %>%
+      head(4)
+
+  #Mutate()
+      #In dplyr, you can add new columns to a data frame using mutate().
+    yugoslavia %>%
+      filter(country == "Serbia") %>%
+      select(year, pop, lifeExp) %>%
+      mutate(pop_million = pop / 1000000) %>%
+      head(2)
+    
+  #ifelse()
+     #A common function used in mutate() is ifelse(). It returns a
+      #vector of values depending on a logical test.
+    
+    ifelse(test = x==y, yes = first_value , no = second_value)
+    #output from ifelse() if x==y is
+      #True: first_value
+      #Faluse: second_value
+      #Na:NA
+    
+    #example
+    example <- c(1, 0, NA, -2)
+    ifelse(example > 0, "Positive", "Not Positive")
+  
+  #ifelse() example 
+    yugoslavia %>%
+    mutate(
+      short_country =
+        ifelse(country == "Bosnia and Herzegovina","B and H", as.character(country))
+    ) %>%
+      select(country, short_country, year, pop) %>%
+      arrange(year, short_country) %>%
+      head(2)
+    
+  ######################################################################################################################################### 
+    #case_when()
+      #case_when() performs multiple ifelse() operations at the same
+    #time. case_when() allows you to create a new variable with values
+    #based on multiple logical statements. This is useful for making
+    #categorical variables or variables from combinations of other
+    #variables
+    
+    #note here: ifsle 
+    
+    
