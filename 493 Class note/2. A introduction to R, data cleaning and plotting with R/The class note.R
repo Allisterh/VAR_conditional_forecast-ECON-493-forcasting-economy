@@ -198,8 +198,8 @@ arrange(year, desc(pop)) %>%
       select(country, short_country, year, pop) %>%
       arrange(year, short_country) %>%
       head(2)
-    
-  ######################################################################################################################################### 
+
+######################################################################################################################################### 
     #case_when()
       #case_when() performs multiple ifelse() operations at the same
     #time. case_when() allows you to create a new variable with values
@@ -207,9 +207,45 @@ arrange(year, desc(pop)) %>%
     #categorical variables or variables from combinations of other
     #variables
     
-    #note here: ifsle
-    #ths is test
-    #this is test when this shit will show up on github 20:23:50
+    #note here: ifelse can only deal withone but the case_when() can do many! 
     
+  
+    gapminder  %>% #The dataset of gapmind 
+      mutate( #mutate() adds new variables and preserves existing ones
+        gdpPercap_ordinal = case_when( 
+          gdpPercap < 700 ~ "low", 
+          gdpPercap >= 700 & gdpPercap < 800 ~ "moderate",
+          TRUE ~ "high" )
+      ) %>%
+      slice(6:9) # get rows 6 through 9
     
+#######################################################################################################################################
+    
+    #Summarize()
+    
+    #summarize() takes your column(s) of data and computes something
+    #using every row:
+      #count how many rows there are
+    #calculate the mean
+    #compute the sum
+    #obtain a minimum or maximum value
+    
+    #You can use any function in summarize() that aggregates multiple
+   #values into a single value (like sd(), mean(), or max()).
+    
+  #Summarize() example
+    yugoslavia %>% filter(year==1982)
+    
+    yugoslavia %>% filter(year==1982) %>%
+      summarize(
+        n_obs = n(),
+        total_pop = sum(pop),
+        mean_life_exp = mean(lifeExp),
+        range_life_exp = max(lifeExp) - min(lifeExp)
+      )
+  #For the year 1982, let’s get the number of observations, total
+  #population, mean life expectancy, and range of life expectancy for
+  # former Yugoslavian countries.
+
+##############################################################################################################################################  
     
