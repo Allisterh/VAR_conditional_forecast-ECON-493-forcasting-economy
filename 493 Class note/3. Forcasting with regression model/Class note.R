@@ -126,3 +126,11 @@ CV(model3)
 
 #Mean suqred error
    #in the regression setting we can use the means equared erorr 
+  # this is the most the useful,
+
+#theeree iotuons 
+  #the valdation set approach 
+ # leave one out cress valiadation 
+ # k-fokd creoss validation
+
+
