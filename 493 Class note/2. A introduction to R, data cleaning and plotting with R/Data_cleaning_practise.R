@@ -366,3 +366,6 @@ lines(inter, col="steelblue2", lwd=2)
 inter <- gcIntermediate(sea,  yeg, n=50, addStartEnd=TRUE, breakAtDateLine=F)
 lines(inter, col="steelblue2", lwd=2)
 
+#waht we need to do
+this is the what we need to do
+#this 
