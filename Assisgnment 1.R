@@ -142,26 +142,46 @@ dev.off()
          
 ################################################################################################################################
          
-#2-f-2 repeat the (d) and find the value of lambda beta hat
+#2-f-2-1 repeat the (d) and find the value of lambda beta hat
          
- eq = function(b){(2-b)^2 + b^2}
-x <- seq(-10,10, by=0.001)
+eq = function(b){0.5 * b^2}
+x <- seq(-5,5, by=0.001)
 y <- eq(x)
 df <- data.frame(x,y)
-         ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
          
-         ##saving the graph
-         pdf("pics/TieMa_homework1_Q2_3.pdf", height = 9, width = 12)
-         ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
-         dev.off()
+ ##saving the graph
+pdf("pics/TieMa_homework1_Q2_f_2.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
          
          
              
-###############################################################################################################################  
+#############################################################################################################################################
+#2-f-2-1 lambda ridge = 0.5 and redue the question d
+
+#first, let's plot the graphy
+
+#(2-b)^2 + 0.5*b^2
+
+eq = function(b){(2-b)^2 + 0.5*b^2}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q2_f_repeat_question_d_plot_the graphy.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
          
-         
-         
-         
+#find the value of lambda beta hat
+
+D ((2-x)^2 + (0.5*x^2) ~x)
+
+
+#############################################################################################################################################     
          
          
          
