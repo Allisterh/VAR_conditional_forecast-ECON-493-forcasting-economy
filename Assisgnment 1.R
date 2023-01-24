@@ -34,9 +34,13 @@ DW = "#003b6f"
 #2-1 plot (2-b)^2 
   
   eq = function(b){(2-b)^2}
+  #set the equation
   x <- seq(-100,100, by=0.01)
+  #give the x a group of number from -100 to 100
   y <- eq(x)
+  #y is equal to the number of that processed by the function
   df <- data.frame(x,y)
+  #make it as data frame
   ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
   #
   #faster way
@@ -48,6 +52,119 @@ DW = "#003b6f"
   ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
   dev.off()
   
+ #2-c
+  eq = function(b){b^2}
+  x <- seq(-100,100, by=0.01)
+  y <- eq(x)
+  df <- data.frame(x,y)
+  ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+  
+  ##saving the graph
+  pdf("pics/TieMa_homework1_Q2_2.pdf", height = 9, width = 12)
+  ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+  dev.off()
+ 
+  rm(list = ls()) 
+ 
+   
+#2-d 
+  #plot the graphy of (2-b)^2 + b^2
+  
+  
+  eq = function(b){(2-b)^2 + b^2}
+  x <- seq(-10,10, by=0.001)
+  y <- eq(x)
+  df <- data.frame(x,y)
+  ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+  
+  ##saving the graph
+  pdf("pics/TieMa_homework1_Q2_3.pdf", height = 9, width = 12)
+  ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+  dev.off()
+  
+  
+# 2-e
+  #trying using R to do the calculise
+  install.packages("mosaicCalc")
+  library(mosaicCalc)
+  #credit: https://cran.r-project.org/web/packages/mosaicCalc/vignettes/Calculus_with_R.html
+
+ #D(a / x ~ x) #dx/db(a/x)
+ #D(x^2 ~ x)
+ #function (x) 
+  #2 * x
+
+D((((6-b)^2) + b^2) ~ b)
+
+    #the function
+    #function (b) 
+    # 4 * (b - 1)
+
+# let 4 * (b - 1) = 0 to find the beta hat ridge
+# 4b - 4 = 0
+
+uniroot.all(function(x,a,b) a*x+b,a=4,b=4,lower=-10,upper=10,tol=0.0001)
+#find al the root
+
+#2.e
+  #the answer is -1
+
+
+################################################################################################################################
+#2 -f 
+  #let the lambda ridge = 0.5 re do the question c and d
+
+  #plot the function 0.5 * b^2
+  
+eq = function(b){0.5*b^2}
+x <- seq(-5,5, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q2_f.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+  
+  #find the value of lambda beta hat
+    
+         D(0.5 * b^2 ~ b)
+
+#the function
+#function (b) 
+# b
+
+# let  b = 0 to find the beta hat ridge
+
+# lambda beta hat = 0
+         
+################################################################################################################################
+         
+#2-f-2 repeat the (d) and find the value of lambda beta hat
+         
+ eq = function(b){(2-b)^2 + b^2}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+         ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+         
+         ##saving the graph
+         pdf("pics/TieMa_homework1_Q2_3.pdf", height = 9, width = 12)
+         ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+         dev.off()
+         
+         
+             
+###############################################################################################################################  
+         
+         
+         
+         
+         
+         
+         
 #2-2 
 #2.3
   
@@ -75,8 +192,6 @@ DW = "#003b6f"
   
   ridge.mod <- glmnet(x, y, alpha = 0, lambda = 2)
 
-  
-  
   
   grid <- 10^(seq(3, -3, length = 100))
   ridge.mod <- glmnet(x, y, alpha = 0, lambda =grid )

@@ -1,0 +1,33 @@
+The files MALES1987 contain 545 observations of your working males in 
+the United States, for the year 1987. 
+
+The following variables are included:
+
+black:   dummy, 1 if black
+hisp:    dummy, 1 if Hispanic
+mar:     dummy, 1 if married
+exper:   experience in years
+exper2:  experience squared
+hours:   hours of work (not used)
+school:  years of schooling
+union:   dummy, 1 if union member
+logwage: natural logarithm of wage rate per hour
+
+Summary statistics:
+
+
+   Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+       BLACK |       545    .1155963     .320034          0          1
+       EXPER |       545    10.01468    1.654918          7         18
+        HISP |       545    .1559633    .3631539          0          1
+       HOURS |       545    45.28317    10.36344   12.98077         96
+         MAR |       545    .6146789    .4871182          0          1
+-------------+--------------------------------------------------------
+      SCHOOL |       545    11.76697    1.747585          3         16
+       UNION |       545    .2623853    .4403351          0          1
+     LOGWAGE |       545    1.866479      .46689  -.1910087   3.343164
+      EXPER2 |       545    103.0275    37.79887         49        324
+
+
+Note: this is a subset of the data used in Chapter 10. 
