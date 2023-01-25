@@ -1,11 +1,12 @@
 #################################################################################################################
 #Tie Ma
 #student number: 1537905
+#this code need to be cleaned up....
 #################################################################################################################
 
 #Clean the enviroment
-rm(list = ls())
-dev.off()
+#rm(list = ls())
+#dev.off()
 
 #set the direction
 setwd("~/SynologyDrive/nn/ECON-493-forcasting-economy/homework 1")
