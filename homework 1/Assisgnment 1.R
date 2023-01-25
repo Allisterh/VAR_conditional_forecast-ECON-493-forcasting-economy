@@ -415,11 +415,14 @@ y1 <- x1 + e
 x1_standardized <- scale(x1)
 model_one_data_set <- data.frame(x1_standardized, y1)
 model_one_with_data_set <- lm(y1 ~ x1_standardized, data = model_one_data_set)
-cv.glmnet()
-cv.glm()
+
+
+cv.error.2 <- rep(NA,3)
 model_one_with_data_set.cv <- glm(y1 ~ x1_standardize)
-cv.error.2[1] <- cv.glmnet(data, model_one.cv, K = 10)$delta[1]
-cv.glm(model_one_data_set, model_one_with_data_set.cv, K=5)$delta[1]
+
+cv.error.2[1] <-cv.glm(model_one_data_set, model_one_with_data_set.cv, K=5)$delta[1]
+
+
 
 # model 2
 model2.cv <- glm(y ~ x1 + x2 + x3)
