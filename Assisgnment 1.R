@@ -377,18 +377,6 @@ x4 <- x1^4
 y4 <- x1 + 2*x1^2 + x2 + x3 + x4+ rnorm(n.obs)
 model_four <- lm(y ~ x1+x2+x3)
 
-
-
-#library("fpp2")
-#cv(model_one)
-#its not working!!!!!!!!!
-
-model_one_AIC <- AIC(model_one)
-model_two_AIC <- AIC(model_two)
-model_three_AIC <- AIC(model_three)
-model_four_AIC <- AIC(model_four)
-
-
 CV(model_one)
 dd
 
