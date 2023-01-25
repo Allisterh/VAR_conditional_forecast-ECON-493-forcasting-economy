@@ -18,10 +18,16 @@ install.packages("r2symbols")
 install.packages("ggplot2")
 install.packages("fpp2")
 install.packages("glmnet")
+install.packages("tidyr")
+install.packages("lmtest")
 library("r2symbols")
 library("ggplot2")
 library("fpp2")
 library("glmnet")
+library("mosaicCalc")
+library("tidyr")
+library("lmtest")
+library("boot")
 
 #doctor who blue 
 DW = "#003b6f"
@@ -178,53 +184,211 @@ dev.off()
          
 #find the value of lambda beta hat
 
-D ((2-x)^2 + (0.5*x^2) ~x)
+D((2-x)^2 + (0.5*x^2) ~x)
+#function (x) 
+#3 * x - 4
+
+#let 3x-4=0, then we can get the lambda beta hat is 4/3
+
+#############################################################################################################################################     
+
+
+
+
+
 
 
 #############################################################################################################################################     
-         
-         
-         
-#2-2 
-#2.3
-  
-  #simulate data 
-  #n.obs <- 200
-  #e <- rnorm(n.obs, mean = 0, sd = 2)
-  #x <- seq(-99,100, by=1)
-  #eq = function(b){2*b+e}
-  #y <- eq(x)
-  #x <- scale(x)
-  #df <- data.frame(x,y)
-  #z <-as.matrix(df)
-  
-  # simulate data
-  n.obs <- 200
-  n.var <- 2
-  #e
-  e<- rnorm(n.obs, mean = 0, sd = 2) # errors
-  x <- matrix(0, n.obs, n.var)
-  for (i in 1:n.var){ x[,i] <- rnorm(n.obs) }
-  #y
-  <- 2*x[,1] + e
-  x <- scale(x)
-  data.all <- data.frame(x,y)
-  
-  ridge.mod <- glmnet(x, y, alpha = 0, lambda = 2)
+#exercise 3
+############################################################################################################################################# 
 
-  
-  grid <- 10^(seq(3, -3, length = 100))
-  ridge.mod <- glmnet(x, y, alpha = 0, lambda =grid )
-  ###############################################################################################################################
-  rm(list = ls())
-  dev.off()
-  
-  #exercise 4
-  #simulated data set
-  set.seed(1234)
-  n.obs <- 100
-  x1 <- rnorm(n.obs)
-  y <- x1 - 2*x1^2 + rnorm(n.obs)
+#3-a
 
-#4.1 
-    plot(x1,y)
+eq = function(b){(2-b)^2}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_a.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+
+
+############################################################################################################################################# 
+
+
+#3-c
+
+eq = function(b){abs(b)}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_C.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+############################################################################################################################################# 
+
+#3-d
+
+eq = function(b){(2-b)^2 + abs(b)}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_d.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+############################################################################################################################################# 
+
+#3-e
+
+D((2-b)^2 + abs(b) ~ b)
+
+#function (b) 
+#sign(b) + 2 * b - 4
+#not enough math knowledge deal in r, i will go for handwriting
+
+############################################################################################################################################# 
+
+#3-f-1 labamta = 0.5 repeat c and d
+
+  #c
+eq = function(b){0.5*abs(b)}
+x <- seq(-5,5, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_f_1.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+
+  #d
+eq = function(b){(2-b)^2 + 0.5*abs(b)}
+x <- seq(-5,5, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_f_2.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+############################################################################################################
+#Q3-g labamta = 4 repeat c and d
+
+
+#c
+eq = function(b){4 * abs(b)}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_g_1.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+
+#d
+eq = function(b){(2-b)^2 + 4*abs(b)}
+x <- seq(-10,10, by=0.001)
+y <- eq(x)
+df <- data.frame(x,y)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+
+
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_g_2.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+#################################################################################################################
+
+
+
+#################################################################################################################
+#Exercise 4 
+
+#generate the simulated data
+#################################################################################################################
+set.seed(1234)
+n.obs <- 100
+x1 <- rnorm(n.obs)
+y <- x1 - 2*x1^2 + rnorm(n.obs)
+#################################################################################################################
+#4-b
+df <-data.frame(x1,y)
+plot(df, main="Question 4-B", 
+     xlab="x1 ", ylab="y1 ", pch=1,col='#003b6f')
+#the ggplot not working here.....
+#save the graphy
+pdf("pics/TieMa_homework1_Q4_B.pdf", height = 9, width = 12)
+plot(df, main="Question 4-B", 
+     xlab="x1 ", ylab="y1 ", pch=1,col='#003b6f')
+
+#clean the enviroment!
+rm(list = ls())
+dev.off()
+#4-b-2
+  #From the graphy we could find nonlinear relationship between x1 and y
+#################################################################################################################
+#Q4-c
+
+######################################################
+#generate the simulated data
+set.seed(1234)
+n.obs <- 100
+x1 <- rnorm(n.obs)
+y <- x1 - 2*x1^2 + rnorm(n.obs)
+######################################################
+y <- x1 + 2*x1^2 + rnorm(n.obs)
+model_one <- lm(y ~ x1)
+
+x2 <- x1^2
+y2 <- x1 + 2*x1^2 + x2 + rnorm(n.obs)
+model_two <- lm(y ~ x1+x2)
+
+x3 <- x1^3
+y3 <- x1 + 2*x1^2 + x2 + x3 + rnorm(n.obs)
+model_three <- lm(y ~ x1+x2+x3)
+
+x4 <- x1^4 
+y4 <- x1 + 2*x1^2 + x2 + x3 + x4+ rnorm(n.obs)
+model_four <- lm(y ~ x1+x2+x3)
+
+
+
+#library("fpp2")
+#cv(model_one)
+#its not working!!!!!!!!!
+
+model_one_AIC <- AIC(model_one)
+model_two_AIC <- AIC(model_two)
+model_three_AIC <- AIC(model_three)
+model_four_AIC <- AIC(model_four)
+
+
+CV(model_one)
+dd
+
