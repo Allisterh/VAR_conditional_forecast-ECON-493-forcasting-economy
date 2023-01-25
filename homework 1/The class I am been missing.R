@@ -138,4 +138,10 @@ data.all <- data.frame(x,y)
   plot(coef.ols)
   
   
+  #for the lasso is popular, do not dod hte thigns do ing the hundard of reression 
+  # something interest may rising eher
+  # any question? 
+  
+  
+  
   
