@@ -20,11 +20,11 @@ install.packages("fpp2")
 install.packages("glmnet")
 install.packages("tidyr")
 install.packages("lmtest")
-library("r2symbols")
+#library("r2symbols") #各种奇形怪状的符号
 library("ggplot2")
 library("fpp2")
 library("glmnet")
-library("mosaicCalc")
+library("mosaicCalc")#微积分计算器！
 library("tidyr")
 library("lmtest")
 library("boot")
@@ -362,21 +362,74 @@ n.obs <- 100
 x1 <- rnorm(n.obs)
 y <- x1 - 2*x1^2 + rnorm(n.obs)
 ######################################################
-y <- x1 + 2*x1^2 + rnorm(n.obs)
+#beta one? 
+
+set.seed(1234)
+n.obs <- 100
+x1 <- rnorm(n.obs)
+x2 <- x1^2
+x3 <- x1^3
+x4 <- x1^4 
+
+y <- x1 + rnorm(n.obs)
 model_one <- lm(y ~ x1)
 
-x2 <- x1^2
-y2 <- x1 + 2*x1^2 + x2 + rnorm(n.obs)
+
+y2 <- x1 + x2 + rnorm(n.obs)
 model_two <- lm(y ~ x1+x2)
 
-x3 <- x1^3
-y3 <- x1 + 2*x1^2 + x2 + x3 + rnorm(n.obs)
+y3 <- x1 + x2 + x3 + rnorm(n.obs)
 model_three <- lm(y ~ x1+x2+x3)
 
-x4 <- x1^4 
-y4 <- x1 + 2*x1^2 + x2 + x3 + x4+ rnorm(n.obs)
+y4 <- x1 + x2 + x3 + x4 + rnorm(n.obs)
 model_four <- lm(y ~ x1+x2+x3)
 
-CV(model_one)
-dd
+邪恶 <- rbind(CV(model_one), CV(model_two), CV(model_three), CV(model_four))
+rownames(邪恶) <- c('Model1', 'Model2', 'Model3', 'Model4')
+邪恶
+
+             #CV       AIC      AICc      BIC     AdjR2
+#Model1 0.9397969 -4.002324 -3.752324 3.813186 0.5747718
+#Model2 0.9435032 -3.502215 -3.081163 6.918465 0.5767836
+#Model3 0.9937286 -4.478856 -3.840558 8.546995 0.5849164
+#Model4 0.9937286 -4.478856 -3.840558 8.546995 0.5849164
+
+#by compare AIC and BIC we can concluded following
+#Model 2 > model 3/model 4 > model 1
+
+#################################################################################################################
+# Q4-V Compute the k-fold cross-validation errors that result from fitting the four models. Use
+#k = 5. Which model would you prefer? Is this what you expected? Explain your answer.
+
+
+# model_one
+  #some thing I need for generate the data
+  #now, its time to create the matrix!
+
+set.seed(1234)
+n.obs <- 100
+e <- rnorm(n.obs)
+x1 <- matrix(0,n.obs, 1)
+for (i in 1:1){ x1[,i] <- rnorm(n.obs) }
+y1 <- x1 + e
+x1_standardized <- scale(x1)
+model_one_data_set <- data.frame(x1_standardized, y1)
+model_one_with_data_set <- lm(y1 ~ x1_standardized, data = model_one_data_set)
+cv.glmnet()
+cv.glm()
+model_one_with_data_set.cv <- glm(y1 ~ x1_standardize)
+cv.error.2[1] <- cv.glmnet(data, model_one.cv, K = 10)$delta[1]
+cv.glm(model_one_data_set, model_one_with_data_set.cv, K=5)$delta[1]
+
+# model 2
+model2.cv <- glm(y ~ x1 + x2 + x3)
+cv.error.2[2] <- cv.glm(data, model2.cv, K = 10)
+# model 3
+model3.cv <- glm(y ~ x1 + x2 + x3 + x4 + x5)
+cv.error.2[3] <- cv.glm(data, model3.cv, K = 10)$delta[1]
+# results
+print(cv.error.2)
+
+
+
 
