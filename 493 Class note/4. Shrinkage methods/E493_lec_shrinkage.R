@@ -352,7 +352,7 @@ coef3 <- coef(model3)
 table1 <- matrix(rep(NA),12,3)
 table1[,1] <- coef1
 table1[c(1,2,4,6),2] <- coef2
-table1[,3] <- coef3[,1]
+table1[,3] <- c[oef3,1]
 table1 <- data.frame(table1)
 colnames(table1) <- c("ols", "bss", "lasso")
 rownames(table1) <- rownames(coef3)

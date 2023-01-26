@@ -15,12 +15,6 @@ setwd("~/SynologyDrive/nn/ECON-493-forcasting-economy/homework 1")
 dir.create("pics")
 
 #Lode the all package that necessary.
-install.packages("r2symbols")
-install.packages("ggplot2")
-install.packages("fpp2")
-install.packages("glmnet")
-install.packages("tidyr")
-install.packages("lmtest")
 #library("r2symbols") #各种奇形怪状的符号
 library("ggplot2")
 library("fpp2")
@@ -94,7 +88,6 @@ dev.off()
 
 # 2-e
 #trying using R to do the calculise
-install.packages("mosaicCalc")
 library(mosaicCalc)
 #credit: https://cran.r-project.org/web/packages/mosaicCalc/vignettes/Calculus_with_R.html
 
@@ -112,7 +105,7 @@ D((((6-b)^2) + b^2) ~ b)
 # let 4 * (b - 1) = 0 to find the beta hat ridge
 # 4b - 4 = 0
 
-uniroot.all(function(x,a,b) a*x+b,a=4,b=4,lower=-10,upper=10,tol=0.0001)
+#uniroot.all(function(x,a,b) a*x+b,a=4,b=4,lower=-10,upper=10,tol=0.0001)
 #find al the root
 
 #2.e
@@ -473,7 +466,6 @@ rm(list = ls())
 #Exercise 5-a
 #Create a matrix X (545 × 9) with the 7 explanatory variables described above plus experience and schooling squared. 
 #Scale the matrix X such that all variables have the same variance. Create a vector y (545 × 1) with log wage.
-install.packages("leaps")
 library("leaps")
 
 #lode the data
@@ -553,6 +545,8 @@ head(X_final_version)
 y_THE_LOGWAGE <- X_Scale$LOGWAGE_scale
 data_question5 <- data.frame(x,y_THE_LOGWAGE)
 
+#check the data
+head(data_question5, 5)
 
 # ridge regression for different values of lambda
 evil_grid <- 10^seq(3, -3, length = 100)
@@ -563,21 +557,109 @@ plot(ridge.mod, xvar = "lambda", label = TRUE)
 
 
 ##################################################################################################################################
-#Q5-C
+#Q5-C-1 Estimate the parameters by OLS using the full sample.
 
-# cr
-paerameters_Q5 <- matrix(rep(NA),12,2)
+# create a table
+parameters_of_Q5<- matrix(rep(NA),9,1)
 
-table1[,1] <- coef1
-table1[c(1:6),2] <- coef2
-table1[,3] <- coef3[,1]
-table1 <- data.frame(table1)
-colnames(table1) <- c("ols", "bss", "lasso")
-rownames(table1) <- rownames(coef3)
-table1
+coef1 <- coef(lm(y_THE_LOGWAGE ~ x, data= data_question5))
+
+#fill it with data
+parameters_of_Q5[,1] <- coef1
+
+#put the row name 
+rownames(parameters_of_Q5) <- colnames(data_question5)
+colnames(parameters_of_Q5)[1] <-'OLS'
+
+#summon the table!
+print(parameters_of_Q5)
 
 
+##################################################################################################################################
+#Q5-C-2 Which variables are statistically significant at the 10% level?
 
+#yes, its just same things..
+#I realize I was over thigns again....
+
+something <- lm(y_THE_LOGWAGE ~ x, data= data_question5)
+something_summary <- summary(something)
+print(something_summary)
+
+
+#the school2_scale are statistically signifcant at 10% level (squared school 1 plus scale)
+
+
+##################################################################################################################################
+#Q5-D Based on the BIC and BIC,  which variables are included in the best model?
+
+
+regfit.all <- regsubsets(y_THE_LOGWAGE~. , data_question5, nvmax = 10)
+something_summary_1<- summary(regfit.all)
+
+
+par(mfrow=c(1,2))
+plot(something_summary_1$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+m.cp <- which.min(something_summary_1$cp)
+plot(regfit.all, scale = "bic")
+layout(1)
+
+pdf("pics/TieMa_homework1_Q5_d.pdf", height = 9, width = 12)
+par(mfrow=c(1,2))
+plot(something_summary_1$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+m.cp <- which.min(something_summary_1$cp)
+plot(regfit.all, scale = "bic")
+layout(1)
+dev.off()
+
+##################################################################################################################################
+#Q5 -E Estimate the lasso coefficients using the full sample. Are any of the coefficients forced
+#to be exactly 0? Compare your results with OLS and best subset selection.
+  
+#evil_grid <- 10^seq(3, -3, length = 100)
+#lasso.mod <- glmnet(x, y_THE_LOGWAGE, alpha = 1, lambda = 10^seq(3, -3, length = 100))
+#plot(lasso.mod, xvar = "lambda", label = TRUE)
+
+lasso.cv <- cv.glmnet(x, y_THE_LOGWAGE, alpha = 1, nfolds = 5)
+model3 <- glmnet(x, y_THE_LOGWAGE, alpha = 1, lambda = lasso.cv$lambda.min)
+coef3 <- coef(model3)
+print (coef3)
+
+pdf("pics/TieMa_homework1_Q5_e.pdf", height = 9, width = 12)
+lasso.cv <- cv.glmnet(x, y_THE_LOGWAGE, alpha = 1, nfolds = 5)
+model3 <- glmnet(x, y_THE_LOGWAGE, alpha = 1, lambda = lasso.cv$lambda.min)
+coef3 <- coef(model3)
+print (coef3)
+dev.off()
+###########################################################################################################################
+#Q5 - f 
+
+
+# split the sample into train/test sets
+train <- sample(nrow(data_question5), round(nrow(data_question5)/2))
+cv.error <- rep(NA,3)
+
+# least squares
+ols.cv <- lm(y_THE_LOGWAGE ~ x, data = data_question5, subset = train)
+cv.error[1] <- mean((y_THE_LOGWAGE - predict(ols.cv,  data_question5))[-train]^2)
+
+# ridge
+ridge.cv <- cv.glmnet(x[train,], y_THE_LOGWAGE[train], alpha = 0, nfolds = 10)
+ridge.lam <- ridge.cv$lambda.min
+cv.error[2] <- mean((y_THE_LOGWAGE - predict(ridge.cv, s = ridge.lam, newx = x))[-train]^2)
+
+# lasso
+lasso.cv <- cv.glmnet(x[train,], y_THE_LOGWAGE[train], alpha = 1, nfolds = 10)
+lasso.lam <- lasso.cv$lambda.min
+cv.error[3] <- mean((y_THE_LOGWAGE - predict(lasso.cv, s = lasso.lam, newx = x))[-train]^2)
+
+plot(ridge.cv)
+
+cv.error <- data.frame(cv.error)
+rownames(cv.error) <- c("ols","ridge","lasso")
+cv.error
+
+###########################################################################################################################
+#I spend over at least 20 
 
 
 
