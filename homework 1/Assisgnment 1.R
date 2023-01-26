@@ -342,7 +342,8 @@ y <- x1 - 2*x1^2 + rnorm(n.obs)
 df <-data.frame(x1,y)
 plot(df, main="Question 4-B", 
      xlab="x1 ", ylab="y1 ", pch=1,col='#003b6f')
-#the ggplot not working here.....
+
+
 #save the graphy
 pdf("pics/TieMa_homework1_Q4_B.pdf", height = 9, width = 12)
 plot(df, main="Question 4-B", 
@@ -350,62 +351,48 @@ plot(df, main="Question 4-B",
 
 #clean the enviroment!
 rm(list = ls())
-dev.off()
 #4-b-2
   #From the graphy we could find nonlinear relationship between x1 and y
 #################################################################################################################
 #Q4-c
 
 ######################################################
-#generate the simulated data
+#generate the simulated data (again, in order to avoid this section been polluted)
 set.seed(1234)
 n.obs <- 100
 x1 <- rnorm(n.obs)
+x2 <- x1^2
+x3 <- x1^3
+x4 <- x1^4
 y <- x1 - 2*x1^2 + rnorm(n.obs)
+Q4_data_set <- data.frame(x1,y)
 ######################################################
 #beta one? 
 
-set.seed(1234)
-n.obs <- 100
-x1 <- rnorm(n.obs)
-y <- x1 + rnorm(n.obs)
-model_one <- lm(y ~ x1)
+model_one <- lm(y ~ x1, data=Q4_data_set)
 
 ##########
-set.seed(1234)
-n.obs <- 100
-x1 <- rnorm(n.obs)
-x2 <- x1^2
-y2 <- x1 + x2 + rnorm(n.obs)
-model_two <- lm(y ~ x1+x2)
+
+model_two <- lm(y ~ x1+x2, data=Q4_data_set)
 
 #########
-set.seed(1234)
-n.obs <- 100
-x1 <- rnorm(n.obs)
-x2 <- x1^2
-x3 <- x1^3
-y3 <- x1 + x2 + x3 + rnorm(n.obs)
-model_three <- lm(y ~ x1+x2+x3)
+
+model_three <- lm(y ~ x1+x2+x3, data=Q4_data_set)
+
 ##########
-set.seed(1234)
-n.obs <- 100
-x1 <- rnorm(n.obs)
-x2 <- x1^2
-x3 <- x1^3
-x4 <- x1^4 
-y4 <- x1 + x2 + x3 + x4 + rnorm(n.obs)
-model_four <- lm(y ~ x1+x2+x3+x4)
 
-邪恶 <- rbind(CV(model_one), CV(model_two), CV(model_three), CV(model_four))
-rownames(邪恶) <- c('Model1', 'Model2', 'Model3', 'Model4')
-邪恶
+model_four <- lm(y ~ x1+x2+x3+x4, data=Q4_data_set)
 
-            #CV      AIC     AICc      BIC     AdjR2
-#Model1 1.095134 11.26655 11.51655 19.08207 0.4679544
-#Model2 1.094918 11.79099 12.21204 22.21167 0.4703428
-#Model3 1.101478 13.45234 14.09064 26.47819 0.4666348
-#Model4 1.115254 15.42932 16.33255 31.06034 0.4611445
+evil <- rbind(CV(model_one), CV(model_two), CV(model_three), CV(model_four))
+rownames(evil) <- c('Model1', 'Model2', 'Model3', 'Model4')
+evil
+
+#.          CV       AIC      AICc       BIC       AdjR2
+#Model1 9.217431 218.96020 219.21020 226.77571 0.009513121
+#Model2 1.094918  11.79099  12.21204  22.21167 0.876435778
+#Model3 1.101478  13.45234  14.09064  26.47819 0.875570749
+#Model4 1.115254  15.42932  16.33255  31.06034 0.874289903
+
 
 #by compare AIC and BIC we can concluded following
 #Model1 <Model2 <Model3 <Model4
@@ -508,8 +495,31 @@ print(cv.error)
 
 ##################################################################################################################################
 #Exercise 5 
+rm(list = ls()) #clean the enviroment
+
+##################################################################################################################################
+#Exercise 5-a
+#Create a matrix X (545 × 9) with the 7 explanatory variables described above plus experience and schooling squared. 
+#Scale the matrix X such that all variables have the same variance. Create a vector y (545 × 1) with log wage.
+
+#lode the data
+DATA <- read.csv("data/males1987.csv", header = TRUE) 
+
+#check the data
+head(DATA, 5)
+str(DATA)
+
+#data is correct!
 
 
+
+
+
+
+##################################################################################################################################
+#now, I can finally rest in peace....
+
+#God, this 
 
 
 
