@@ -473,25 +473,111 @@ rm(list = ls())
 #Exercise 5-a
 #Create a matrix X (545 × 9) with the 7 explanatory variables described above plus experience and schooling squared. 
 #Scale the matrix X such that all variables have the same variance. Create a vector y (545 × 1) with log wage.
+install.packages("leaps")
+library("leaps")
 
 #lode the data
+X_df <-read.csv("data/males1987.csv", header = TRUE)
+
+#check the data!
+class(X_df)
+str(X_df)
+head(X_df, 4)
+
+#move the logwage in the first col
+X_relocated <- relocate(X_df, LOGWAGE, before = )
+#AFTER SPEND 3 HOURS FINALLY DOWN
+
+#check the data!
+str(X_relocated)
+head(X_relocated, 4)
+#It look good
 
 
-DATA <- read.csv("data/males1987.csv", header = TRUE) #lode the data into the R
+#now square experience and school
 
-##check the data!
-#str(DATA)
-#head(DATA, 4)
+X_relocated_final<- X_relocated %>% select(LOGWAGE, BLACK, EXPER, HISP, MAR, SCHOOL, UNION, EXPER2) %>% mutate(SCHOOL2 = SCHOOL^2)
+
+#check the data
+head(X_relocated_final, 4)
+#its look good!
+
+X_Scale <- X_relocated_final%>% select(LOGWAGE, BLACK, EXPER, HISP, MAR, SCHOOL, UNION, SCHOOL2, EXPER2)  %>% transmute(LOGWAGE_scale =scale(LOGWAGE) , BLACK, EXPER_scale = scale(EXPER), HISP, MAR, SCHOOL_scale = scale(SCHOOL), UNION, EXPER2_scale = scale(EXPER2), SCHOOL2_scale = scale(SCHOOL2))
+#sorry for this line of code is way too long...
+#I did not really sure how to shrink it down...
+#It select the all the variable 
+#and using the scale function to scale the non-dummy variable...
 
 
+#check the data!
+head(X_Scale, 4)
+#it look good!
+
+#check what the data is
+class(X_Scale)
+# its data frame! 
+
+#transfer to matrix
+X <- data.matrix(X_Scale)
+
+#check if the data actually been scale()
+summary(X_Scale)
+var.all <- rep(NA,5)
+var.all[1] <- var(X_Scale$LOGWAGE_scale)
+var.all[2]<- var(X_Scale$EXPER_scale)
+var.all[3]<- var(X_Scale$SCHOOL_scale)
+var.all[4]<- var(X_Scale$EXPER2_scale)
+var.all[5]<- var(X_Scale$SCHOOL2_scale)
+print(var.all)
+
+#[1] 1 1 1 1 1
+var(X_Scale$SCHOOL2_scale)
+#all non dummy variable have the same variance 
+
+#Create a vector y with log wage
+#recall we have the matrix X that include all the data
+
+x<- X_Scale%>%
+  dplyr::select(
+    BLACK, EXPER_scale, HISP, MAR, SCHOOL_scale, UNION, EXPER2_scale,
+    SCHOOL2_scale
+  )%>%
+  data.matrix()
+
+#check the data!
+head(X_final_version)
+
+##################################################################################################################################
+
+#Q5-b
+y_THE_LOGWAGE <- X_Scale$LOGWAGE_scale
+data_question5 <- data.frame(x,y_THE_LOGWAGE)
 
 
+# ridge regression for different values of lambda
+evil_grid <- 10^seq(3, -3, length = 100)
+ridge.mod <- glmnet(x, y_THE_LOGWAGE, alpha = 0, lambda = grid)
+
+#plot ridge results
+plot(ridge.mod, xvar = "lambda", label = TRUE)
 
 
 ##################################################################################################################################
-#now, I can finally rest in peace....
+#Q5-C
 
-#God, this 
+# cr
+paerameters_Q5 <- matrix(rep(NA),12,2)
+
+table1[,1] <- coef1
+table1[c(1:6),2] <- coef2
+table1[,3] <- coef3[,1]
+table1 <- data.frame(table1)
+colnames(table1) <- c("ols", "bss", "lasso")
+rownames(table1) <- rownames(coef3)
+table1
+
+
+
 
 
 
