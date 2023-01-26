@@ -30,6 +30,7 @@ library("tidyr")
 library("lmtest")
 library("boot")
 
+
 #doctor who blue 
 DW = "#003b6f"
   ##################################################################################################
@@ -463,11 +464,24 @@ print(cv.error)
 
 ##################################################################################################################################
 
-
-
+#clean the enviroment!
+rm(list = ls())
 
 ##################################################################################################################################
 #Exercise 5 
+##################################################################################################################################
+#Exercise 5-a
+#Create a matrix X (545 × 9) with the 7 explanatory variables described above plus experience and schooling squared. 
+#Scale the matrix X such that all variables have the same variance. Create a vector y (545 × 1) with log wage.
+
+#lode the data
+
+
+DATA <- read.csv("data/males1987.csv", header = TRUE) #lode the data into the R
+
+##check the data!
+#str(DATA)
+#head(DATA, 4)
 
 
 
@@ -477,7 +491,7 @@ print(cv.error)
 ##################################################################################################################################
 #now, I can finally rest in peace....
 
-
+#God, this 
 
 
 
