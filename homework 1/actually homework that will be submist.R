@@ -646,8 +646,9 @@ rownames(cv.error) <- c("ols","ridge","lasso")
 cv.error
 
 ###########################################################################################################################
-#This is the longest, most challange homework I ever down... 
+#This is the longest,the most challange homework I ever down... 
 #now I can finally rest in peace
+
 
 
 
