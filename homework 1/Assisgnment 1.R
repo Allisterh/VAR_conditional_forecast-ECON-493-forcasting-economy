@@ -528,6 +528,17 @@ str(DATA)
 #now, I can finally rest in peace....
 
 
+# read data
+data <-
+  read.csv(
+    "data/used_cars_work.csv",
+    header = TRUE,
+    stringsAsFactors = TRUE
+  )
+# focus only on Chicago
+data <- data %>%
+  filter(area == "chicago")
+
 
 
 
