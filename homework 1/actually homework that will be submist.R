@@ -29,6 +29,7 @@ library("tidyr")
 library("lmtest")
 library("boot")
 
+
 #doctor who blue 
 col = "#003b6f"
 
@@ -257,7 +258,7 @@ rm(list = ls()) #clean the enviroment
 
 
 #3-b
-#the hand wrtiing verson also availibe 
+#the hand wrtiing verson also availble...
 rm(list = ls())
 eq = function(b){(2-b)^2}
 ans <- optimize(eq, interval = c(-10,10))
@@ -266,10 +267,9 @@ y_min = ans$objective
 print(y_min)
 #[1] 0
 print(x_min)
-#[1] 1
+#[1] 2
 
 ############################################################################################################################################# 
-
 #3-c
 rm(list = ls())
 eq = function(b){abs(b)}
@@ -301,6 +301,7 @@ ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 
 dev.off()
 
 ############################################################################################################################################# 
+
 #3-e
 rm(list = ls())
 eq = function(b){(2-b)^2 + abs(b)}
@@ -313,7 +314,6 @@ print(x_min)
 #[1] 1.5
 
 ############################################################################################################################################# 
-
 #3-f-1 labamta = 0.5 repeat c and d
 
 #c
@@ -330,18 +330,7 @@ pdf("pics/TieMa_homework1_Q3_f_1.pdf", height = 9, width = 12)
 ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
 dev.off()
 
-rm(list = ls())
-eq = function(b){0.5*abs(b)}
-ans <- optimize(eq, interval = c(-10,10))
-x_min = ans$minimum
-y_min = ans$objective
-print(y_min)
-#[1] 6.661338e-16
-print(x_min)
-#[1] 1.332268e-15
-
-
-#d
+###########################################################################################################d
 rm(list = ls())
 eq = function(b){(2-b)^2 + 0.5*abs(b)}
 x <- seq(-5,5, by=0.1)
@@ -369,7 +358,6 @@ print(x_min)
 ############################################################################################################
 #Q3-g labamta = 4 repeat c and d
 
-
 #c
 eq = function(b){4 * abs(b)}
 x <- seq(-10,10, by=0.001)
@@ -383,17 +371,7 @@ pdf("pics/TieMa_homework1_Q3_g_1.pdf", height = 9, width = 12)
 ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
 dev.off()
 
-rm(list = ls())
-eq = function(b){4 * abs(b)}
-ans <- optimize(eq, interval = c(-10,10))
-x_min = ans$minimum
-y_min = ans$objective
-print(y_min)
-#[1] 5.329071e-15
-print(x_min)
-#[1] 1.332268e-15
 
-########################################################################################################################################
 #d
 eq = function(b){(2-b)^2 + 4*abs(b)}
 x <- seq(-10,10, by=0.001)
@@ -420,19 +398,25 @@ print(x_min)
 #################################################################################################################
 #3-H
 
+#yes, its only grahy here, the explnatory verson is availably on the hand writng verson
 rm(list = ls())
 eq1 = function(b){2-b}^2
 eq2 = function(b){(2-b)^2 + abs(b)}
 curve(eq1, from = -5, to = 5, col= 2)
 curve(eq2, from = -5, to = 5, col= "#003b6f", xlab = "x13", add = TRUE)
+#this part of code writing 2 hours before due, no time to make it look good.... 
 
 
-#################################################################################################################
+##saving the graph
+pdf("pics/TieMa_homework1_Q3_h.pdf", height = 9, width = 12)
+ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+dev.off()
+
+#############################################################################################################################################
 #Exercise 4 
 ########################################################################################################################################
 #generate the simulated data
 
-#################################################################################################################
 set.seed(1234)
 n.obs <- 100
 x1 <- rnorm(n.obs)
@@ -442,21 +426,26 @@ y <- x1 - 2*x1^2 + rnorm(n.obs)
 df <-data.frame(x1, y)
 plot(df, pch=1,col='#003b6f', type = "p")
 
-
 #save the graphy
 pdf("pics/TieMa_homework1_Q4_b.pdf", height = 9, width = 12)
 plot(df, pch=1,col='#003b6f', type = "p")
 dev.off()
+#note: ggplot2 is so hard to understand so I just used the plot() at here.....
+
 
 #clean the enviroment!
 rm(list = ls())
+
 #4-b-2
 #From the graphy we could find nonlinear relationship between x1 and y
+
+
 #################################################################################################################
 #Q4-c
-
 ######################################################
-#generate the simulated data (again, in order to avoid this section been polluted)
+#generate the simulated data 
+#(again, in order to avoid this section been polluted)
+
 set.seed(1234)
 n.obs <- 100
 x1 <- rnorm(n.obs)
@@ -543,17 +532,22 @@ print(cv.error)
 model_four_with_data_set.cv <- glm(y ~ x1 + x2 +x3 +x4)
 cv.error[4] <-cv.glm(Q4_data_set_2, model_four_with_data_set.cv, K=5)$delta[1]
 print(cv.error)
+
 #I spend 3 hours on those code, god its finally down.....
 ##################################################################################################################################
 
 # The 5- fold corss-validation errors
 #8.865048 1.078610 1.157496 1.115773
 
-#low fold cross validation erros may relate to the problem of over fitting, 
-#the AIC and BIC test are working on find the model that fit the data better with relative smllar variance
-# It show the similar perference as the result with. the AIC and BIC test. 
+##### n
+#lThe 5-fold cross-validation error suggests model 2 is the one with the better approach to the data set. 
+#AIC/BIC tests are working to find the best-fit model with the smallest number of  parameter  possible. 
+#AIC/BIC prefer the model with fewer  parameters because it gives heavy punishment for size of  parameters. 
+#Considering the size of the observation and all available model numbers, the  size parameters are relatively small. 
+#Therefore, it is unsurprising that both AIC, BIC, and k-fold cross-validation errors choose the same outcome: model two.
 ##################################################################################################################################
 
+Q2 - E
 
 model_one <- lm(y ~ x1, data=Q4_data_set)
 ##########
@@ -565,6 +559,10 @@ model_three <- lm(y ~ x1+x2+x3, data=Q4_data_set)
 ##########
 
 model_four <- lm(y ~ x1+x2+x3+x4, data=Q4_data_set)
+########### It just the same code as qesution D
+#I copy here so I can using the summary() function
+
+
 
 summary(model_one)
 #Coefficients:
@@ -594,7 +592,11 @@ summary(model_four)
 #x2          -2.075771   0.222837  -9.315 4.81e-15 ***
 #x3           0.034229   0.058369   0.586    0.559    
 #x4          -0.006444   0.043575  -0.148    0.883    
-
+#################
+#The summary of model_two, model_three, and model_four suggests that X1 and X2 have extremely 
+#high statistical significance, and the rest, X3 and X4, are not statistically signiﬁcance. 
+#Therefore, model 2, which only has x1 and x2, is relatively the best.
+#It is held consistent with the conclusion in questions 4-c and 4-d.  
 
 ##################################################################################################################################
 
@@ -607,7 +609,9 @@ rm(list = ls())
 #Exercise 5-a
 #Create a matrix X (545 × 9) with the 7 explanatory variables described above plus experience and schooling squared. 
 #Scale the matrix X such that all variables have the same variance. Create a vector y (545 × 1) with log wage.
-library("leaps")
+
+library("leaps") #I forget why I need this package (2 hours before due)
+library("tidyverse")
 
 #lode the data
 X_df <-read.csv("data/males1987.csv", header = TRUE)
@@ -620,42 +624,37 @@ head(X_df, 4)
 #move the logwage in the first col
 X_relocated <- relocate(X_df, LOGWAGE, before = )
 #AFTER SPEND 3 HOURS FINALLY DOWN
+#note: two hours before due
+  #i notice I did not need to relocated it
+  #this part of code seem doing nothing
+  #i just keep it here, because rest of code need this line of code....
 
 #check the data!
 str(X_relocated)
 head(X_relocated, 4)
 #It look good
 
-
 #now square experience and school
-
 X_relocated_final<- X_relocated %>% select(LOGWAGE, BLACK, EXPER, HISP, MAR, SCHOOL, UNION, EXPER2) %>% mutate(SCHOOL2 = SCHOOL^2)
+#I am using %>% because I learned it from internet but I cannot understand the logic behind %>%
 
 #check the data
-head(X_relocated_final, 4)
+head(X_relocated_final, 4) #the one with squared school
 #its look good!
 
+#scale the data (note: I only scale the non-dummy variable)
 X_Scale <- X_relocated_final%>% 
   select(LOGWAGE, BLACK, EXPER, HISP, MAR, SCHOOL, UNION, SCHOOL2, EXPER2)  %>% 
   transmute(LOGWAGE_scale =scale(LOGWAGE) , BLACK, EXPER_scale = scale(EXPER), 
             HISP, MAR, SCHOOL_scale = scale(SCHOOL), UNION, EXPER2_scale = scale(EXPER2), SCHOOL2_scale = scale(SCHOOL2))
 #sorry for this line of code is way too long...
-#I did not really sure how to shrink it down...
-#It select the all the variable 
-#and using the scale function to scale the non-dummy variable...
-
+#I did not really sure how to shrink it down..
 
 #check the data!
 head(X_Scale, 4)
 #it look good!
 
-#check what the data is
-class(X_Scale)
-# its data frame! 
-
-#transfer to matrix
-X <- data.matrix(X_Scale)
-
+#I wrote this part just check if the scale actually work...
 #check if the data actually been scale()
 #summary(X_Scale)
 #var.all <- rep(NA,5)
@@ -669,6 +668,7 @@ X <- data.matrix(X_Scale)
 #[1] 1 1 1 1 1
 #var(X_Scale$SCHOOL2_scale)
 #all non dummy variable have the same variance 
+
 
 #Create a vector y with log wage
 #recall we have the matrix X that include all the data
@@ -691,12 +691,13 @@ head(data_question5, 5)
 
 #the final matrix
 matrix_X <- data.matrix(data_question5)
+#yeeeeeeee
 
 ##################################################################################################################################
 #Q5-b
 # ridge regression for different values of lambda
 evil_grid <- 10^seq(3, -3, length = 100)
-ridge.mod <- glmnet( y_THE_LOGWAGE, x, alpha = 0, lambda = evil_grid)
+ridge.mod <- glmnet( y_THE_LOGWAGE, x, alpha = 0, lambda = evil_grid) 
 
 #plot ridge results
 plot(ridge.mod, xvar = "lambda", label = TRUE, main = "ridge regression standardized coeﬃcients")
@@ -715,7 +716,12 @@ plot(lasso.mod, xvar = "lambda", label = TRUE, main = "lasso regression")
 pdf("pics/TieMa_homework1_Q5_b_lasso.pdf", height = 9, width = 12)
 plot(lasso.mod, xvar = "lambda", label = TRUE, main = "lasso regression")
 dev.off()
-
+#############################################
+#comment
+#Each line corresponds to a coefficient estimate. 
+#but lasso perferms the variable selection therefore 
+#we can see some coeffcient end really first but ridge does not, 
+#which make it end in the later part of graphy
 
 ##################################################################################################################################
 #Q5-C-1 Estimate the parameters by OLS using the full sample.
@@ -735,6 +741,16 @@ colnames(parameters_of_Q5)[1] <-'OLS'
 #summon the table!
 print(parameters_of_Q5)
 
+      #            OLS
+#y_THE_LOGWAGE -0.1629943
+#BLACK         -0.4004997
+#EXPER_scale   -0.3340307
+#HISP           0.0833148
+#MAR            0.1926395
+#SCHOOL_scale  -0.3917260
+#UNION          0.2968348
+#EXPER2_scale   0.2954532
+#SCHOOL2_scale  0.7177077
 
 ##################################################################################################################################
 #Q5-C-2 Which variables are statistically significant at the 10% level?
@@ -746,8 +762,18 @@ something <- lm(y_THE_LOGWAGE ~ x, data= data_question5)
 something_summary <- summary(something)
 print(something_summary)
 
-
-#the school2_scale are statistically signifcant at 10% level (squared school 1 plus scale)
+#.                Estimate Std. Error  t value Pr(>|t|)   
+#(Intercept)      -0.16299    0.07359  -2.215  0.02718 * 
+#  xBLACK         -0.40050    0.12984  -3.085  0.00214 **
+#  xEXPER_scale   -0.33403    0.38512  -0.867  0.38614   
+#xHISP             0.08331    0.11300   0.737  0.46126   
+#xMAR              0.19264    0.08260   2.332  0.02006 * 
+#  xSCHOOL_scale  -0.39173    0.36589  -1.071  0.28483   
+#xUNION            0.29683    0.09228   3.217  0.00138 **
+ # xEXPER2_scale   0.29545    0.40474   0.730  0.46572   
+#xSCHOOL2_scale    0.71771    0.34767   2.064  0.03947 * 
+  
+#Black, MAR,  Union and xSCHOOL2_scale plus intercept are statistically signiﬁcant at the 10% level.
 
 
 ##################################################################################################################################
@@ -772,6 +798,10 @@ plot(regfit.all, scale = "bic")
 layout(1)
 dev.off()
 
+#According to AIC(CP), the best k = 5 (5 variable) 
+#According the BIC, also the best k at 5 and those 5 variable are BLACK, MR, Union, 
+#school2_scaled plus intercept. It hold consistent with the conclution at question 5-b.
+
 ##################################################################################################################################
 #Q5 -E Estimate the lasso coefficients using the full sample. Are any of the coefficients forced
 #to be exactly 0? Compare your results with OLS and best subset selection.
@@ -784,6 +814,24 @@ lasso.cv <- cv.glmnet(x, y_THE_LOGWAGE, alpha = 1, nfolds = 5)
 model3 <- glmnet(x, y_THE_LOGWAGE, alpha = 1, lambda = lasso.cv$lambda.min)
 coef3 <- coef(model3)
 print (coef3)
+
+#s0
+#(Intercept)          -0.123735661
+#BLACK                -0.373701647
+#EXPER_scale          -0.005662817
+#HISP                  0.045290208
+#MAR                   0.163475106
+#SCHOOL_scale   .          
+#UNION                 0.226330843
+#EXPER2_scale   .          
+#SCHOOL2_scale         0.327358681
+
+#The variable that been force to be zero. are the school _scale and the exper2_sclaed. 
+#compare with OLS, we could find out such variabes with high statistically significant 
+#will get higher number in the lasso coefficients.  Same as the the 5 variables that AIC/BIC  
+#suggested :  BLACK, MR, Union,  school2_scaled plus intercep
+
+
 
 ###########################################################################################################################
 #Q5 - f 
@@ -816,6 +864,10 @@ cv.error
 #ols   0.8464181
 #ridge 0.8885653
 #lasso 0.9063391
+
+#The test sample error of ols, ridge and lasso are extremely close, 
+#which provides a similar result on which variable is better on fit within data.
+#Such results match the outcome of questions c, d and e. 
 
 
 plot(ridge.cv)
