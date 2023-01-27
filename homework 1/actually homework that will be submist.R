@@ -8,7 +8,7 @@
 
 #Clean the enviroment
 rm(list = ls())
-dev.off()
+#dev.off()
 
 #set the direction
 #setwd("~/SynologyDrive/nn/ECON-493-forcasting-economy/homework 1")
@@ -229,7 +229,8 @@ curve(eq2, from = -100, to = 100, col= "#003b6f", add = TRUE)
 
 ##saving the graph
 pdf("pics/TieMa_homework1_Q2_h.pdf", height = 9, width = 12)
-ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+curve(eq1, from = -100, to = 100, col= 2)
+curve(eq2, from = -100, to = 100, col= "#003b6f", add = TRUE)
 dev.off()
 
 #the writing available on the hand wrting version...
@@ -276,6 +277,7 @@ eq = function(b){abs(b)}
 x <- seq(-10,10, by=0.001)
 y <- eq(x)
 df <- data.frame(x,y)
+
 ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
 
 
@@ -409,7 +411,8 @@ curve(eq2, from = -5, to = 5, col= "#003b6f", xlab = "x13", add = TRUE)
 
 ##saving the graph
 pdf("pics/TieMa_homework1_Q3_h.pdf", height = 9, width = 12)
-ggplot(df, aes(x=x, y=y)) + geom_line(col='#003b6f')  + geom_hline(yintercept = 0)+geom_vline(xintercept = 0) + stat_function(fun = eq) 
+curve(eq1, from = -5, to = 5, col= 2)
+curve(eq2, from = -5, to = 5, col= "#003b6f", xlab = "x13", add = TRUE)
 dev.off()
 
 #############################################################################################################################################
@@ -546,19 +549,18 @@ print(cv.error)
 #Considering the size of the observation and all available model numbers, the  size parameters are relatively small. 
 #Therefore, it is unsurprising that both AIC, BIC, and k-fold cross-validation errors choose the same outcome: model two.
 ##################################################################################################################################
+#Q2 - E
 
-Q2 - E
-
-model_one <- lm(y ~ x1, data=Q4_data_set)
+model_one <- lm(y ~ x1, data=Q4_data_set_2)
 ##########
 
-model_two <- lm(y ~ x1+x2, data=Q4_data_set)
+model_two <- lm(y ~ x1+x2, Q4_data_set_2)
 #########
 
-model_three <- lm(y ~ x1+x2+x3, data=Q4_data_set)
+model_three <- lm(y ~ x1+x2+x3, Q4_data_set_2)
 ##########
 
-model_four <- lm(y ~ x1+x2+x3+x4, data=Q4_data_set)
+model_four <- lm(y ~ x1+x2+x3+x4, Q4_data_set_2)
 ########### It just the same code as qesution D
 #I copy here so I can using the summary() function
 
@@ -697,7 +699,7 @@ matrix_X <- data.matrix(data_question5)
 #Q5-b
 # ridge regression for different values of lambda
 evil_grid <- 10^seq(3, -3, length = 100)
-ridge.mod <- glmnet( y_THE_LOGWAGE, x, alpha = 0, lambda = evil_grid) 
+ridge.mod <- glmnet( x,y_THE_LOGWAGE, alpha = 0, lambda = evil_grid) 
 
 #plot ridge results
 plot(ridge.mod, xvar = "lambda", label = TRUE, main = "ridge regression standardized coeﬃcients")
