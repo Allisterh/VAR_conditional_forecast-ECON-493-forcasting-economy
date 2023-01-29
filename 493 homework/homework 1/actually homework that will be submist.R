@@ -871,8 +871,8 @@ cv.error
 #which provides a similar result on which variable is better on fit within data.
 #Such results match the outcome of questions c, d and e. 
 
-
 plot(ridge.cv)
+
 ###########################################################################################################################
 #This is the longest,the most challange homework I ever down... 
 #now I can finally rest in peace
