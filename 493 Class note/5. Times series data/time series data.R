@@ -19,5 +19,8 @@ library("boot")
 
 ###########
 #you build the model and the model wullhave some redisula diagnostics 
-  #
+  #the residuals should be unrelated.(missing of the varialbe)
+  #the residuals should be mean zero ( you miss the intercept)
+
+
 

@@ -539,6 +539,20 @@ data <-
 data <- data %>%
   filter(area == "chicago")
 
+set.seed(1234) 
+n.obs <- 100 
+x1 <- rnorm(n.obs) 
+y <- x1 - 2*(x1^2) + rnorm(n.obs)
 
+x2 <- x1^2
+x3 <- x1^3
+x4 <- x1^4
+data.all <- data.frame(y,x1,x2,x3,x4) 
+# estimate models
+model1 <- lm(y~x1,data=data.all) 
+model2 <- lm(y~x1+x2,data=data.all) 
+model3 <- lm(y~x1+x2+x3,data=data.all) 
+model4 <- lm(y~x1+x2+x3+x4,data=data.all)
 
+c(BIC(model1),BIC(model2),BIC(model3),BIC(model4))
 

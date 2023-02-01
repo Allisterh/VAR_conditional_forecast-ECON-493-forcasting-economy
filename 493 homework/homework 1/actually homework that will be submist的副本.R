@@ -449,7 +449,14 @@ model_three <- lm(y ~ x1+x2+x3, data=Q4_data_set)
 
 model_four <- lm(y ~ x1+x2+x3+x4, data=Q4_data_set)
 
+AIC(model_one)
+BIC(model_one)
+extractAIC(model_one)
+CV(model_one)
+BIC(model_one)
+
 evil <- rbind(CV(model_one), CV(model_two), CV(model_three), CV(model_four))
+evil
 rownames(evil) <- c('Model1', 'Model2', 'Model3', 'Model4')
 evil
 
