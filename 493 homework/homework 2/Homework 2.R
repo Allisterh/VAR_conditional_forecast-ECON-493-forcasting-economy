@@ -96,24 +96,10 @@ print(evil)
 #fit.beer_season_trend 12.45572  9.639053 2.208542
 #fit.beer_season       13.72155 10.195266 2.317054
 
-#########
-
-beer2 <- window(ausbeer, start = 1992, end = c(2007,4)) # training set
-beer3 <- window(ausbeer, start = 2008)
-tab <- matrix(NA, ncol = 3, nrow = 3)
- beerfit1 <- meanf(beer2, h = 10)
- beerfit2 <- rwf(beer2, h = 10)
- beerfit3 <- snaive(beer2, h = 10)
-tab[1,] <- accuracy(beerfit1, beer3)[2,c(2,3,5)]
-tab[2,] <- accuracy(beerfit2, beer3)[2,c(2,3,5)]
-tab[3,] <- accuracy(beerfit3, beer3)[2,c(2,3,5)]
-colnames(tab) <- c("RMSE","MAE","MAPE")
-rownames(tab) <- c("Mean method", "Naïve method", "Seasonal naïve method")
-tab
 
 ################################################################################################################################################################################
 #Q4
-########################################################################################
+
 
 #Q4-a 
 daily20 <- head(elecdaily,20)
@@ -123,6 +109,7 @@ daily20 <- head(elecdaily,20)
 
 #view the data 
 View(daily20)
+plot(daily20)
 
 #There are two variable
   #demand
@@ -176,28 +163,27 @@ print(y)
 ######
 #Q4-d
 
-r markdown
+predict(model_one, daily20)
+
+
+#####
+#Q5-e
 
 
 
+#################################################################################################
+#q-5
+install.packages(datasets)
+library(datasets)
+library(forecast)
+
+Huron<- window(LakeHuron, start=1875, end=1972)
+plot(Huron, col = "#003b6f")
+View(Huron)
 
 
+Huron.ts <- ts(LakeHuron, start=1875, end=1972, frequency = 1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+model_one_linear_regression <- tslm(Huron ~ , data = Huron) 
 
 

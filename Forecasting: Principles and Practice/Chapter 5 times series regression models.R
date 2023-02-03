@@ -1,4 +1,12 @@
-# the evil chapter 5, finall back to the code itself
+# the evil chapter 5
+#finall back to the code itself
+
+#note: Because the professor explain the content so poorly
+#I need to restudy this chapter again.
+#its fucking hell
+#2023/0204/2026 
+
+
 # the linear model.
   # the simple linear regression, you can see it from the BLUE, best linear regression omodel
 
