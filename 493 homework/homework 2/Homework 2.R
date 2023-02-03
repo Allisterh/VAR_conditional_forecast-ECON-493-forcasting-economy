@@ -117,4 +117,87 @@ tab
 
 #Q4-a 
 daily20 <- head(elecdaily,20)
+#note ths is a matrix!
+
+
+
+#view the data 
+View(daily20)
+
+#There are two variable
+  #demand
+  #tempurtury
+
+model_one <- lm(Demand ~ Temperature, data = daily20)
+
+######
+#Q4-b
+checkresiduals(model_one)
+#there are the trend of the model
+
+######
+#Q4-c
+summary(model_one)
+
+#Coefficients:
+              #Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  39.2117    17.9915   2.179   0.0428 *  
+#Temperature   6.7572     0.6114  11.052 1.88e-09 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#Residual standard error: 22 on 18 degrees of freedom
+#Multiple R-squared:  0.8716,	Adjusted R-squared:  0.8644 
+#F-statistic: 122.1 on 1 and 18 DF,  p-value: 1.876e-09
+
+#we can get the function
+# y = 39.2117 + 6.7572x 
+
+eq = function(x){39.2117 + 6.7572*x}
+
+#forcasting one: when the temputure equal 15 degree. 
+
+x1 <- 15
+y  <- eq(x1)
+print(y)
+#the demand = 140.5697
+
+#forcasting two: when the temperature equal to 35 degree.
+x2 <- 34
+y  <- eq(x2)
+print(y)
+#the demand = 268.9565
+
+#yes, it mmarch with th e common sence.
+#the higher the temperature, the more power people will use for the
+#make the tempture cold and 15 degree is relatie less uncomforatable
+#compare with 34 degree to force people to use air condition.
+
+######
+#Q4-d
+
+r markdown
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
