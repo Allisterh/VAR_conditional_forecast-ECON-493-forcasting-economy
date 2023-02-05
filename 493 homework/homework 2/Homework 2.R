@@ -173,17 +173,21 @@ predict(model_one, daily20)
 
 #################################################################################################
 #q-5
+
+#5-a
 install.packages(datasets)
 library(datasets)
 library(forecast)
 
 Huron<- window(LakeHuron, start=1875, end=1972)
 plot(Huron, col = "#003b6f")
-View(Huron)
 
+# 5- b
+evil <- time(Huron)
+model_one_linear_regression <- tslm(Huron ~ evil , data = Huron) 
 
-Huron.ts <- ts(LakeHuron, start=1875, end=1972, frequency = 1)
-
-model_one_linear_regression <- tslm(Huron ~ , data = Huron) 
-
-
+time_know <- 1915
+evil_1 <- ts(pmax(0, evil - time_know), start = 1940)
+piecewise_linear_model <- tslm(Huron ~ evil + evil_1)
+evil.new <- t[length(evil)] + seq(10)
+evil_1.new <
