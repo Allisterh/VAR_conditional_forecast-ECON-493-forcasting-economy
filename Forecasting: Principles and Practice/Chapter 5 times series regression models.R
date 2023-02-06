@@ -41,6 +41,7 @@ uschange %>%
   #"geom_smooth" 函数用于在绘图中增加一条估计数据趋势的平滑曲线
 
 
+<<<<<<< HEAD
 #plot function in R to create a scatter plot with a smoothed line. One way to 
 #achieve this is by using the l and then plotting the data and the smoother using the lines and points 
 #functions. Here's an example:
@@ -59,6 +60,8 @@ lines(predict(fit), col = "red")
 
 
 
+=======
+>>>>>>> main
 #> `geom_smooth()` using formula 'y ~ x'
 
 tslm(Consumption ~ Income, data=uschange) #强制拟合
@@ -288,6 +291,7 @@ cbind(Data=beer2, Fitted=fitted(fit.beer)) %>%
 #Fourier series
   #An alternative to using seasonal dummy variables, especially for long seasonal periods, is to use Fourier terms.
   #so, where to use it?
+    #when the data are in the trend that are not seasonal?
 
 
 #5.3 
