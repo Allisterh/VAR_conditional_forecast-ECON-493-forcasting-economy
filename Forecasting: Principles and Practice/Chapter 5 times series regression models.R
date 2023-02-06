@@ -7,24 +7,40 @@
 #2023/0204/2026 
 
 
+#so this chapter is about the time series regressin models
+  #feed the data and generate the a linear regression model
+  #to future tie: its the shit you learned from 399
+  #its scary because just the name is scar .
+
 # the linear model.
   # the simple linear regression, you can see it from the BLUE, best linear regression omodel
 
-install.packages("fpp2")
-install.packages("GGally")
 library(fpp2)
 library(GGally)
+#lode the package
+########################
+
 
 autoplot(uschange[,c("Consumption","Income")]) +
+#the data set uschange and pick the vartiable consumption and income
   ylab("% change") + xlab("Year")
+#the ylab the percentage of change and x labor year 
+#generate the graphy
+###########
 
 uschange %>%
-  as.data.frame() %>%
+  as.data.frame() %>% 
+  # transfer the data uschange into the the data from
   ggplot(aes(x=Income, y=Consumption)) +
+  #make the grphay of x as variable income and y as the variable consumption.
   ylab("Consumption (quarterly % change)") +
   xlab("Income (quarterly % change)") +
   geom_point() +
   geom_smooth(method="lm", se=FALSE)
+  #it using the geom_smooth function to genertte and does not need to show se
+  #"geom_smooth" 函数用于在绘图中增加一条估计数据趋势的平滑曲线
+
+
 #> `geom_smooth()` using formula 'y ~ x'
 
 tslm(Consumption ~ Income, data=uschange) #强制拟合
