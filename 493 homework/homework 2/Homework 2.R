@@ -174,20 +174,35 @@ predict(model_one, daily20)
 #################################################################################################
 #q-5
 
-#5-a
-install.packages(datasets)
+#########5-a
+
+######## 
 library(datasets)
 library(forecast)
-
+########
 Huron<- window(LakeHuron, start=1875, end=1972)
-plot(Huron, col = "#003b6f")
+
+#########
+autoplot(Huron, col = "#003b6f") + xlab("Year") + ylab("depth")
+########
 
 # 5- b
-evil <- time(Huron)
-model_one_linear_regression <- tslm(Huron ~ evil , data = Huron) 
+#take of the year as the variale.
+year <- time(Huron)
 
-time_know <- 1915
-evil_1 <- ts(pmax(0, evil - time_know), start = 1940)
-piecewise_linear_model <- tslm(Huron ~ evil + evil_1)
-evil.new <- t[length(evil)] + seq(10)
-evil_1.new <
+#fit a linear regression 
+linear_regression_model <- tslm(Huron ~ year, data = Huron) 
+
+#fit a piecewise linear trend
+
+t.break1 <- 1915
+t <- time(LakeHuron) 
+t1 <- ts(pmax(0, t-t.break1), start = 1940)
+fit.pw <- tslm(LakeHuron ~ t + t1)
+t.new <- t[length(t)] + seq(10)
+t1.new <- t1[length(t1)] + seq(10) 
+newdata <- data.frame("t" = t.new, "t1" = t1.new)
+fcasts.pw <- forecast(fit.pw, newdata = newdata)
+
+autoplot(fcasts.pw, col = "#003b6f") + xlab("Year") + ylab("depth") +
+   

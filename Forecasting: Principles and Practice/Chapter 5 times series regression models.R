@@ -233,23 +233,23 @@ fit.beer <- tslm(beer2 ~ trend + season)
 #set the model tsslm
 summary(fit.beer)
 
-Residuals:
-  Min      1Q  Median      3Q     Max 
--42.903  -7.599  -0.459   7.991  21.789 
+#Residuals:
+#  Min      1Q  Median      3Q     Max 
+#-42.903  -7.599  -0.459   7.991  21.789 
 
-Coefficients:
-  Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 441.80044    3.73353 118.333  < 2e-16 ***
-  trend        -0.34027    0.06657  -5.111 2.73e-06 ***
-  season2     -34.65973    3.96832  -8.734 9.10e-13 ***
-  season3     -17.82164    4.02249  -4.430 3.45e-05 ***
-  season4      72.79641    4.02305  18.095  < 2e-16 ***
-  ---
-  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) 441.80044    3.73353 118.333  < 2e-16 ***
+ # trend        -0.34027    0.06657  -5.111 2.73e-06 ***
+#  season2     -34.65973    3.96832  -8.734 9.10e-13 ***
+#  season3     -17.82164    4.02249  -4.430 3.45e-05 ***
+#  season4      72.79641    4.02305  18.095  < 2e-16 ***
+ # ---
+#  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 12.23 on 69 degrees of freedom
-Multiple R-squared:  0.9243,	Adjusted R-squared:  0.9199 
-F-statistic: 210.7 on 4 and 69 DF,  p-value: < 2.2e-16
+#Residual standard error: 12.23 on 69 degrees of freedom
+#Multiple R-squared:  0.9243,	Adjusted R-squared:  0.9199 
+#F-statistic: 210.7 on 4 and 69 DF,  p-value: < 2.2e-16
 
 
 autoplot(beer2, series="Data") +
@@ -293,8 +293,86 @@ cbind(Data=beer2, Fitted=fitted(fit.beer)) %>%
   #so, where to use it?
     #when the data are in the trend that are not seasonal?
 
+#############################
 
-#5.3 
+#5.5
+
+# adjust R^2
+  #Maximising ¯R2 works quite well as a method of selecting predictors,
+  #although it does tend to err on the side of selecting too many predictors.
+
+
+#Cross-validation
+  #the best fit is the one with the smallest cv
+
+#AIC and BIC 
+  #the model with. the minimum value of the AIC is of then best model for forecasting.
+  #as with the AIC, the AICc should be minimised
+
+  #BIC test 
+    #As with the AIC, minimising the BIC is intended to give the best model. 
+    #The model chosen by the BIC is either the same as that chosen by the AIC
+    #or one with fewer terms. this is because the BIC penalises the number of 
+    #parameters more heabily than the AIC. for the large values of T, minimising
+    #BIC is similar to leave v out cross validation when 
+
+#which measure should we use?
+  # Not R^2 because it tendenct to select too many perdictor variables makes it less sutiable
+  # for forcasting.
+
+  #not BIC
+    #the BIC will select that model given enough data. 
+    #hoever, in reality, there is rarely, if even a 
+    # true underlying modle....
+    # selecting that mode lwill not nevcessarily given the best forecast because
+    # the parameter estimates may not be accuratte.
+
+#Consequently, we recommend that one of the AICc, AIC, 
+#or CV statistics be used, each of which has forecasting as their objective. 
+#If the value of T is large enough, they will all lead to the same model. 
+#In most of the examples in this book, we use the AICc value to select the forecasting 
+#model.
+
+
+#Best subset regreiion
+  #start with the model containing all potential predictors.
+  #Remove one predictor at a time. Keep the model if it improves the measure of predictive accuracy.
+  #Iterate until no further improvement.
+
+#Beware of inference after selecting predictors
+  #if you do with to look at the statistical significance of the predictors, beware
+  #that ay procedure involving selecting predictors first will invalidate the
+  #assuptions behind the p values 
+
+  #the procedictors first will invalidate the assumption behind the p values. 
+  #the procedures wr recommoend for selecting predictors are helpfup when the model is used
+  #for forecasting, they are no helpful if you iteh t
+
+
+
+###################
+#5.6
+  #forcasting with regression 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
