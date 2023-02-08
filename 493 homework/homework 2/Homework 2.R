@@ -35,6 +35,7 @@ col = "#003b6f"
 #predition intervals 
    #4*squart(8) = 8
 
+
 #Exercise 3
 
 #####
@@ -42,7 +43,7 @@ col = "#003b6f"
 #Estimate a linear model with seasonal dummies as predictors using data from 1990Q1 to 2004Q4. 
 #Evaluate the residuals. Compute the AIC and BIC.
 
-au_beer <- window(ausbeer, start = 1992, end = c(2004,4))
+au_beer <- window(ausbeer, start = 1990, end = c(2004,4))
 
 fit.beer_season <- tslm(au_beer ~ season)
 #time serive find the linear relationship 
@@ -56,6 +57,12 @@ CV(fit.beer_season)
 #CV         AIC        AICc         BIC       AdjR2 
 #220.9687500 282.3726654 283.6770132 292.1288840   0.9007409 
 
+AIC(fit.beer_season)
+  #546.8521
+BIC(fit.beer_season)
+  #557.3238
+
+
 ######
 #3-b
   #Estimate a linear model with a trend and seasonal dummies as predictors 
@@ -63,13 +70,20 @@ CV(fit.beer_season)
 
 fit.beer_season_trend <- tslm(au_beer ~ season + trend)
 
-checkresiduals(fit.beer_season_trend )
+checkresiduals(fit.beer_season_trend)
 #some shit you can copy from the book
 #residentual are standard divition, the mean equal to zero shit
 
-CV(fit.beer_season_trend )
+checkresiduals(fit.beer_season_trend)
+
+CV(fit.beer_season_trend)
 #CV         AIC        AICc         BIC       AdjR2 
 #192.7542573 274.3067186 276.1733853 286.0141809   0.9164696 
+
+AIC(fit.beer_season_trend)
+#519.3477
+BIC(fit.beer_season_trend)
+#531.9138
 
 ######
 #3-c
@@ -82,93 +96,75 @@ CV(fit.beer_season_trend )
 #these models in the test set 2005Q1 to 2009Q4.
 #Which model performs better?
 
-au_beer_test <- window(ausbeer, start = 2005, end = c(2009,4))
+test_set <- window(ausbeer, start = 2005, end = c(2009,4))
+#If my math is correct, there are 20 data set. 
 
+test_end <- 2009.75
 
-evil <- matrix(NA, ncol = 3, nrow = 2)
-evil[1,] <- accuracy(fit.beer_season_trend, data = au_beer_test)[,c(2,3,5)]
-evil[2,] <- accuracy(fit.beer_season, data = au_beer_test)[,c(2,3,5)]
-rownames(evil) <- c("fit.beer_season_trend", "fit.beer_season")
-colnames(evil) <- c("RMSE","MAE","MAPE")
-print(evil)
+pred = matrix(NA, nrow = 20, ncol = 3)
+#pred <- matrix(rep(NA,80),20,4)
+#create a matrix 20x4 and repite 80 times NA. 
 
-#                        RMSE       MAE     MAPE
-#fit.beer_season_trend 12.45572  9.639053 2.208542
-#fit.beer_season       13.72155 10.195266 2.317054
+#loop 
+for(i in 1:20){ #this loop running 20 times
+  start_data<- 2005 #the start_time set at 2005
+  tmp1 <- start_data +(i-1)*.25 #the function that coculate the different
+  tmp <- window(test_set, start_data, tmp1) 
+  pred[i,1] <- window(test_set, tmp1+.25, tmp1+.25) # actual 
+  # compute forecasts 
+  pred[i,2] <- meanf(tmp, h = 1)$mean 
+  pred[i,3] <- rwf(tmp, h = 1)$mean
+}
 
 
 ################################################################################################################################################################################
 #Q4
 
+#Q4-a Plot the data and ﬁnd the regression model for Demand 
+#with temperature as an explanatory variable. Why is there a
+#positive relationship?
 
-#Q4-a 
 daily20 <- head(elecdaily,20)
-#note ths is a matrix!
 
-
-
-#view the data 
-View(daily20)
-plot(daily20)
-
-#There are two variable
-  #demand
-  #tempurtury
-
-model_one <- lm(Demand ~ Temperature, data = daily20)
+model_one <- tslm(Demand ~ Temperature, data = daily20)
+#the higher the temputre, people will spend more electricity on the
+#keep them cooling
 
 ######
 #Q4-b
+
+model_one %>% residuals() %>% plot()
+#plot(residuals(model_one))
+#there is no trend? 
+
 checkresiduals(model_one)
 #there are the trend of the model
 
+
 ######
 #Q4-c
-summary(model_one)
 
-#Coefficients:
-              #Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)  39.2117    17.9915   2.179   0.0428 *  
-#Temperature   6.7572     0.6114  11.052 1.88e-09 ***
-  ---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+evil <- forecast(model_one, newdata = pure_evil )
+pure_evil <- data.frame(
+  Temperature = c(35, 45)
+)
+print(evil)
 
-#Residual standard error: 22 on 18 degrees of freedom
-#Multiple R-squared:  0.8716,	Adjusted R-squared:  0.8644 
-#F-statistic: 122.1 on 1 and 18 DF,  p-value: 1.876e-09
+#Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
+#1       275.7146 245.2278 306.2014 227.5706 323.8586
+#2       343.2868 310.3597 376.2140 291.2890 395.2846
 
-#we can get the function
-# y = 39.2117 + 6.7572x 
-
-eq = function(x){39.2117 + 6.7572*x}
-
-#forcasting one: when the temputure equal 15 degree. 
-
-x1 <- 15
-y  <- eq(x1)
-print(y)
-#the demand = 140.5697
-
-#forcasting two: when the temperature equal to 35 degree.
-x2 <- 34
-y  <- eq(x2)
-print(y)
-#the demand = 268.9565
-
-#yes, it mmarch with th e common sence.
-#the higher the temperature, the more power people will use for the
-#make the tempture cold and 15 degree is relatie less uncomforatable
-#compare with 34 degree to force people to use air condition.
 
 ######
 #Q4-d
 
-predict(model_one, daily20)
-
 
 #####
-#Q5-e
-
+#Q4-e
+View(elecdaily)
+evil_data = head(elecdaily, 216)
+model_two <- tslm(Demand ~ Temperature, data = evil_data)
+plot(model_two, data = evil_data)
 
 
 #################################################################################################
@@ -196,13 +192,20 @@ linear_regression_model <- tslm(Huron ~ year, data = Huron)
 #fit a piecewise linear trend
 
 t.break1 <- 1915
-t <- time(LakeHuron) 
+t <- time(LakeHuron)
+
 t1 <- ts(pmax(0, t-t.break1), start = 1940)
+
 fit.pw <- tslm(LakeHuron ~ t + t1)
+
+
 t.new <- t[length(t)] + seq(10)
 t1.new <- t1[length(t1)] + seq(10) 
 newdata <- data.frame("t" = t.new, "t1" = t1.new)
 fcasts.pw <- forecast(fit.pw, newdata = newdata)
 
-autoplot(fcasts.pw, col = "#003b6f") + xlab("Year") + ylab("depth") +
-   
+
+install.packages("benchmarkme")
+
+
+
