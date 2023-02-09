@@ -205,7 +205,11 @@ newdata <- data.frame("t" = t.new, "t1" = t1.new)
 fcasts.pw <- forecast(fit.pw, newdata = newdata)
 
 
+<<<<<<< HEAD
 install.packages("benchmarkme")
 
 
 
+=======
+   
+>>>>>>> main
