@@ -112,6 +112,7 @@ test_set <- window(ausbeer, start = 2005, end = c(2009,4))
 #you cannot see which model is better from the graphy
 evil_model_one <- forecast(fit.beer_season_trend)
 evil_model_two <- forecast(fit.beer_season)
+<<<<<<< HEAD
 #autoplot(evil_model_one) + autolayer(evil_model_two, col = "red")
 
 accuracy(evil_model_one, test_set)
@@ -127,6 +128,23 @@ accuracy(evil_model_two, test_set)
 #Training set  1.894781e-15 21.21755 14.56444 -0.1973919 3.192709 0.9450856  0.2810504        NA
 #Test set     -1.486667e+01 18.68071 15.18667 -3.4198192 3.499224 0.9854616 -0.4723262 0.3651066
 
+=======
+autoplot(evil_model_one) + autolayer(evil_model_two, col = "red")
+
+accuracy(evil_model_one, test_set)
+
+                        #ME     RMSE      MAE       MPE     MAPE      MASE        ACF1 Theil s U
+#Training set -1.776357e-15 16.59264 12.49218 -0.117834 2.792942 0.8106167 -0.04212879        NA
+#Test set      1.206762e+01 16.80038 14.55452  2.984183 3.499996 0.9444419 -0.51518506 0.3360352
+
+==
+accuracy(evil_model_two, test_set)
+
+                      #ME     RMSE      MAE        MPE     MAPE      MASE       ACF1 Theil's U
+#Training set  1.894781e-15 21.21755 14.56444 -0.1973919 3.192709 0.9450856  0.2810504        NA
+#Test set     -1.486667e+01 18.68071 15.18667 -3.4198192 3.499224 0.9854616 -0.4723262 0.3651066
+
+>>>>>>> main
 #by compare two model's RMSE and MAE
   #we could find that the evil_model_one,which the linear regression with both season and trned
   #have smaller number of RMSE and MAE. Therefore the linear regreesion model with bot season 
@@ -154,6 +172,7 @@ plot(daily20.df$Temperature,daily20.df$Demand)
 #find the regression model
 model_one <- tslm(Demand ~ Temperature, data = daily20)
 summary(model_one)
+<<<<<<< HEAD
 
 
 #Coefficients:
@@ -167,6 +186,21 @@ summary(model_one)
 #Multiple R-squared:  0.8716,	Adjusted R-squared:  0.8644 
 #F-statistic: 122.1 on 1 and 18 DF,  p-value: 1.876e-09
 
+=======
+
+
+#Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  39.2117    17.9915   2.179   0.0428 *  
+#  Temperature   6.7572     0.6114  11.052 1.88e-09 ***
+  ---
+#  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#Residual standard error: 22 on 18 degrees of freedom
+#Multiple R-squared:  0.8716,	Adjusted R-squared:  0.8644 
+#F-statistic: 122.1 on 1 and 18 DF,  p-value: 1.876e-09
+
+>>>>>>> main
 #why there are a positive relationship? 
   #the higher the temputre, people will spend more electricity on the keep them cooling
 
@@ -177,9 +211,12 @@ model_one %>% residuals() %>% plot()
 checkresiduals(model_one)
 #when the tempture incrase, the residuals of the function are been increase.
 #there is a upward trent.
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> main
 
 ######
 #Q4-c
@@ -215,6 +252,15 @@ View(elecdaily)
 evil_data <-  head(elecdaily, 365)
 evil_data.df <- evil_data %>% as.data.frame()
 plot(evil_data.df$Temperatur, evil_data.df$Demand)
+<<<<<<< HEAD
+=======
+# from the graphic we could find the the tempture and usage of demand have 
+# the non-linear reationship. When the tempture within the rang among 0 to 20 degree
+# the the usage and tempture have the negative relationshop but when the tempture go 
+# higher than 45, the usage and tempture have a positive relationship. therefore
+# linear regression model cannot analysis this data set well enough. 
+################################################################################################################################################################
+>>>>>>> main
 
 #from the graphic, we could find that the #temperature and usage of demand have a non-
 #linear relationship. When the temperature is within the range of 0 to 20 degrees the usage 
@@ -222,9 +268,12 @@ plot(evil_data.df$Temperatur, evil_data.df$Demand)
 #the usage and temperature have a positive #relationship. therefore linear regression model 
 #cannot analyze this data set well enough. 
 
+<<<<<<< HEAD
 ################################################################################################################################################################
 
 
+=======
+>>>>>>> main
 #q-5
 ######## 
 library(datasets)
@@ -234,7 +283,11 @@ Huron<- window(LakeHuron, start=1875, end=1972)
 
 #########
 autoplot(Huron, col = "#003b6f") + xlab("Year") + ylab("depth")
+<<<<<<< HEAD
 # we could find both downward and cyclic patterns of the water's depth from graph.
+=======
+# we cound find the a possible downward and cyclic path of the depth of the water 
+>>>>>>> main
 ########
 
 
@@ -255,6 +308,7 @@ autoplot(Huron) +
   autolayer(fitted(piecewise_linear_trend), series = "Piecewise") +
   xlab("Year") +  ylab("depth") +
   guides(colour = guide_legend(title = " "))
+<<<<<<< HEAD
 
 
 ############
@@ -313,3 +367,71 @@ autoplot(piecewise_linear_trend_forecast, series = "Piecewise")
 #the linear regression model displays a downward trend forecast, which remains the same.
 #the piecewise linear trend forecast an upward trend which is different from 
 #the time knot set at 1920 (which displays downward forecasting).
+=======
+
+
+############
+#5-c
+  
+new_data_q5<- data.frame(
+  year = c(1972:1979)
+)
+linear_regression_model_forecast <- forecast(linear_regression_model, newdata = new_data_q5)
+print(linear_regression_model_forecast)
+autoplot(linear_regression_model_forecast)
+      
+t.new <- t[length(t)] + seq(10)
+t1.new <- t1[length(t1)] + seq(10) 
+newdata_evil<- data.frame("t" = t.new, "t1" = t1.new)
+piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, newdata = newdata_evil)
+
+autoplot(linear_regression_model_forecast,series = "Linear") 
+autoplot(piecewise_linear_trend_forecast, series = "Piecewise")
+
+#comment 
+  #the linear_regression model are forcecasting there will be a downturn
+  #the piecewise forecasting that the level will hold consistent 
+
+
+############
+#5-d-1
+
+Huron<- window(LakeHuron, start=1875, end=1972)
+year <- time(Huron)
+linear_regression_model <- tslm(Huron ~ year, data = Huron) 
+t.break1 <- 1920
+t <- time(LakeHuron)
+t1 <- ts(pmax(0, t-t.break1), start = 1915)
+piecewise_linear_trend <- tslm(LakeHuron ~ t + t1)
+autoplot(Huron) +
+  autolayer(fitted(linear_regression_model), series = "Linear") +
+  autolayer(fitted(piecewise_linear_trend), series = "Piecewise") +
+  xlab("Year") +  ylab("depth") +
+  guides(colour = guide_legend(title = " "))
+
+#the linear regression model display a downward trend
+#the pieewise display a downward trend from 1875 - 1920 and after
+#the time knot, it display a upward trend which is the diffetent when 
+#the time knot set at 1915.
+
+
+############
+#5-d-2
+new_data_q5<- data.frame( year = c(1972:1979))
+linear_regression_model_forecast <- forecast(linear_regression_model, newdata = new_data_q5)
+print(linear_regression_model_forecast)
+autoplot(linear_regression_model_forecast)
+t.new <- t[length(t)] + seq(10)
+t1.new <- t1[length(t1)] + seq(10) 
+newdata_evil<- data.frame("t" = t.new, "t1" = t1.new)
+piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, newdata = newdata_evil)
+autoplot(linear_regression_model_forecast,series = "Linear") 
+autoplot(piecewise_linear_trend_forecast, series = "Piecewise")
+
+#the linear regression model display a downward trend forecast, remain the same.
+#the piecewise linear trend forecate a upward trend which is the different with 
+#the time knot set at 1920 (which dieplay a downward forcasting).
+
+forecast(linear_regression_model)
+
+>>>>>>> main
