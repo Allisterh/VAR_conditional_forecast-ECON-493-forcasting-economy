@@ -8,9 +8,7 @@ tudent number 1537905
 class 439  
 homework 2
 
-```{r echo=TRUE}
-#Clean the enviroment  
-#Lode the all package that necessary.
+```{r}
 #some of the package may not been used in this homework
 library("ggplot2")
 library("fpp2")
@@ -23,9 +21,10 @@ library("boot")
 Exercise 1
 ===================================
 a. Based upon your estimated trend model, construct a point forecast for 2018Q4.
-```{r eval=FALSE}
+
  0.51 + 2.30 * 2018.75 = 4643.635
-```
+
+
 The point forecast for 2018Q4 is 4643.635
 
 
@@ -38,6 +37,43 @@ the lower bond is. <br>
 
 
 Exercise 2
+===================================
+
+2-a
+
+$x_1$ = 1 if the month equal to the January, February and March, otherwise equal to zero<br>
+
+$x_2$ = 1 if the month equal to the April, May and June, otherwise equal to zero<br>
+
+$x_3$ = 1 if the month equal to the July, August, September, otherwise equal to zero<br>
+
+y = the monthly sales.
+
+Therefore we can construct the model
+
+$$ y = x_1 \beta_1 + x_2 \beta_2 + x_3 \beta_3 + \epsilon $$
+
+2-b
+ 
+$x_1$ = 1 if the month equal to the January, April, July, and October, otherwise equal to zero<br>
+
+$x_2$ = 1 if the month equal to the February, May and August and November otherwise equal to zero<br>
+
+y = the monthly sales.
+
+$$ y =x_1 \beta_1 + x_2 \beta_2 + \epsilon $$
+2-c 
+
+$x_1$ = 1 if the month equal to the  November, December otherwise equal to 0
+
+y = the monthly sales.
+
+$$ y =x_1 \beta_1 + \epsilon $$
+
+
+
+
+Exercise 3
 ===================================
 #3-a Estimate a linear model with seasonal dummies as predictors using data from 1990Q1 to 2004Q4. Evaluate the residuals. Compute the AIC and BIC.
 ```{r echo=TRUE}
@@ -161,6 +197,7 @@ from the graphic, we could find that the #temperature and usage of demand have a
 
 
 Exercise 5 (R)
+===================================
 
 
 a. Plot the data and comment on its features. 
