@@ -8,9 +8,7 @@ tudent number 1537905
 class 439  
 homework 2
 
-```{r echo=TRUE}
-#Clean the enviroment  
-#Lode the all package that necessary.
+```{r}
 #some of the package may not been used in this homework
 library("ggplot2")
 library("fpp2")
@@ -23,9 +21,10 @@ library("boot")
 Exercise 1
 ===================================
 a. Based upon your estimated trend model, construct a point forecast for 2018Q4.
-```{r eval=FALSE}
+
  0.51 + 2.30 * 2018.75 = 4643.635
-```
+
+
 The point forecast for 2018Q4 is 4643.635
 
 
@@ -39,6 +38,43 @@ the lower bond is. <br>
 
 Exercise 2
 ===================================
+
+2-a
+
+$x_1$ = 1 if the month equal to the January, February and March, otherwise equal to zero<br>
+
+$x_2$ = 1 if the month equal to the April, May and June, otherwise equal to zero<br>
+
+$x_3$ = 1 if the month equal to the July, August, September, otherwise equal to zero<br>
+
+y = the monthly sales.
+
+Therefore we can construct the model
+
+$$ y = x_1 \beta_1 + x_2 \beta_2 + x_3 \beta_3 + \epsilon $$
+
+2-b
+ 
+$x_1$ = 1 if the month equal to the January, April, July, and October, otherwise equal to zero<br>
+
+$x_2$ = 1 if the month equal to the February, May and August and November otherwise equal to zero<br>
+
+y = the monthly sales.
+
+$$ y =x_1 \beta_1 + x_2 \beta_2 + \epsilon $$
+2-c 
+
+$x_1$ = 1 if the month equal to the  November, December otherwise equal to 0
+
+y = the monthly sales.
+
+$$ y =x_1 \beta_1 + \epsilon $$
+
+
+
+
+Exercise 3
+===================================
 #3-a Estimate a linear model with seasonal dummies as predictors using data from 1990Q1 to 2004Q4. Evaluate the residuals. Compute the AIC and BIC.
 ```{r echo=TRUE}
 au_beer <- window(ausbeer, start = 1990, end = c(2004,4))
@@ -48,7 +84,7 @@ fit.beer_season <- tslm(au_beer ~ season)
 checkresiduals(fit.beer_season)
 ```
 
-According to the ACF and other residuals graphy, we could find the residual is normally distribution butF the residuals are autocorrelated which menas missed the important variable.
+According to the ACF and other residuals graphy, we could find the residual is normally distribution but AFC graph suggestthe residuals are autocorrelated which menas missed the important variable.
 
 ```{r echo=TRUE}
 
@@ -75,8 +111,7 @@ BIC(fit.beer_season_trend)
 
 c. Which model is preferred? Explain.
 
-irst of all, comparing the AIC/BIC, the linear regression model with both season and trend are better due to low AIC and BIC.  <br>
-second of all, by checking the residuals, the linear regression model with both season and trend residuals are less autocorrelated and residuals do not seem to have a visible trend. 
+first of all, comparing the AIC/BIC, the linear regression model with both season and trend are better due to low AIC and BIC. second of all, by checking the residuals, the linear regression model with both season and trend residuals are less autocorrelated and residuals do not seem to have a visible trend. 
 
 3-d Evaluate the predictive performance of  these models in the test set 2005Q1 to 2009Q4. Which model performs better?
 
@@ -102,7 +137,7 @@ daily20 <- head(elecdaily,20)
 
 #plot the data 
 daily20.df <- daily20 %>% as.data.frame()
-plot(daily20.df$Demand, daily20.df$Temperature)
+plot(daily20.df$Temperature, daily20.df$Demand)
 
 #find the regression model
 model_one <- tslm(Demand ~Temperature, data = daily20)
@@ -111,14 +146,13 @@ model_one <- tslm(Demand ~Temperature, data = daily20)
 Because when the temperature is higher than the comfortable range, people will turn to use an air conditioner to cool down the temperature.
 
 
-Q4-b: Produce a residual plot. Is the model adequate? Are there any outliers or inﬂuential observations?
+Q4-b: Produce a residual plot. Is the model adequate? Are there any outlier or inﬂuential observations?
 
 ```{r echo=TRUE}
 checkresiduals(model_one)
 ```
 
-Form the residual diagnostics, we could find the residuals are not autocorrelated and it been normally distributed. However, from the residual graph, we could find the residual is influenced by the outliers. combine with the plot data graphy, we could find the outliers data point in the top left side. 
-
+Form the residual diagnostics, we could find the residuals are not autocorrelated and it been normally distributed. However, from the residual graph, we could find the residual is random therefore there are no outlier and influential observation.
 Q4-c
 Use the model to forecast the electricity demand that you would expect for the next day if the maximum temperature was 15 ◦ and compare it with the forecast if the with maximum temperature was 35 Do you believe these forecasts?
 
@@ -154,13 +188,15 @@ When the temperature was 35 degree, the prediction intervals for 95% prediction 
 ```{r echo=TRUE}
 evil_data <-  head(elecdaily, 365)
 evil_data.df <- evil_data %>% as.data.frame()
-plot(evil_data.df$Demand,evil_data.df$Temperatur, xlab = "Demand", ylab = "Temperatur", main = "elecdaily", col = "#003b6f")
+plot(evil_data.df$Temperatur, evil_data.df$Demand,
+     xlab ="Temperatur" , ylab = "Demand", main = "elecdaily", col = "#003b6f")
 ```
 from the graphic, we could find that the #temperature and usage of demand have a non-linear relationship. When the temperature is #within the range of 0 to 20 degrees the usage and temperature have a negative relationship but when the temperature goes higher than 45, the usage and temperature have a positiverelationship. therefore linear regression model cannot analyze this data set well enough. 
 
 
 
 Exercise 5 (R)
+===================================
 
 
 a. Plot the data and comment on its features. 
@@ -206,15 +242,19 @@ c. Generate forecasts from these two models for the period up to 1980 and commen
 new_data_q5<- data.frame(
   year = c(1972:1980)
 )
-linear_regression_model_forecast <- forecast(linear_regression_model, newdata = new_data_q5)
+linear_regression_model_forecast <- forecast(linear_regression_model, 
+                                             newdata = new_data_q5)
       
 t.new <- t[length(t)] + seq(9)
 t1.new <- t1[length(t1)] + seq(9) 
 newdata_evil<- data.frame("t" = t.new, "t1" = t1.new)
-piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, newdata = newdata_evil)
+piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, 
+                                            newdata = newdata_evil)
 
-autoplot(linear_regression_model_forecast, xlab = "Year", ylab = "depth", main = "linear_regression_model_forecast") 
-autoplot(piecewise_linear_trend_forecast, series = "Piecewise", lab = "Year", ylab = "depth", main = "piecewise_linear_trend_forecast")
+autoplot(linear_regression_model_forecast,
+         xlab = "Year",  ylab = "depth", main = "linear_regression_model_forecast") 
+autoplot(piecewise_linear_trend_forecast, 
+         series = "Piecewise", lab = "Year", ylab = "depth", main = "piecewise_linear_trend_forecast")
 rm(list = ls())
 ```
 
@@ -238,7 +278,9 @@ autoplot(Huron) +
   guides(colour = guide_legend(title = " "))
 ```
 
-the linear regression model displays a downward trend the piecewise display a downward trend from 1875 - 1920 and after the time knot, displays an upward trend which is different when the time knot set in 1915.
+the linear regression model displays a downward trend the piecewise display a 
+downward trend from 1875 - 1920 and after the time knot, displays an upward trend 
+which is different when the time knot set in 1915.
 
 
 ```{r echo=TRUE}
@@ -247,12 +289,17 @@ linear_regression_model_forecast <- forecast(linear_regression_model, newdata = 
 t.new <- t[length(t)] + seq(9)
 t1.new <- t1[length(t1)] + seq(9) 
 newdata_evil<- data.frame("t" = t.new, "t1" = t1.new)
-piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, newdata = newdata_evil)
-autoplot(linear_regression_model_forecast, xlab = "Year", ylab = "depth", main = "linear_regression_model_forecast") 
-autoplot(piecewise_linear_trend_forecast, series = "Piecewise", lab = "Year", ylab = "depth", main = "piecewise_linear_trend_forecast")
+piecewise_linear_trend_forecast <- forecast(piecewise_linear_trend, 
+                                            newdata = newdata_evil)
+autoplot(linear_regression_model_forecast, xlab = "Year", ylab = "depth",
+         main = "linear_regression_model_forecast") 
+autoplot(piecewise_linear_trend_forecast, series = "Piecewise", lab = "Year",
+         ylab = "depth", main = "piecewise_linear_trend_forecast")
 ```
  
-the linear regression model displays a downward trend forecast, which remains the same. the piecewise linear trend forecast an stronger upward trend which is different from  the time knot set at 1920 (which displays downward forecasting).
+the linear regression model displays a downward trend forecast, which remains the same. 
+the piecewise linear trend forecast an stronger upward trend which is different from
+the time knot set at 1920 (which displays downward forecasting).
 
 
 

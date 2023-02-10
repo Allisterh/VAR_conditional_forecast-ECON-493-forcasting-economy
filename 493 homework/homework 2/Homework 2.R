@@ -52,9 +52,8 @@ fit.beer_season <- tslm(au_beer ~ season)
 #using the both trend with season
 
 checkresiduals(fit.beer_season)
-#According to the ACF and other residuals graphy, we could find the residual is
-#normally distribution, high in the left part. Also according to the ACF
-#the residuals are autocollrated which means we lost the important variance. 
+#According to the ACF and other residuals graphy, we could find the residual is 
+#normally distribution but AFC graph suggestthe residuals are autocorrelated which menas missed the important variable.
 
 
 CV(fit.beer_season)
@@ -93,13 +92,10 @@ BIC(fit.beer_season_trend)
 
 ######
 #3-c
-#first of all
-  #compare the AIC/BIC, the linear regression model with both season and trend are better due to 
-  #low AIC and BIC.
-
-#second of all
-  #by check the residuals, the the linear regression model with both season and trend residuals are 
-  #less autocorrelated and residuals does not seem have a visiable trend. 
+#first of all, comparing the AIC/BIC, the linear regression model with both season
+#and trend are better due to low AIC and BIC. second of all, by checking the residuals, 
+#the linear regression model with both season and trend residuals are less autocorrelated
+#and residuals do not seem to have a visible trend. 
 
 #######
 #3-e
@@ -172,7 +168,6 @@ plot(daily20.df$Temperature,daily20.df$Demand)
 #find the regression model
 model_one <- tslm(Demand ~ Temperature, data = daily20)
 summary(model_one)
-<<<<<<< HEAD
 
 
 #Coefficients:
@@ -202,21 +197,16 @@ summary(model_one)
 
 >>>>>>> main
 #why there are a positive relationship? 
-  #the higher the temputre, people will spend more electricity on the keep them cooling
+  #the higher the tempture, people will spend more electricity on the keep them cooling
 
   
 ######
 #Q4-b
 model_one %>% residuals() %>% plot()
 checkresiduals(model_one)
-#when the tempture incrase, the residuals of the function are been increase.
-#there is a upward trent.
-<<<<<<< HEAD
+#Form the residual diagnostics, we could find the residuals are not autocorrelated and it been normally distributed. However, 
+#from the residual graph, we could find the residual is random therefore there are no outlier and influential observation.
 
-
-
-=======
->>>>>>> main
 
 ######
 #Q4-c
@@ -251,24 +241,21 @@ print(daily_forecast_model)
 View(elecdaily)
 evil_data <-  head(elecdaily, 365)
 evil_data.df <- evil_data %>% as.data.frame()
-plot(evil_data.df$Temperatur, evil_data.df$Demand)
-<<<<<<< HEAD
-=======
-# from the graphic we could find the the tempture and usage of demand have 
-# the non-linear reationship. When the tempture within the rang among 0 to 20 degree
-# the the usage and tempture have the negative relationshop but when the tempture go 
-# higher than 45, the usage and tempture have a positive relationship. therefore
+plot(evil_data.df$Temperatur, evil_data.df$Demand, xlab ="Temperatur" , ylab = "Demand", main = "elecdaily", col = "#003b6f")
+
+# from the graphic we could find the the temperature and usage of demand have 
+# the non-linear relationship. When the tempture within the rang among 0 to 20 degree
+# the the usage and temperature have the negative relationship but when the temperature go 
+# higher than 45, the usage and temperature have a positive relationship. therefore
 # linear regression model cannot analysis this data set well enough. 
 ################################################################################################################################################################
->>>>>>> main
 
-#from the graphic, we could find that the #temperature and usage of demand have a non-
+#from the graphic, we could find that the temperature and usage have a non-
 #linear relationship. When the temperature is within the range of 0 to 20 degrees the usage 
 #and temperature have a negative relationship #but when the temperature goes higher than 45, 
 #the usage and temperature have a positive #relationship. therefore linear regression model 
 #cannot analyze this data set well enough. 
 
-<<<<<<< HEAD
 ################################################################################################################################################################
 
 
@@ -283,11 +270,10 @@ Huron<- window(LakeHuron, start=1875, end=1972)
 
 #########
 autoplot(Huron, col = "#003b6f") + xlab("Year") + ylab("depth")
-<<<<<<< HEAD
+
 # we could find both downward and cyclic patterns of the water's depth from graph.
-=======
 # we cound find the a possible downward and cyclic path of the depth of the water 
->>>>>>> main
+
 ########
 
 
