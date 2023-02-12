@@ -84,7 +84,7 @@ fit.beer_season <- tslm(au_beer ~ season)
 checkresiduals(fit.beer_season)
 ```
 
-According to the ACF and other residuals graphy, we could find the residual is normally distribution but AFC graph suggestthe residuals are autocorrelated which menas missed the important variable.
+According to esiduals graphy, we could find the residual is normally distribution but AFC graph suggest the residuals are autocorrelated which means the important variable is missing.
 
 ```{r echo=TRUE}
 
@@ -153,6 +153,8 @@ checkresiduals(model_one)
 ```
 
 Form the residual diagnostics, we could find the residuals are not autocorrelated and it been normally distributed. However, from the residual graph, we could find the residual is random therefore there are no outlier and influential observation.
+
+
 Q4-c
 Use the model to forecast the electricity demand that you would expect for the next day if the maximum temperature was 15 ◦ and compare it with the forecast if the with maximum temperature was 35 Do you believe these forecasts?
 
