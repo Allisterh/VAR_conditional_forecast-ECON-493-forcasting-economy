@@ -114,7 +114,11 @@ accuracy(evil_model_two, test_set)
 #Training set  1.894781e-15 21.21755 14.56444 -0.1973919 3.192709 0.9450856  0.2810504        NA
 #Test set     -1.486667e+01 18.68071 15.18667 -3.4198192 3.499224 0.9854616 -0.4723262 0.3651066
 
+<<<<<<< HEAD
 cross valtion 
+=======
+
+>>>>>>> main
 
 accuracy(evil_model_one, test_set)
 
@@ -325,5 +329,17 @@ autoplot(piecewise_linear_trend_forecast, series = "Piecewise")
 #the linear regression model display a downward trend forecast, remain the same.
 #the piecewise linear trend forecate a upward trend which is the different with 
 #the time knot set at 1920 (which dieplay a downward forcasting).
+
+
+
+
+
+
+
+
+
+
+
+
 
 
