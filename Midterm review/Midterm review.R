@@ -431,25 +431,67 @@ plot(ridge.cv)
 #This is the longest,the most challange homework I ever down... 
 #now I can finally rest in peace
 
+# data and set up
+beer1 <- window(ausbeer, start=1990,end=c(2009,4))
+n.end <- 2004.75 # 2004Q4
+# set matrix for storage, 20 obs in test set
+pred <- matrix(rep(NA,80),20,4)
+# loop
+# data and set up
+beer1 <- window(ausbeer, start=1990,end=c(2009,4))
+n.end <- 2004.75 # 2004Q4
+# set matrix for storage, 20 obs in test set
+pred <- matrix(rep(NA,80),20,4)
+# loop
+
+for(i in 1:20){
+  pred[i,1] <- window(beer1,n.end+i*.25,n.end+i*.25) # actual 
+  tmp <- window(beer1,1990,n.end+(i-1)*.25)
+  # compute forecasts 1
+  fit.beer1 <- tslm(tmp ~ season)
+  fcast1 <- forecast(fit.beer1, h=1)
+  pred[i,2] <- fcast1$mean
+  # compute forecasts 2
+  fit.beer2 <- tslm(tmp ~ trend + season)
+  fcast2 <- forecast(fit.beer2, h=1)
+  pred[i,3] <- fcast2$mean
+  # compute forecasts 2
+  fcast3 <- snaive(tmp, h=1)
+  pred[i,4] <- fcast3$mean
+}
+
+print(pred)
 
 
-x <- iris[which(iris[,5] != "setosa"), c(1,5)]
-trials <- 10000
-res <- data.frame()
-system.time({
-  trial <- 1
-  while(trial <= trials) {
-    ind <- sample(100, 100, replace=TRUE)
-    result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
-    r <- coefficients(result1)
-    res <- rbind(res, r)
-    trial <- trial + 1
-  }
-})
+# compute rmse
+beerfit1 <- pred[,1] - pred[,2]
+beerfit2 <- pred[,1] - pred[,3]
+beerfit3 <- pred[,1] - pred[,4]
+rmse1 <- sqrt(mean(beerfit1^2, na.rm=TRUE))
+rmse2 <- sqrt(mean(beerfit2^2, na.rm=TRUE))
+rmse3 <- sqrt(mean(beerfit3^2, na.rm=TRUE))
 
-detectCores(logical = F)  # 8
-mc <- getOption("mc.cores", 10)
-system.time({
-  res <- mclapply(1:5000000, fun, mc.cores = mc);
-})
-stopCluster(mc)
+# display rmse
+cbind(rmse1,rmse2,rmse3)
+
+# plot
+fcast.all <- ts(pred, start=2005, frequency=4, names=c("Actual","Dummies","Trend+Dummies","SNaive"))
+autoplot(fcast.all)
+
+print(pred)
+
+# compute rmse
+beerfit1 <- pred[,1] - pred[,2]
+beerfit2 <- pred[,1] - pred[,3]
+beerfit3 <- pred[,1] - pred[,4]
+rmse1 <- sqrt(mean(beerfit1^2, na.rm=TRUE))
+rmse2 <- sqrt(mean(beerfit2^2, na.rm=TRUE))
+rmse3 <- sqrt(mean(beerfit3^2, na.rm=TRUE))
+
+# display rmse
+cbind(rmse1,rmse2,rmse3)
+
+# plot
+fcast.all <- ts(pred, start=2005, frequency=4, names=c("Actual","Dummies","Trend+Dummies","SNaive"))
+autoplot(fcast.all)
+
