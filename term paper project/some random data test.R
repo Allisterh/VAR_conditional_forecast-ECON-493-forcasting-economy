@@ -92,9 +92,6 @@ ggplot(The_housing_sell_data.raw, aes(x = Date)) +
   geom_line(aes(y = `10-year average`, color = "10-year average")) + 
   labs(title = "Housing Sell Data", x = "Date", y = "Data")
 
-noel 
-
-
 
 
 

@@ -1,0 +1,65 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Econ 493 Term paper proposal
+
+Econ 495. 
+Tie Ma. 
+Student number 1537905. 
+
+1. The data description.
+
+The data I am planning to work on for my term paper is the seasonally adjusted Canadian monthly home sales data from January 1, 2007 to January 1, 2023. The data was collected and processed by the Canadian Real Estate Association (CREA).
+
+The data can be accessed from the following link.
+(https://stats.crea.ca/en-CA/)
+
+
+
+2.some summary of the data
+``` {r}
+setwd("~/SynologyDrive/nn/ECON-493-forcasting-economy")
+```
+
+```{r include=FALSE}
+library (tsbox)
+library (RColorBrewer)
+library(wesanderson)
+library(writexl)
+library(ggplot2)
+library(reshape2)
+library(readxl)
+library(psych)
+```
+
+2.1 input the data
+
+```{r echo=TRUE}
+The_housing_sell_data <- read_excel("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/excel/The_housing_sell_data.xlsx", 
+    col_types = c("date", "numeric", "numeric", 
+        "skip", "skip"))
+
+```
+
+
+2.2 draw the graphy
+```{r echo=TRUE}
+
+The_housing_sell_data.raw <- as.data.frame(The_housing_sell_data)
+head(The_housing_sell_data.raw, 5)
+
+ggplot(The_housing_sell_data.raw, aes(x = Date)) + 
+  geom_line(aes(y = Canada, color = "Canada")) + 
+labs(title = "Housing Sell Data", x = "Date", y = "Data")
+
+```
+
+
+2.3 the summary of the data
+```{r echo=TRUE}
+describe(The_housing_sell_data.raw$Canada)
+```
+
+
