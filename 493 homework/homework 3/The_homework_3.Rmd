@@ -197,20 +197,73 @@ acf(log_different_GGPD)
 pacf(log_different_GGPD)
 ```
 
-The ACF graphy suggest the same things. even there is a fast drop but ther are slow and constant drop.
+The ACF graphy suggest the same things. even there is a fast drop but the are slow and constant drop.
 
 3-c
 
-The ACF and PACF graph suggest both AR() and MA().
+The ACF and PACF graph suggest both AR() and MA() (AKA: ARMA) because both graph display significant spikes.
 
-Be
+For the ACF() graph, because the ACF graph is slowly drop and does not have spikes after 4th lag, therefore we need AR()
+
+For the PACF() graph, because there are spikes exist, we need MA() model.
 
 ```{r}
 
-
-#by using the function auto_arima() we cound find teh 
+#by using the function auto_arima() we cound just find the answer...
 test_one <- auto.arima(log_different_GGPD)
 print(test_one)
 ```
 
-\#
+3-d
+
+```{r}
+#This is a loop test from ARMA(1,1,0) to ARMA(10, 1, 0). choise 10 beacase the answer is 4 (see code in 3-c)
+
+BIC_test <- matrix(0, nrow = 10, ncol = 2)
+
+for(i in 1:10){BIC_test[i,1] <- i}
+
+BIC_test[1,2] <- BIC(Arima(log_different_GGPD, order = c(1,1,0)))
+BIC_test[2,2] <- BIC(Arima(log_different_GGPD, order = c(2,1,0)))
+BIC_test[3,2] <- BIC(Arima(log_different_GGPD, order = c(3,1,0)))
+BIC_test[4,2] <- BIC(Arima(log_different_GGPD, order = c(4,1,0)))
+BIC_test[5,2] <- BIC(Arima(log_different_GGPD, order = c(5,1,0)))
+BIC_test[6,2] <- BIC(Arima(log_different_GGPD, order = c(6,1,0)))
+BIC_test[7,2] <- BIC(Arima(log_different_GGPD, order = c(7,1,0)))
+BIC_test[8,2] <- BIC(Arima(log_different_GGPD, order = c(8,1,0)))
+BIC_test[9,2] <- BIC(Arima(log_different_GGPD, order = c(9,1,0)))
+BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,1,0)))
+
+print(BIC_test)
+
+```
+
+
+According to the BIC test Matrix, the AR(3) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
+
+3-e
+
+```{r}
+
+AIC_test <- matrix(0, nrow = 10, ncol = 2)
+
+for(i in 1:10){AIC_test[i,1] <- i}
+
+AIC_test[1,2] <- AIC(Arima(log_different_GGPD, order = c(1,1,0)))
+AIC_test[2,2] <- AIC(Arima(log_different_GGPD, order = c(2,1,0)))
+AIC_test[3,2] <- AIC(Arima(log_different_GGPD, order = c(3,1,0)))
+AIC_test[4,2] <- AIC(Arima(log_different_GGPD, order = c(4,1,0)))
+AIC_test[5,2] <- AIC(Arima(log_different_GGPD, order = c(5,1,0)))
+AIC_test[6,2] <- AIC(Arima(log_different_GGPD, order = c(6,1,0)))
+AIC_test[7,2] <- AIC(Arima(log_different_GGPD, order = c(7,1,0)))
+AIC_test[8,2] <- AIC(Arima(log_different_GGPD, order = c(8,1,0)))
+AIC_test[9,2] <- AIC(Arima(log_different_GGPD, order = c(9,1,0)))
+AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,1,0)))
+                      
+print(AIC_test)
+
+```
+According to AIC test matrix, the AR(2) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
+
+
+
