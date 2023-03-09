@@ -1,0 +1,216 @@
+---
+---
+---
+
+Tie Ma
+
+Homework 3 - R code part
+
+student number 1537905
+
+```{r include=FALSE}
+#Lode the all package that necessary.
+#some of the package may not been used in this homework
+library("ggplot2")
+library("fpp2")
+library("glmnet")
+library("tidyr")
+library("lmtest")
+library("boot")
+library("forecast")
+library("readr")
+library("ggfortify")
+```
+
+\###########################################
+
+Exercise 3
+
+3-a
+
+```{r}
+#Import the data
+Coal_production<- window(bicoal, start=1920, end=1968)
+
+#fit with the AR(4) model
+Coal_production_AR4_model<- Arima(Coal_production, order = c(4,0,0))
+```
+
+This model is AR(4) model, therefore
+
+p = 4, d = 0, and q = 0
+
+3-b
+
+```{r}
+par(mfrow=c(1,2))
+acf(resid(arima(Coal_production, order=c(4, 0, 0))), main="ACF of Residuals")
+pacf(resid(arima(Coal_production, order=c(4, 0, 0))), main="PACF of Residuals")
+```
+
+By compare the ACF and PACF graphic, we could find the AR(4) or ARMA(4,0,0) include all the possible relationship such the residual left with white noise (smaller than 1). Therefore we should this model for explain the data.
+
+3 - c
+
+```{r}
+
+```
+
+3- d
+
+```{r}
+
+```
+
+\#######
+
+Exercise 4
+
+4-a
+
+```{r}
+IBM_stock_price<- window(ibmclose)
+summary(IBM_stock_price)
+var(IBM_stock_price)
+```
+
+```{r}
+#plot the data
+plot(IBM_stock_price)
+abline(h = 450, col = "red", lty = 2, lwd = 2)
+text(1, 450, "The Average", pos = 4)
+```
+
+From the plot graphy, we can see a strong downward trend and a relative big varaince, therefor the data is not stationary.
+
+```{r}
+#Plot the ACF and PACF
+par(mfrow=c(1,2))
+acf(IBM_stock_price)
+pacf(IBM_stock_price)
+```
+
+The non-stationary data ACF and PACF graphy will show the slow decaying trend of data collection. Therefore, the IBM stock market ACF graphic show that such data are non-stationary.
+
+4-B
+
+```{R}
+#fit the model
+IBM_stock_price_AR_1_model<- Arima(IBM_stock_price, order = c(1,0,0))
+
+```
+
+```{R}
+#note: I want to try all the code that can give estimated coeffcient I knew. In case they have different reuslt and I lose the grade.In the end they all give the same result.
+coef(IBM_stock_price_AR_1_model)
+summary(IBM_stock_price_AR_1_model)
+(fit2 <- Arima(IBM_stock_price, order = c(1,0,0)))
+```
+
+the estimated coefficient measures the correlation between the one observation and the observation last to it. the estimated coefficient measures the corrlation relationship between two observations. the positive estimated coefficient means the positive relationship and the negative estimated coefficient means the negative relationship. the larger the number, the stronger the relationship.
+
+4-c
+
+```{R}
+#Use R to plot the ﬁrst diﬀerence of the series, the ACF and PACF. Explain how each plot shows that the diﬀerenced series is stationary.
+
+IBM_stock_price_difference <- diff(IBM_stock_price)
+
+summary(IBM_stock_price_difference)
+
+
+plot(IBM_stock_price_difference)
+abline(h = -0.2799, col = "red", lty = 2, lwd = 2)
+text(1, -10, "The Average", pos = 4)
+```
+
+The plot does not display any visible trend and moving around the average compare the un-staational verson.
+
+```{R}
+par(mfrow=c(1,2))
+acf(IBM_stock_price_difference)
+pacf(IBM_stock_price_difference)
+
+```
+
+The ACF and PACF graphic does not show the slow decaying trend means that the observation have little or non relationship (correlation) with each others compare to the non-stationary data.
+
+4-d
+
+```{R}
+IBM_stock_price_AR_1_model_differencedata<- Arima(IBM_stock_price_difference, order = c(1,0,0))
+
+#since all three way will give the same estimated coeffcient, so I will use summary()
+
+summary(IBM_stock_price_AR_1_model_differencedata)
+```
+
+The estimated coefficient is 0.0855 which is smaller than 0.9960 in the question 4-c. by different the data, the correlation relationship between observation have been massively decreased.
+
+\####
+
+Exercise 5
+
+5-a
+
+```{R}
+
+GGDP_raw <- read_csv("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/493 homework/homework 3/NAEXKP01CAQ661S.csv", col_types = cols(NAEXKP01CAQ661S = col_number()))
+
+GGDP.ts <- ts(GGDP_raw, frequency = 4)
+
+plot(GGDP_raw, type = "l")
+abline(h = 64.35, col = "red", lty = 2, lwd = 2)
+text(1, 60, "The Average", pos = 4)
+
+```
+
+The plot data show the upward trend, therefore the data need to be stationary.
+
+```{R}
+par(mfrow=c(1,2))
+acf(GGDP$NAEXKP01CAQ661S)
+pacf(GGDP$NAEXKP01CAQ661S)
+```
+
+The non-stationary data ACF and PACF graphs will show a slow downward trend. In this data set, the ACF graph shows a slow downward trend, therefore, thus GDP data need to be stationary.
+
+5-b
+
+```{R}
+#Use R to plot the change in log RGDP
+
+log_different_GGPD <- diff(log(GGDP$NAEXKP01CAQ661S), lag = 4)
+summary(log_different_GGPD)
+
+plot(log_different_GGPD, type = "l")
+abline(h = 0.03097, col = "red", lty = 2, lwd = 2)
+text(1, 0.01, "The Average", pos = 4)
+
+```
+
+The plot graphy still have a down turn, which may sugget it is not fully stationary.
+
+```{R}
+par(mfrow=c(1,2))
+acf(log_different_GGPD)
+pacf(log_different_GGPD)
+```
+
+The ACF graphy suggest the same things. even there is a fast drop but ther are slow and constant drop.
+
+3-c
+
+The ACF and PACF graph suggest both AR() and MA().
+
+Be
+
+```{r}
+
+
+#by using the function auto_arima() we cound find teh 
+test_one <- auto.arima(log_different_GGPD)
+print(test_one)
+```
+
+\#
