@@ -54,13 +54,67 @@ By compare the ACF and PACF graphic, we could find the AR(4) or ARMA(4,0,0) incl
 
 ```{r}
 
+mu1 <- 0.83
+mu2 <- -0.34
+mu3 <- 0.55
+mu4 <- -0.38
+c <- 162.00
+
+#calcuallate the variance
+#μ = c/ 1 - φ1 - φ2 - φ3 -φ4
+
+
+μ <- (c)/(1 - mu1 - mu2 - mu3 -mu4)
+print(μ)
+#μ <- 476.4706
+
+y1968 <- 545
+y1967 <-552
+y1966 <-534
+y1965 <-512
+y1964 <-467
+summary(c(y1967,y1968,y1966,y1965,y1964))
+#mean: 522
+
+#y1969
+
+#y1969 <- μ + (φ1^q)*((Yt)- μ) + (φ2^q)*((Yt_-1)-μ) + (φ3^q)*((Yt_-2 )-μ) + (φ4^q)*((Yt_-3)- μ)
+
+y1969 <- μ + mu1 * (y1968 - μ) + mu2 *(y1967-μ) + mu3 *(y1966-μ) + mu4 * (y1965 - μ)
+print(y1969)
+#1969
+#525.81
+
+#1970
+y1970 <-  μ + ((mu1)^2) * (y1969 - μ) + ((mu2)^2) *(y1968- μ) + ((mu3)^2) *(y1967- μ) + ((mu4)^2) * (y1966 - μ)
+print(y1970)
+#y1970
+#549.5374
+
+#1971
+y1971 <-  μ + (mu1^3) * (y1970 - μ) + (mu2^3) *(y1969-μ) + (mu3^3) *(y1968-μ) + (mu4^3) * (y1967 - μ)
+print(y1971)
+#y1971
+#523.5671
+
+plot(c(y1964, y1965, y1966, y1967, y1968, y1969, y1970, y1971))
+
 ```
 
 3- d
 
 ```{r}
+evil_forcast <- forecast(Arima(bicoal, order = c(4, 0, 0)))
+plot(evil_forcast)
+
+print(evil_forcast)
+summary(Arima(bicoal, order = c(4, 0, 0)))
 
 ```
+
+first, ARMA model will always went back to its mean in the long term. Consider the mean different between hand forecast and over data forecast.
+
+second, for AR(4) model, the long term forcast always on the trend back to its expect value. Consider the the different mu, for example mu1 hand calculate is 0.84 but in AR(4) for all data set is 0.8334.
 
 \#######
 
@@ -157,8 +211,6 @@ Exercise 5
 
 GGDP_raw <- read_csv("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/493 homework/homework 3/NAEXKP01CAQ661S.csv", col_types = cols(NAEXKP01CAQ661S = col_number()))
 
-GGDP.ts <- ts(GGDP_raw, frequency = 4)
-
 plot(GGDP_raw, type = "l")
 abline(h = 64.35, col = "red", lty = 2, lwd = 2)
 text(1, 60, "The Average", pos = 4)
@@ -167,10 +219,12 @@ text(1, 60, "The Average", pos = 4)
 
 The plot data show the upward trend, therefore the data need to be stationary.
 
-```{R}
+```{R message=TRUE, warning=TRUE}
 par(mfrow=c(1,2))
-acf(GGDP$NAEXKP01CAQ661S)
-pacf(GGDP$NAEXKP01CAQ661S)
+acf(GGDP_raw$NAEXKP01CAQ661S)
+pacf(GGDP_raw$NAEXKP01CAQ661S)
+
+GGDP <- GGDP_raw
 ```
 
 The non-stationary data ACF and PACF graphs will show a slow downward trend. In this data set, the ACF graph shows a slow downward trend, therefore, thus GDP data need to be stationary.
@@ -189,7 +243,7 @@ text(1, 0.01, "The Average", pos = 4)
 
 ```
 
-The plot graphy still have a down turn, which may sugget it is not fully stationary.
+The plot graph still have a down turn, which may suggest it is not fully stationary.
 
 ```{R}
 par(mfrow=c(1,2))
@@ -199,7 +253,7 @@ pacf(log_different_GGPD)
 
 The ACF graphy suggest the same things. even there is a fast drop but the are slow and constant drop.
 
-3-c
+5-c
 
 The ACF and PACF graph suggest both AR() and MA() (AKA: ARMA) because both graph display significant spikes.
 
@@ -214,9 +268,9 @@ test_one <- auto.arima(log_different_GGPD)
 print(test_one)
 ```
 
-3-d
+5-d
 
-```{r}
+```{r echo=TRUE}
 #This is a loop test from ARMA(1,1,0) to ARMA(10, 1, 0). choise 10 beacase the answer is 4 (see code in 3-c)
 
 BIC_test <- matrix(0, nrow = 10, ncol = 2)
@@ -237,7 +291,6 @@ BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,1,0)))
 print(BIC_test)
 
 ```
-
 
 According to the BIC test Matrix, the AR(3) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
 
@@ -263,7 +316,43 @@ AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,1,0)))
 print(AIC_test)
 
 ```
+
 According to AIC test matrix, the AR(2) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
 
+###
+f. Use the models selected in parts (d) and (e) to forecast the quarterly log RGDP in 2018:Q2, 2018:Q3, and 2018:Q4. Compare your results.
+
+Part d or BIC test show that AR(3) is the best model.
+```{r}
+Q5_f_d <- forecast(Arima(log_different_GGPD, order = c(3, 1, 0)))
+plot(Q5_f_d)
+print(Q5_f_d)
+```
 
 
+Part e or AIC test show that AR(2) is the best model
+```{r}
+Q5_f_e <- forecast(Arima(log_different_GGPD, order = c(2, 1, 0)))
+autoplot(Q5_f_e)
+print(Q5_f_e)
+```
+
+
+AIC
+2018:Q2    0.02019323 -0.002515274 0.04290174 -0.0145364310 0.05492290
+2018:Q3   0.02003051 -0.009778071 0.04983910 -0.0255577834 0.06561881
+2018:Q4    0.01998481 -0.015721534 0.05569115 -0.0346233309 0.07459295
+
+BIC
+
+2018:Q2    0.02093293 -0.001697496 0.04356336 -0.0136773202 0.05554318
+2018:Q3    0.02142733 -0.008562651 0.05141731 -0.0244383867 0.06729304
+2018:Q4    0.02171863 -0.013722599 0.05715985 -0.0324840492 0.07592130
+
+
+
+```{r}
+
+
+
+```
