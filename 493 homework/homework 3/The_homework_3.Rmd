@@ -44,6 +44,7 @@ p = 4, d = 0, and q = 0
 
 ```{r}
 par(mfrow=c(1,2))
+#put two graph together and generate the gra
 Acf(resid(arima(Coal_production, order=c(4, 0, 0))), main="ACF of Residuals")
 Pacf(resid(arima(Coal_production, order=c(4, 0, 0))), main="PACF of Residuals")
 ```
@@ -51,11 +52,11 @@ Pacf(resid(arima(Coal_production, order=c(4, 0, 0))), main="PACF of Residuals")
 By compare the ACF and PACF graphic, we could find the AR(4) or ARMA(4,0,0) include all the possible relationship such the residual left with white noise (smaller than 1). Therefore we should this model for explain the data.
 
 3 - c
+Note: I did both the mean adjust form and regression. 
 
 ```{r}
 
-#The mean adjust form
-#MEAN ADJUSTFORM 
+#The following are the mean adjustment form.
 
 mu1 <- 0.83
 mu2 <- -0.34
@@ -84,24 +85,58 @@ summary(c(y1967,y1968,y1966,y1965,y1964))
 #y1969 <- μ + (φ1^q)*((Yt)- μ) + (φ2^q)*((Yt_-1)-μ) + (φ3^q)*((Yt_-2 )-μ) + (φ4^q)*((Yt_-3)- μ)
 
 y1969 <- μ + mu1 * (y1968 - μ) + mu2 *(y1967-μ) + mu3 *(y1966-μ) + mu4 * (y1965 - μ)
-print(y1969)
+
+#print(y1969)
 #1969
 #525.81
 
 #1970
 y1970 <-  μ + ((mu1)^2) * (y1969 - μ) + ((mu2)^2) *(y1968- μ) + ((mu3)^2) *(y1967- μ) + ((mu4)^2) * (y1966 - μ)
-print(y1970)
+
+#print(y1970)
 #y1970
 #549.5374
 
 #1971
 y1971 <-  μ + (mu1^3) * (y1970 - μ) + (mu2^3) *(y1969-μ) + (mu3^3) *(y1968-μ) + (mu4^3) * (y1967 - μ)
-print(y1971)
+
+#print(y1971)
 #y1971
 #523.5671
 
 plot(c(y1964, y1965, y1966, y1967, y1968, y1969, y1970, y1971))
 
+```
+
+```{r}
+#The regression form 
+#because I used the y for the adjust mean form, for the data is clear to read. I will using ry to represent the forcast generate by hte regression form.
+
+ry1969 <- c + mu1 * y1968 + mu2 *y1967 + mu3* y1966 + mu4 *y1965
+
+#print(ry1969)
+#525.81
+
+ry1970 <- c + mu1 * ry1969 + mu2 *y1968 + mu3* y1967 + mu4 *y1966
+
+#print(ry1970)
+#513.8023
+
+
+ry1971 <- c + mu1 * ry1970 + mu2 *ry1969 + mu3* y1968+ mu4 *y1967
+#print(ry1971)
+#499.6705
+
+The_forcast_matrix <- matrix(nrow = 2, ncol = 3)
+
+
+colnames(The_forcast_matrix) <- c("1969", "1970", "1971")
+rownames(The_forcast_matrix) <- c("Mean_adjust_form", "Regression_form")
+
+The_forcast_matrix[1, ] <- (c(y1969, y1970, y1971))
+The_forcast_matrix[2, ]<- (c(ry1969, ry1970, ry1971))
+
+print(The_forcast_matrix)
 ```
 
 3- d
@@ -205,7 +240,7 @@ IBM_stock_price_AR_1_model_differencedata<- Arima(IBM_stock_price_difference, or
 summary(IBM_stock_price_AR_1_model_differencedata)
 ```
 
-The estimated coefficient is 0.0855 which is smaller than 0.9960 in the question 4-c. by different the data, the correlation relationship between observation have been massively decreased.
+The estimated coefficient is 0.0855 which is smaller than 0.9960 in the question 4-c. by different the data, the correlation relationship between observation have been massively decreased. In other word, the data been stationary,
 
 \####
 
@@ -282,22 +317,22 @@ BIC_test <- matrix(0, nrow = 10, ncol = 2)
 
 for(i in 1:10){BIC_test[i,1] <- i}
 
-BIC_test[1,2] <- BIC(Arima(log_different_GGPD, order = c(1,1,0)))
-BIC_test[2,2] <- BIC(Arima(log_different_GGPD, order = c(2,1,0)))
-BIC_test[3,2] <- BIC(Arima(log_different_GGPD, order = c(3,1,0)))
-BIC_test[4,2] <- BIC(Arima(log_different_GGPD, order = c(4,1,0)))
-BIC_test[5,2] <- BIC(Arima(log_different_GGPD, order = c(5,1,0)))
-BIC_test[6,2] <- BIC(Arima(log_different_GGPD, order = c(6,1,0)))
-BIC_test[7,2] <- BIC(Arima(log_different_GGPD, order = c(7,1,0)))
-BIC_test[8,2] <- BIC(Arima(log_different_GGPD, order = c(8,1,0)))
-BIC_test[9,2] <- BIC(Arima(log_different_GGPD, order = c(9,1,0)))
-BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,1,0)))
+BIC_test[1,2] <- BIC(Arima(log_different_GGPD, order = c(1,0,0), include.drift = TRUE))
+BIC_test[2,2] <- BIC(Arima(log_different_GGPD, order = c(2,0,0), include.drift = TRUE))
+BIC_test[3,2] <- BIC(Arima(log_different_GGPD, order = c(3,0,0), include.drift = TRUE))
+BIC_test[4,2] <- BIC(Arima(log_different_GGPD, order = c(4,0,0), include.drift = TRUE))
+BIC_test[5,2] <- BIC(Arima(log_different_GGPD, order = c(5,0,0), include.drift = TRUE))
+BIC_test[6,2] <- BIC(Arima(log_different_GGPD, order = c(6,0,0), include.drift = TRUE))
+BIC_test[7,2] <- BIC(Arima(log_different_GGPD, order = c(7,0,0), include.drift = TRUE))
+BIC_test[8,2] <- BIC(Arima(log_different_GGPD, order = c(8,0,0), include.drift = TRUE))
+BIC_test[9,2] <- BIC(Arima(log_different_GGPD, order = c(9,0,0), include.drift = TRUE))
+BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,0,0), include.drift = TRUE))
 
 print(BIC_test)
 
 ```
 
-According to the BIC test Matrix, the AR(3) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
+According to the BIC test Matrix, the AR(1) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
 
 3-e
 
@@ -307,57 +342,38 @@ AIC_test <- matrix(0, nrow = 10, ncol = 2)
 
 for(i in 1:10){AIC_test[i,1] <- i}
 
-AIC_test[1,2] <- AIC(Arima(log_different_GGPD, order = c(1,1,0)))
-AIC_test[2,2] <- AIC(Arima(log_different_GGPD, order = c(2,1,0)))
-AIC_test[3,2] <- AIC(Arima(log_different_GGPD, order = c(3,1,0)))
-AIC_test[4,2] <- AIC(Arima(log_different_GGPD, order = c(4,1,0)))
-AIC_test[5,2] <- AIC(Arima(log_different_GGPD, order = c(5,1,0)))
-AIC_test[6,2] <- AIC(Arima(log_different_GGPD, order = c(6,1,0)))
-AIC_test[7,2] <- AIC(Arima(log_different_GGPD, order = c(7,1,0)))
-AIC_test[8,2] <- AIC(Arima(log_different_GGPD, order = c(8,1,0)))
-AIC_test[9,2] <- AIC(Arima(log_different_GGPD, order = c(9,1,0)))
-AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,1,0)))
+AIC_test[1,2] <- AIC(Arima(log_different_GGPD, order = c(1,0,0), include.drift = TRUE))
+AIC_test[2,2] <- AIC(Arima(log_different_GGPD, order = c(2,0,0), include.drift = TRUE))
+AIC_test[3,2] <- AIC(Arima(log_different_GGPD, order = c(3,0,0), include.drift = TRUE))
+AIC_test[4,2] <- AIC(Arima(log_different_GGPD, order = c(4,0,0), include.drift = TRUE))
+AIC_test[5,2] <- AIC(Arima(log_different_GGPD, order = c(5,0,0), include.drift = TRUE))
+AIC_test[6,2] <- AIC(Arima(log_different_GGPD, order = c(6,0,0), include.drift = TRUE))
+AIC_test[7,2] <- AIC(Arima(log_different_GGPD, order = c(7,0,0), include.drift = TRUE))
+AIC_test[8,2] <- AIC(Arima(log_different_GGPD, order = c(8,0,0), include.drift = TRUE))
+AIC_test[9,2] <- AIC(Arima(log_different_GGPD, order = c(9,0,0), include.drift = TRUE))
+AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,0,0), include.drift = TRUE))
                       
 print(AIC_test)
 
 ```
 
-According to AIC test matrix, the AR(2) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
+According to AIC test matrix, the AR(1) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
 
 ###
 f. Use the models selected in parts (d) and (e) to forecast the quarterly log RGDP in 2018:Q2, 2018:Q3, and 2018:Q4. Compare your results.
 
-Part d or BIC test show that AR(3) is the best model.
+AIC and BIC test show that AR(1) is the best model.
 ```{r}
-Q5_f_d <- forecast(Arima(log_different_GGPD, order = c(3, 1, 0)))
-plot(Q5_f_d)
+Q5_f_d <- forecast(Arima(diff(log(GGDP$NAEXKP01CAQ661S), lag = 4), order = c(1, 0, 0), include.drift = TRUE))
+
 print(Q5_f_d)
-```
-
-
-Part e or AIC test show that AR(2) is the best model
-```{r}
-Q5_f_e <- forecast(Arima(log_different_GGPD, order = c(2, 1, 0)))
-autoplot(Q5_f_e)
-print(Q5_f_e)
-```
-
-
-AIC
-2018:Q2    0.02019323 -0.002515274 0.04290174 -0.0145364310 0.05492290
-2018:Q3   0.02003051 -0.009778071 0.04983910 -0.0255577834 0.06561881
-2018:Q4    0.01998481 -0.015721534 0.05569115 -0.0346233309 0.07459295
-
-BIC
-
-2018:Q2    0.02093293 -0.001697496 0.04356336 -0.0136773202 0.05554318
-2018:Q3    0.02142733 -0.008562651 0.05141731 -0.0244383867 0.06729304
-2018:Q4    0.02171863 -0.013722599 0.05715985 -0.0324840492 0.07592130
-
-
-
-```{r}
-
-
 
 ```
+
+
+
+2018:Q2    0.02116382	0.007187593	0.03514005	-0.0002109758	0.04253862
+2018:Q3     0.01973173	0.001326942	0.03813651	-0.0084159634	0.04787942
+2018:Q4    0.01847955	-0.002592020	0.03955113	-0.0137466361	0.05070574
+
+
