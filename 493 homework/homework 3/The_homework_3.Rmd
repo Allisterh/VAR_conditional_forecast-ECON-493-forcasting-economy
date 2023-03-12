@@ -11,6 +11,7 @@ student number 1537905
 ```{r include=FALSE}
 #Lode the all package that necessary.
 #some of the package may not been used in this homework
+#Yes, I copy it around
 library("ggplot2")
 library("fpp2")
 library("glmnet")
@@ -52,7 +53,8 @@ Pacf(resid(arima(Coal_production, order=c(4, 0, 0))), main="PACF of Residuals")
 By compare the ACF and PACF graphic, we could find the AR(4) or ARMA(4,0,0) include all the possible relationship such the residual left with white noise (smaller than 1). Therefore we should this model for explain the data.
 
 3 - c
-Note: I did both the mean adjust form and regression. 
+
+Note: I did both the mean adjust form and regression.
 
 ```{r}
 
@@ -77,7 +79,7 @@ y1967 <-552
 y1966 <-534
 y1965 <-512
 y1964 <-467
-summary(c(y1967,y1968,y1966,y1965,y1964))
+
 #mean: 522
 
 #y1969
@@ -103,8 +105,6 @@ y1971 <-  μ + (mu1^3) * (y1970 - μ) + (mu2^3) *(y1969-μ) + (mu3^3) *(y1968-μ
 #print(y1971)
 #y1971
 #523.5671
-
-plot(c(y1964, y1965, y1966, y1967, y1968, y1969, y1970, y1971))
 
 ```
 
@@ -142,17 +142,21 @@ print(The_forcast_matrix)
 3- d
 
 ```{r}
-evil_forcast <- forecast(Arima(bicoal, order = c(4, 0, 0)))
-plot(evil_forcast)
+Coal_production<- window(bicoal, start=1920, end=1968)
+evil_forcast <- forecast(Arima(Coal_production, order = c(4, 0, 0)))
+print(Arima(Coal_production, order = c(4, 0, 0)))
+ryd1969 <- c + 0.8334 * y1968 + -0.3443 *y1967 + 0.5525* y1966 + -0.3780 *y1965
+print(ryd1969)
+
+
 
 print(evil_forcast)
-summary(Arima(bicoal, order = c(4, 0, 0)))
 
 ```
 
 first, ARMA model will always went back to its mean in the long term. Consider the mean different between hand forecast and over data forecast.
 
-second, for AR(4) model, the long term forcast always on the trend back to its expect value. Consider the the different mu, for example mu1 hand calculate is 0.84 but in AR(4) for all data set is 0.8334.
+second, for AR(4) model, the long term forecast always on the trend back to its expect value. Consider the the different mu, for example mu1 hand calculate is 0.84 but in AR(4) for all data set is 0.8334.
 
 \#######
 
@@ -359,10 +363,12 @@ print(AIC_test)
 
 According to AIC test matrix, the AR(1) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
 
-###
-f. Use the models selected in parts (d) and (e) to forecast the quarterly log RGDP in 2018:Q2, 2018:Q3, and 2018:Q4. Compare your results.
+### 
+
+f.  Use the models selected in parts (d) and (e) to forecast the quarterly log RGDP in 2018:Q2, 2018:Q3, and 2018:Q4. Compare your results.
 
 AIC and BIC test show that AR(1) is the best model.
+
 ```{r}
 Q5_f_d <- forecast(Arima(diff(log(GGDP$NAEXKP01CAQ661S), lag = 4), order = c(1, 0, 0), include.drift = TRUE))
 
@@ -370,10 +376,8 @@ print(Q5_f_d)
 
 ```
 
+2018:Q2 0.02116382 0.007187593 0.03514005 -0.0002109758 0.04253862
 
+2018:Q3 0.01973173 0.001326942 0.03813651 -0.0084159634 0.04787942
 
-2018:Q2    0.02116382	0.007187593	0.03514005	-0.0002109758	0.04253862
-2018:Q3     0.01973173	0.001326942	0.03813651	-0.0084159634	0.04787942
-2018:Q4    0.01847955	-0.002592020	0.03955113	-0.0137466361	0.05070574
-
-
+2018:Q4 0.01847955 -0.002592020 0.03955113 -0.0137466361 0.05070574
