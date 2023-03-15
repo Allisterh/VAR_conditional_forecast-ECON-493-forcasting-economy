@@ -1,6 +1,13 @@
+
 ---
+title: "Habits"
+author: John Doe
+date: March 22, 2005
+output: 
+  pdf_document: 
+    keep_tex: yes
 ---
----
+
 
 Tie Ma
 
@@ -200,20 +207,21 @@ IBM_stock_price_AR_1_model<- Arima(IBM_stock_price, order = c(1,0,0))
 ```
 
 ```{R}
-#note: I want to try all the code that can give estimated coeffcient I knew. In case they have different reuslt and I lose the grade.In the end they all give the same result.
+#note: I want to try all the code that can give estimated coeffcient I knew. In case they have different reuslt and I lose the grade.
+#In the end they all give the same result.
 coef(IBM_stock_price_AR_1_model)
 summary(IBM_stock_price_AR_1_model)
 (fit2 <- Arima(IBM_stock_price, order = c(1,0,0)))
 ```
 
-the estimated coefficient measures the correlation between the one observation and the observation last to it. the estimated coefficient measures the corrlation relationship between two observations. the positive estimated coefficient means the positive relationship and the negative estimated coefficient means the negative relationship. the larger the number, the stronger the relationship.
+The estimated coefficient measures the correlation between one observation and the previous observation. It indicates the correlation relationship between two observations, where a positive coefficient signifies a positive relationship and a negative coefficient signifies a negative relationship. the larger the number, the stronger the relationship. In this case, it means the data has a strong positive correlation relationship representing the data is not fully stationary enough.
 
 4-c
 
 ```{R}
 #Use R to plot the ﬁrst diﬀerence of the series, the ACF and PACF. Explain how each plot shows that the diﬀerenced series is stationary.
 
-IBM_stock_price_difference <- diff(IBM_stock_price)
+IBM_stock_price_difference <- diff(IBM_stock_price, lag = 1)
 
 summary(IBM_stock_price_difference)
 
@@ -223,7 +231,7 @@ abline(h = -0.2799, col = "red", lty = 2, lwd = 2)
 text(1, -10, "The Average", pos = 4)
 ```
 
-The plot does not display any visible trend and moving around the average compare the un-staational verson.
+The plot does not display any visible trend and moving around the average compare the un-stationary verson.
 
 ```{R}
 par(mfrow=c(1,2))
@@ -301,9 +309,11 @@ The ACF graphy suggest the same things. even there is a fast drop but the are sl
 
 The ACF and PACF graph suggest both AR() and MA() (AKA: ARMA) because both graph display significant spikes.
 
-For the ACF() graph, because the ACF graph is slowly drop and does not have spikes after 4th lag, therefore we need AR()
+3 lag in the ACF so its need to be MA(4)
 
-For the PACF() graph, because there are spikes exist, we need MA() model.
+3 lag in the PACF so its need to be AR(4)
+
+ARMA (4, 0 ,4)
 
 ```{r}
 
@@ -312,22 +322,14 @@ test_one <- auto.arima(log_different_GGPD)
 print(test_one)
 ```
 
-<<<<<<< HEAD
-5-d
-
 ```{r echo=TRUE}
-=======
-3-d
 
-```{r}
->>>>>>> main
 #This is a loop test from ARMA(1,1,0) to ARMA(10, 1, 0). choise 10 beacase the answer is 4 (see code in 3-c)
 
 BIC_test <- matrix(0, nrow = 10, ncol = 2)
 
 for(i in 1:10){BIC_test[i,1] <- i}
 
-<<<<<<< HEAD
 BIC_test[1,2] <- BIC(Arima(log_different_GGPD, order = c(1,0,0), include.drift = TRUE))
 BIC_test[2,2] <- BIC(Arima(log_different_GGPD, order = c(2,0,0), include.drift = TRUE))
 BIC_test[3,2] <- BIC(Arima(log_different_GGPD, order = c(3,0,0), include.drift = TRUE))
@@ -338,29 +340,13 @@ BIC_test[7,2] <- BIC(Arima(log_different_GGPD, order = c(7,0,0), include.drift =
 BIC_test[8,2] <- BIC(Arima(log_different_GGPD, order = c(8,0,0), include.drift = TRUE))
 BIC_test[9,2] <- BIC(Arima(log_different_GGPD, order = c(9,0,0), include.drift = TRUE))
 BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,0,0), include.drift = TRUE))
-=======
-BIC_test[1,2] <- BIC(Arima(log_different_GGPD, order = c(1,1,0)))
-BIC_test[2,2] <- BIC(Arima(log_different_GGPD, order = c(2,1,0)))
-BIC_test[3,2] <- BIC(Arima(log_different_GGPD, order = c(3,1,0)))
-BIC_test[4,2] <- BIC(Arima(log_different_GGPD, order = c(4,1,0)))
-BIC_test[5,2] <- BIC(Arima(log_different_GGPD, order = c(5,1,0)))
-BIC_test[6,2] <- BIC(Arima(log_different_GGPD, order = c(6,1,0)))
-BIC_test[7,2] <- BIC(Arima(log_different_GGPD, order = c(7,1,0)))
-BIC_test[8,2] <- BIC(Arima(log_different_GGPD, order = c(8,1,0)))
-BIC_test[9,2] <- BIC(Arima(log_different_GGPD, order = c(9,1,0)))
-BIC_test[10,2] <- BIC(Arima(log_different_GGPD, order = c(10,1,0)))
->>>>>>> main
+
 
 print(BIC_test)
 
 ```
 
-<<<<<<< HEAD
-According to the BIC test Matrix, the AR(1) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
-=======
-
-According to the BIC test Matrix, the AR(3) has the lowest absolute BIC, therefore it is the best for AR() for describe model.
->>>>>>> main
+According to the BIC test Matrix, the AR(1) has the lowest absolute BIC, therefore it is the best for AR(1) for describe model.
 
 3-e
 
@@ -370,7 +356,6 @@ AIC_test <- matrix(0, nrow = 10, ncol = 2)
 
 for(i in 1:10){AIC_test[i,1] <- i}
 
-<<<<<<< HEAD
 AIC_test[1,2] <- AIC(Arima(log_different_GGPD, order = c(1,0,0), include.drift = TRUE))
 AIC_test[2,2] <- AIC(Arima(log_different_GGPD, order = c(2,0,0), include.drift = TRUE))
 AIC_test[3,2] <- AIC(Arima(log_different_GGPD, order = c(3,0,0), include.drift = TRUE))
@@ -381,25 +366,13 @@ AIC_test[7,2] <- AIC(Arima(log_different_GGPD, order = c(7,0,0), include.drift =
 AIC_test[8,2] <- AIC(Arima(log_different_GGPD, order = c(8,0,0), include.drift = TRUE))
 AIC_test[9,2] <- AIC(Arima(log_different_GGPD, order = c(9,0,0), include.drift = TRUE))
 AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,0,0), include.drift = TRUE))
-=======
-AIC_test[1,2] <- AIC(Arima(log_different_GGPD, order = c(1,1,0)))
-AIC_test[2,2] <- AIC(Arima(log_different_GGPD, order = c(2,1,0)))
-AIC_test[3,2] <- AIC(Arima(log_different_GGPD, order = c(3,1,0)))
-AIC_test[4,2] <- AIC(Arima(log_different_GGPD, order = c(4,1,0)))
-AIC_test[5,2] <- AIC(Arima(log_different_GGPD, order = c(5,1,0)))
-AIC_test[6,2] <- AIC(Arima(log_different_GGPD, order = c(6,1,0)))
-AIC_test[7,2] <- AIC(Arima(log_different_GGPD, order = c(7,1,0)))
-AIC_test[8,2] <- AIC(Arima(log_different_GGPD, order = c(8,1,0)))
-AIC_test[9,2] <- AIC(Arima(log_different_GGPD, order = c(9,1,0)))
-AIC_test[10,2] <- AIC(Arima(log_different_GGPD, order = c(10,1,0)))
->>>>>>> main
+
                       
 print(AIC_test)
 
 ```
-<<<<<<< HEAD
 
-According to AIC test matrix, the AR(1) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
+According to AIC test matrix, the AR(1) has the lowest absolute value, therefore, according to AIC test, Ar(1) is THE best adequately describe the chagne in log RGDP.
 
 ### 
 
@@ -414,14 +387,12 @@ print(Q5_f_d)
 
 ```
 
-2018:Q2 0.02116382 0.007187593 0.03514005 -0.0002109758 0.04253862
-c
+2018:Q2 0.02116382 0.007187593 0.03514005 -0.0002109758 0.04253862 c
+
 2018:Q3 0.01973173 0.001326942 0.03813651 -0.0084159634 0.04787942
 
 2018:Q4 0.01847955 -0.002592020 0.03955113 -0.0137466361 0.05070574
-=======
+
 According to AIC test matrix, the AR(2) has the lowest absolute value, therefore, according to AIC test, AT(2) is THE best adequately describe the chagne in log RGDP.
 
-
-
->>>>>>> main
+(I love Coding, and coding make me happy!)
