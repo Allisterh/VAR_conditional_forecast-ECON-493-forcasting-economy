@@ -1,11 +1,4 @@
-library("ggplot2")
-library("fpp2")
-library("glmnet")
-library("mosaicCalc")#微积分计算器！
-library("tidyr")
-library("lmtest")
-library("boot")
-####################
+≈####
 
 #homework_one
 
