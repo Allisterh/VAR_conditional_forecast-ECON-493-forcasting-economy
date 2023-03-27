@@ -51,7 +51,7 @@ library (tsbox)
 library (RColorBrewer) #so sad they do not have colorful black 
 library(plotly)
 library(wesanderson)
-  library("writexl")
+library(writexl)
   
 
 #1 The labor data

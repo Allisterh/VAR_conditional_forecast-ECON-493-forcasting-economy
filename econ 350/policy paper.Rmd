@@ -1,0 +1,171 @@
+---
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r include=FALSE}
+library (lubridate)    
+library (cansim)       
+library (OECD)        
+library (WDI)          
+library (fredr)        
+library (mFilter)      
+library (neverhpfilter)
+library (tsbox)
+library (RColorBrewer) #so sad they do not have colorful black 
+library(plotly)
+library(wesanderson)
+library(writexl)
+```
+
+```{r echo=FALSE}
+#1 The labor data
+  #1.1 Labor force characteristics, monthly, seasonally adjusted and trend-cycle
+    #unemployment seasonally adjusted (201-2023)
+
+unemployment_rate_raw <- "v2062815"
+  unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2014-01-01")
+  unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
+  unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
+  
+  #transfer data to the time series time
+  c(unemployment_rate_year.st, unemployment_rate_month.st)
+  unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
+  #now its time series data!
+
+  #the YoY Growth Rate 
+  unemployment_rate.yoy <- diff(log(unemployment_rate.ts), 12)
+
+plot(unemployment_rate.yoy, type = "l", col = "#1D70B6", lwd = 3, ylab = "Rate", xlab = "")
+
+```
+
+```{r echo=FALSE}
+
+CA_Job_vacancy_rate_raw<- "v1374464762"
+  CA_Job_vacancy_rate <- get_cansim_vector(CA_Job_vacancy_rate_raw, start_time = "2017-01-01")
+
+  CA_Job_vacancy_rate_year.st <- year(CA_Job_vacancy_rate$REF_DATE[1])
+  CA_Job_vacancy_rate_month.st <- month(CA_Job_vacancy_rate$REF_DATE[1])
+  
+  #transfer data to the time series time
+  c(CA_Job_vacancy_rate_year.st, CA_Job_vacancy_rate_month.st)
+  CA_Job_vacancy_rate.ts<- ts (CA_Job_vacancy_rate$VALUE, 
+                            start = c(CA_Job_vacancy_rate_year.st, CA_Job_vacancy_rate_month.st), 
+                            freq = 4)
+
+
+ CA_Job_vacancy_rate.yoy <- diff(log(CA_Job_vacancy_rate.ts), 4)
+  plot(CA_Job_vacancy_rate.yoy, type = "l",col= "#003B6F",lwd=2.4, 
+       main = 'Canada Job vacancy rate quarterly 2018-2023', ylab = 'rate', xlab = 'time')
+
+  
+```
+
+```{r echo=FALSE}
+#1.3 Wages, salaries and employers' social contributions monthly from 2018-2022
+  CA_wage_and_Salaries_raw <- "v1996532"
+  CA_wage_and_Salaries.st <- get_cansim_vector(CA_wage_and_Salaries_raw, start_time = "2010-01-01")
+  CA_wage_and_Salaries_year.st <- year(CA_wage_and_Salaries.st$REF_DATE[1])
+  CA_wage_and_Salaries_month.st <- month(CA_wage_and_Salaries.st$REF_DATE[1])
+  
+  #transfer data to the time series time
+  c( CA_wage_and_Salaries_year.st,  CA_wage_and_Salaries_month.st)
+  CA_wage_and_Salaries.ts<- ts(CA_wage_and_Salaries.st$VALUE,
+                               start = c(CA_wage_and_Salaries_year.st, CA_wage_and_Salaries_month.st),
+                               freq = 12)
+  #now its time series data!
+  
+  #the YoY Growth Rate 
+  CA_wage_and_Salaries.yoy <- diff(log( CA_wage_and_Salaries.ts), 12)
+  
+  plot(CA_wage_and_Salaries.yoy, type = "l",col= "#1D70B6",lwd=2.4, 
+       main = 'Canadian wage change monthly 2010-2023', ylab = 'the percantage change', xlab = 'time')
+
+
+```
+
+```{r}
+
+library(readxl)
+The_EI_data_set <- read_excel("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/econ 350/The EI data set.xlsx", 
+    sheet = "Combine of the both CPC and EI")
+
+```
+
+```{R echo=FALSE}
+
+library(readxl)
+UnempRate_Monthly_2 <- read_excel("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/econ 350/UnempRate_Monthly-2.xlsx")
+five_year_average_canada<- mean(UnempRate_Monthly_2$Canada)
+five_year_average_NL<-mean(UnempRate_Monthly_2$`Newfoundland and Labrador`)
+five_year_average_PEI<-mean(UnempRate_Monthly_2$`Prince Edward Island`)
+five_year_average_NS<-mean(UnempRate_Monthly_2$`Nova Scotia`)
+five_year_average_NB<-mean(UnempRate_Monthly_2$`New Brunswick`)
+five_year_average_QC<-mean(UnempRate_Monthly_2$Quebec)
+five_year_average_ON<-mean(UnempRate_Monthly_2$Ontario)
+five_year_average_MA<-mean(UnempRate_Monthly_2$Manitoba)
+five_year_average_SK<-mean(UnempRate_Monthly_2$Saskatchewan)
+five_year_average_AB<-mean(UnempRate_Monthly_2$Alberta)
+five_year_average_BC <- mean(UnempRate_Monthly_2$`British Columbia`)
+
+# Create a data frame with the unemployment rate for each province
+data <- data.frame(
+  Province = c("NL", "PEI", "NS", "NB", "QC", "ON", "MA", "SK", "AB", "BC"),
+  UnemploymentRate = c(five_year_average_NL, five_year_average_PEI, five_year_average_NS, five_year_average_NB,
+                       five_year_average_QC, five_year_average_ON, five_year_average_MA,
+                       five_year_average_SK, five_year_average_AB,five_year_average_BC)
+)
+
+# Create a bar chart
+barplot(data$UnemploymentRate,
+        names.arg = data$Province, col = c("#1D70B6"))
+
+# Add a vertical line representing the Canadian average
+abline(h = five_year_average_canada)
+
+# Add a label for the horizontal line
+text(x = 7, y = five_year_average_canada + 0.5, labels = "Canada Average")
+
+#    xlab = "Province",
+ #       ylab = "Unemployment Rate(%)",
+  #      main = "Aaverage Unemployment Rate by Province", col = c("#1D70B6"))
+
+
+```
+
+```{r}
+
+The_EI_data_set <- read_excel("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/econ 350/The EI data set.xlsx", 
+    sheet = "Combine of the both CPC and EI")
+
+print(The_EI_data_set, head = 4)
+
+```
+
+
+```{r}
+
+
+CA_CPI_Mothly_raw<- "v41690973"
+  CA_CPI_Mothly_rate <- get_cansim_vector(CA_CPI_Mothly_raw, start_time = "2010-01-01")
+
+  CA_CPI_Mothly_year.st <- year(CA_CPI_Mothly_rate$REF_DATE[1])
+  CA_CPI_Mothly_month.st <- month(CA_CPI_Mothly_rate$REF_DATE[1])
+  
+  #transfer data to the time series time
+  c(CA_CPI_Mothly_year.st, CA_CPI_Mothly_month.st)
+  CA_CPI_Mothly.ts<- ts (CA_CPI_Mothly_rate$VALUE, 
+                            start = c(CA_CPI_Mothly_year.st, CA_CPI_Mothly_month.st), 
+                            freq = 12)
+
+ 
+  
+ CA_CPI_Mothly.ts.yoy <- diff(log(CA_CPI_Mothly.ts), 12)
+  plot(CA_CPI_Mothly.ts.yoy, type = "l",col="#1D70B6",lwd=2.4, ylab = "rate", xlab = "")
+#Canada CPI year over year change 2010 - 2023
+```
+
+

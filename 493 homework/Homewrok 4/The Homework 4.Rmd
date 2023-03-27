@@ -1,0 +1,303 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r include=FALSE}
+#Lode the all package that necessary.
+#some of the package may not been used in this homework
+#Yes, I copy it around
+library("ggplot2")
+library("fpp2")
+library("glmnet")
+library("tidyr")
+library("lmtest")
+library("boot")
+library("forecast")
+library("readr")
+library("ggfortify")
+library("tseries")
+library("urca")
+library("readxl")
+library("lubridate")
+```
+
+Exercise 3 (R)
+
+Consider the total monthly expenditure on cafes, restaurants, and takeaway food services in Australia (\$billion) for the sample April 1982 to September 2017 (data set auscafe).
+
+```{r}
+#lode the data
+
+data(auscafe)
+auscafe_ts <- ts(auscafe, frequency = 12)
+plot(auscafe_ts)
+
+
+```
+
+3-a Do the data need transforming? If so, ﬁnd a suitable transformation.
+
+yes, the data need log transformation
+
+```{r}
+auscafe_log.ts <- log(auscafe_ts)
+plot(auscafe_log.ts)
+```
+
+3-b. Are the data stationary? If not, ﬁnd an appropriate diﬀerencing which yields stationary data.
+
+```{r warning=FALSE}
+
+auscafe_log_diff.ts<- diff(auscafe_log.ts)
+plot(auscafe_log_diff.ts)
+#According to the graphy, it look staionary.
+
+
+adf_result <- adf.test(auscafe_log_diff.ts)
+kpss_result <- kpss.test(auscafe_log_diff.ts)
+
+print(kpss_result)
+print(adf_result)
+```
+
+Both KPSS and ADF test suggest the data is stationary because both test the P-value is less the 0.05, we reject the null hypothesis and concluded the data is stationary.
+
+Question 3-C
+
+Identify a couple of ARIMA models that might be useful in describing the time series. Which of your models is the best according to their AIC values?
+
+```{r}
+par(mfrow=c(1,2))
+Acf(auscafe_log_diff.ts)
+Pacf(auscafe_log_diff.ts)
+```
+
+According to the Acf and Pacf graph. The possible one are
+
+ARIMA(2,1,1)(2,0,0)12 ARIMA(2,1,1)(1,0,0)12 ARIMA(2,1,1)(2,0,1)4 ARIMA(2,1,1)(1,0,1)4
+
+ARIMA(2,1,0)(2,0,0)12 ARIMA(2,1,0)(1,0,0)4 ARIMA(2,1,0)(2,0,1)12 ARIMA(2,1,0)(1,0,1)12
+
+ARIMA(1,1,1)(2,0,0)12 ARIMA(1,1,1)(1,0,0)12 ARIMA(1,1,1)(2,0,1)12 ARIMA(1,1,1)(1,0,1)12
+
+ARIMA(1,1,0)(2,0,0)12 ARIMA(1,1,0)(1,0,0)12 ARIMA(1,1,0)(2,0,1)12 ARIMA(1,1,0)(1,0,1)12
+
+```{R}
+
+model_211_200 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
+model_211_100 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 1), seasonal = list(order = c(1, 0, 0), period = 12))
+model_211_201 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 1), period = 12))
+model_211_101 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 1), seasonal = list(order = c(1, 0, 1), period = 12))
+
+model_210_200 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 0), seasonal = list(order = c(2, 0, 0), period = 12))
+model_210_100 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 0), seasonal = list(order = c(1, 0, 0), period = 12))
+model_210_201 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 0), seasonal = list(order = c(2, 0, 1), period = 12))
+model_210_101 <- Arima(auscafe_log_diff.ts, order = c(2, 1, 0), seasonal = list(order = c(1, 0, 1), period = 12))
+
+model_111_200 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
+model_111_100 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 1), seasonal = list(order = c(1, 0, 0), period = 12))
+model_111_201 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 1), seasonal = list(order = c(2, 0, 1), period = 12))
+model_111_101 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 1), seasonal = list(order = c(1, 0, 1), period = 12))
+
+model_110_200 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 0), seasonal = list(order = c(2, 0, 0), period = 12))
+model_110_100 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 0), seasonal = list(order = c(1, 0, 0), period = 12))
+model_110_201 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 0), seasonal = list(order = c(2, 0, 1), period = 12))
+model_110_101 <- Arima(auscafe_log_diff.ts, order = c(1, 1, 0), seasonal = list(order = c(1, 0, 1), period = 12))
+
+aic_values <- c(
+  model_211_200$aic, model_211_100$aic, model_211_201$aic, model_211_101$aic,
+  model_210_200$aic, model_210_100$aic, model_210_201$aic, model_210_101$aic,
+  model_111_200$aic, model_111_100$aic, model_111_201$aic, model_111_101$aic,
+  model_110_200$aic, model_110_100$aic, model_110_201$aic, model_110_101$aic
+)
+
+names(aic_values) <- c(
+  "ARIMA(2,1,1)(2,0,0)12", "ARIMA(2,1,1)(1,0,0)12", "ARIMA(2,1,1)(2,0,1)12", "ARIMA(2,1,1)(1,0,1)12",
+  "ARIMA(2,1,0)(2,0,0)12", "ARIMA(2,1,0)(1,0,0)12", "ARIMA(2,1,0)(2,0,1)12", "ARIMA(2,1,0)(1,0,1)12",
+  "ARIMA(1,1,1)(2,0,0)12", "ARIMA(1,1,1)(1,0,0)12", "ARIMA(1,1,1)(2,0,1)12", "ARIMA(1,1,1)(1,0,1)12",
+  "ARIMA(1,1,0)(2,0,0)12", "ARIMA(1,1,0)(1,0,0)12", "ARIMA(1,1,0)(2,0,1)12", "ARIMA(1,1,0)(1,0,1)12"
+)
+
+#Print AIC values
+
+print(aic_values)
+
+aic_values_df <- as.data.frame(aic_values)
+
+print(aic_values_df)
+min(aic_values_df)
+```
+
+ARIMA(2,1,1)(2,0,1)12 is the one with the smallest value.
+
+d.  Estimate the parameters of your best model and do diagnostic testing on the residuals. Do the residuals resemble white noise? If not, try to ﬁnd another ARIMA model which ﬁts better.
+
+```{r}
+
+The_best_model <- Arima(auscafe_log_diff.ts, order = c(2, 1, 1),
+seasonal = list(order = c(2, 0, 1), period = 12))
+checkresiduals(The_best_model)
+
+
+```
+
+The residuaks seem like white noise.
+
+f.  Forecast the next 24 months of data using your preferred model.
+
+```{r}
+
+
+auto.arima(auscafe_log_diff.ts)
+The_best_model_better_best <- Arima(auscafe_log_diff.ts, order = c(3, 0, 0), seasonal = list(order = c(2, 1, 1), period = 12))
+checkresiduals(The_best_model_better_best)
+
+forecast1 <- forecast(The_best_model_better_best, h = 24)
+forecast2 <- forecast(The_best_model, h = 24)
+
+#007A33 is ualberta green
+
+plot(forecast1, type = "l", col = "#007A33", xlab = "Year", ylab = "Cafes, Restaurants and Takeaway Expenditure (billions of dollars)", main = "Forecasts for the next 24 months")
+legend("topleft", legend = c("Autoarima"), col = c("#007A33"), lty = 1)
+
+plot(forecast2, type = "l", col = "#F2CD00", xlab = "Year", ylab = "Cafes, Restaurants and Takeaway Expenditure (billions of dollars)", main = "Forecasts for the next 24 months")
+legend("topleft", legend = c( "The_one I guess"), col = c( "#F2CD00"), lty = 1)
+
+
+summary(forecast1)
+summary(forecast2)
+
+```
+
+AIC and BIC are close and forecast almost identical.
+
+4.  Consider monthly sales and advertising data for an automotive parts company (data set advert).
+
+```{r}
+autoplot(advert, facets = TRUE) +
+  ggtitle("Monthly Sales and Advertising Data") +
+  xlab("Time") +
+  ylab("Values")
+
+```
+
+The facets=TRUE function allowed you compare two set of data side by side provide more straright forward veson on their relationship.
+
+b.  Fit a standard regression model y t = a + bx t + n t where y t denotes sales and x t denotes advertising using the tslm() function
+
+```{r}
+
+regression_model <- tslm(sales ~ advert, data = advert)
+summary(regression_model)
+```
+
+c.  Show that the residuals have signiﬁcant autocorrelation.
+
+```{R}
+checkresiduals(regression_model)
+```
+
+According the ACF graph, it show a consistent decresing trend, represent the residuals is significant auto correlations. The P value is greater than 0.01, represent there are autocorrlation excist.
+
+4-d e. Reﬁt the model using auto.arima(). How much diﬀerence does the error model make to the estimated parameters? What ARIMA model for the errors is selected?
+
+```{r}
+
+advert.df <- as.data.frame(advert)
+advert_arma <- auto.arima(advert.df$sales, xreg = advert.df$advert)
+summary(advert_arma)
+checkresiduals(advert_arma)
+
+```
+
+The estimated of coefficients for the adverstisigin variable are smaller from regression model. The auto-arima choice ARIMA(0,1,0)
+
+4g
+
+```{r}
+model_arima <- auto.arima(advert.df$sales, xreg = advert.df$advert)
+sales_forecast <- forecast(model_arima, xreg = rep(10, 6))
+autoplot(sales_forecast)
+```
+
+Q5:The ﬁle NAEXKP01CAQ661S.csv contains the series of quarterly real gross domestic product (RGDP) for Canada for the quarters 1961:Q1 to 2018:Q1, measured in millions of 2010 Canadian dollars and seasonally adjusted.
+
+a.  Use R to plot the series, the ACF, and PACF. Does the series appear to be stationary?
+
+```{r}
+RealGDP <- read_excel("/Users/tie/SynologyDrive/nn/ECON-493-forcasting-economy/493 homework/Homewrok 4/NAEXKP01CAQ661S.xlsx", 
+    col_types = c("date", "numeric"))
+
+#head(RealGDP, 5)
+
+RealGDP.ts <- ts(RealGDP$NAEXKP01CAQ661S, start = 1961/01/01, end = 2018/01/01, frequency = 4)
+
+Acf(RealGDP.ts)
+Pacf(RealGDP.ts)
+```
+
+No, the data is not stationary.
+
+```{r}
+# Subset the data
+
+RealGDP_trainset <- window(RealGDP.ts, start = 1961/01/01, end = 2009/01/01)
+
+trend <- seq_along(RealGDP_trainset) 
+(fit1 <- auto.arima(RealGDP_trainset, d=0, xreg=trend))
+
+
+```
+
+```{R}
+trend <- seq_along(RealGDP_trainset)
+(fit1 <- auto.arima(RealGDP_trainset, d=0, xreg=trend))
+phi1 <- coef(fit1)['ar1']
+phi2 <- coef(fit1)['ar2']
+intercept <- coef(fit1)['intercept']
+slope <- coef(fit1)['xreg']
+sigma2 <- fit1$sigma2
+
+fc1 <- forecast(fit1, xreg=length(RealGDP_trainset) + 1:32)
+
+plot(fc1)
+lines(RealGDP.ts)
+
+```
+
+The graph show that the forecast are continue to up with a permanent negative shock around 2008 however the real data suggest the economy is backing to it normal growth rate. forecast is upward are date trend suggest and perdition error are hold relative consistent.
+
+5-d Here we will ﬁt a diﬀerence stationary model for the sample 1961Q1 to 2009Q4. Using the AIC, ﬁnd the AR model that adequately describes the change RGDP. Make sure your model uses d = 1 and includes a drift. Motivate the steps that you take.
+
+```{r}
+
+(fit2 <- auto.arima(RealGDP_trainset, d=1))
+
+#ARIMA(1,1,0
+
+drift <- coef(fit2)['drift']
+theta1 <- coef(fit2)['ma1']
+sigma2 <- fit2$sigma2
+fc2 <- forecast(fit2, h=32)
+
+plot(fc2)
+lines(RealGDP.ts)
+```
+
+According to the graphy, we can see that the forecaster values of real GDP follow an increasing trend with wider and wider predicted interview represent the increasing uncertainty in the fulture. The upward trend is consistent with the historical data. further more the predition error is wider in a faster speed than
+
+5-e
+
+```{r}
+tend_stationary_model_accuracy <- accuracy(fc1, RealGDP.ts)
+Difference_stationary_model_accuracy <- accuracy(fc2,RealGDP.ts)
+
+
+print(tend_stationary_model_accuracy)
+print(Difference_stationary_model_accuracy)
+
+```
+
+According to the accuarcy function, the Difference_stationary_model_accuracy have the lower RMSE, therefore, Difference_stationary_mode is better model.
