@@ -38,6 +38,7 @@ Pacf(Can_month_housing_sell.ts)
 adf.test(Can_month_housing_sell.ts)
 kpss.test(Can_month_housing_sell.ts)
 
+
 #all test suggest this time series is not stationary
 ###########################
 
@@ -54,6 +55,8 @@ Pacf(Can_month_housing_sell_df.ts)
 adf.test(Can_month_housing_sell_df.ts)
 kpss.test(Can_month_housing_sell_df.ts)
 # The union root test tell the data is stationary.
+
+
 
 #almost statioanry. 
 #########################
@@ -83,21 +86,54 @@ Pacf(all_data_model_1$residuals)
 #it look goooood
 
 ########### forecasting time
-
 all_data_forecast <- forecast(all_data_model_1, h = 5)
 autoplot(all_data_forecast)
 
 
+
+#3 after_2008_forecasting.
 #########################
+
 #constructed model 2: what if we do not including the data from before the 2008 the economic crisis?
+after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
+
+#plot the graphy
+autoplot(after_2008_forecasting_data)
+
+#the data look coool, now it is the time to play with data.
+after_2008_forecasting_model <- auto.arima(after_2008_forecasting_data, approximation = FALSE, parallel = TRUE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+#ARIMA(2,1,0)
+print(after_2008_forecasting_model)
+
+#check the model
+checkresiduals(after_2008_forecasting_model)
+Pacf(after_2008_forecasting_model$residuals)
 
 
-#becase
-Model_1<- Arima(Can_month_housing_sell.ts, order = c(0, 1, 1))
-evil_forecast <- forecast(Model_1, h=5)
-plot(evil_forecast)
+########### forecasting time
+after_2008_forecasting_model_forecast <- forecast(after_2008_forecasting_model, h = 5)
+autoplot(after_2008_forecasting_model_forecast)
 
-(fit2 <- auto.arima(Can_month_housing_sell.ts))
+
+######### compare those two model.
+
+########### the graphic
+# Plot the time series data
+plot(Can_month_housing_sell.ts)
+
+# Add the forecast from the after_2008_forecasting_model
+lines(forecast(after_2008_forecasting_model, h = 5)$mean, col = "blue")
+
+# Add the forecast from the all_data_forecast model
+lines(forecast(all_data_model_1, h = 5)$mean, col = "red")
+
+# Add a legend
+legend("topright", legend = c("Original data", "After 2008 forecast", "All data forecast"), col = c("black", "blue", "red"), lty = 1)
+
+#############################
+
+
+
 
 
 #Housing_sell_per_covid <- ts(News_release_chart_data_mar_2023$Canada, start = c(2007, 1), end = c(2019, 6), frequency = 12)
