@@ -20,6 +20,7 @@ library("lubridate")
 library("readxl")
 
 
+#1.1 The data processing
 ########################import the data
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
@@ -40,7 +41,6 @@ kpss.test(Can_month_housing_sell.ts)
 #all test suggest this time series is not stationary
 ###########################
 
-
 #stationary data.
 Can_month_housing_sell_df.ts <- diff(Can_month_housing_sell.ts, lag = 1)
 autoplot(Can_month_housing_sell_df.ts)
@@ -59,7 +59,8 @@ kpss.test(Can_month_housing_sell_df.ts)
 #########################
 
 
-#all_data_model_one
+
+#2.0 all_data_model_one
 ########################
 
 #trace = TRUE
@@ -81,9 +82,14 @@ Pacf(all_data_model_1$residuals)
 
 #it look goooood
 
-########### forcasting time
+########### forecasting time
+
+all_data_forecast <- forecast(all_data_model_1, h = 5)
+autoplot(all_data_forecast)
 
 
+#########################
+#constructed model 2: what if we do not including the data from before the 2008 the economic crisis?
 
 
 #becase
