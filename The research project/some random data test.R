@@ -20,6 +20,19 @@ library("lubridate")
 library("readxl")
 
 
+#Index
+  #the data process
+  #play with data alone
+    #all data ARIMA model
+    #After 2008 ARIMA model
+    #before and after covid ARIMA model
+    #After covid model.
+
+
+
+
+
+
 #1.1 The data processing
 ########################import the data
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
@@ -171,7 +184,14 @@ print(The_2022_along.data_model)
 autoplot(forecast(The_2022_along.data_model, h = 6))
 
 
-####################
+#############################################################################################################################
+
+
+
+#############################################################################################################################
+#The housing sell with normal and real interesting rate.
+
+
 
 
 
