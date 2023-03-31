@@ -214,18 +214,19 @@ c(unemployment_rate_year.st, unemployment_rate_month.st)
 unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
 #now its time series data!
 
-###########
-autoplot(unemployment_rate.ts)
 
 
+########### The following code just for fun
+#autoplot(unemployment_rate.ts)
 #####
-unemployment_rate_model <- auto.arima(unemployment_rate.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
-print(unemployment_rate_model)
+#unemployment_rate_model <- auto.arima(unemployment_rate.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+#print(unemployment_rate_model)
+#checkresiduals(unemployment_rate_model)
+#unemployment_rate_model_2 <- auto.arima(Can_month_housing_sell.ts, xreg=unemployment_rate.ts)
+#checkresiduals(unemployment_rate_model_2)
+#forecast_fit1 <- forecast(unemployment_rate_model_2, xreg=unemployment_rate.ts, h=2)
+#autoplot(forecast_fit1)
 
-checkresiduals(unemployment_rate_model)
+############################
 
-unemployment_rate_model_2 <- auto.arima(Can_month_housing_sell.ts, xreg=unemployment_rate.ts)
-checkresiduals(unemployment_rate_model_2)
 
-forecast_fit1 <- forecast(unemployment_rate_model_2, xreg=unemployment_rate.ts, h=2)
-autoplot(forecast_fit1)
