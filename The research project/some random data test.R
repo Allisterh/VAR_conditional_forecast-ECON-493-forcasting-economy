@@ -58,10 +58,31 @@ kpss.test(Can_month_housing_sell_df.ts)
 #almost statioanry. 
 #########################
 
-allowdrift = TRUE
-stepwise = TRUE
+
+#all_data_model_one
+########################
+
+#trace = TRUE
+  #输出诊断信息到控制台，以便更好地理解模型选择过程。
+#approximation = FALSE
+  #不使用近似方法加速模型选择过程。这样可以确保算法能够尝试所有可能的模型
+
 
 #now, its time to fit the model.
+#because the name maybe too long so I just use model 1 or 2 to t
+
+all_data_model_1 <- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+#ARIMA(2,1,0)
+print(all_data_model_1)
+
+#check the model
+checkresiduals(all_data_model_1)
+Pacf(all_data_model_1$residuals)
+
+#it look goooood
+
+########### forcasting time
+
 
 
 
