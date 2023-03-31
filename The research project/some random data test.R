@@ -134,61 +134,45 @@ legend("topright", legend = c("Original data", "After 2008 forecast", "All data 
 
 
 
+#constructed model 2: what if we only including the data from 2016 - 2023 alone? 
+#The_before_during_after_Covid_model.
+#######################
+
+####################### process the data. 
+The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2017,1), end= c(2023,2))
+
+#plot the graphy
+#autoplot(The_before_during_after_Covid_model.data)
+#checkresiduals(The_before_during_after_Covid_model.data)
+#diff_The_before_during_after_Covid_model.data <- diff(The_before_during_after_Covid_model.data, lag = 1)
+#adf.test(diff_The_before_during_after_Covid_model.data)
+#yep, the data is staionary. 
 
 
-#Housing_sell_per_covid <- ts(News_release_chart_data_mar_2023$Canada, start = c(2007, 1), end = c(2019, 6), frequency = 12)
-#autoplot(Housing_sell_per_covid)
-#model_pre_covid <- auto.arima(Housing_sell_per_covid)
-#model_pre_covid_forecast <- forecast(model_pre_covid, h = 24)
-#plot(model_pre_covid_forecast)
+#the data look coool, now it is the time to play with data.
+The_before_during_after_Covid_model <- auto.arima(The_before_during_after_Covid_model.data, approximation = FALSE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+print(The_before_during_after_Covid_model)
+#ARIMA(2,1,0) 
 
-Housing_sell_after_covid_start_2018 <- ts(News_release_chart_data_mar_2023$Canada, start = c(2018, 1), end = c(2023, 3), frequency = 12)
+autoplot(forecast(The_before_during_after_Covid_model, h = 5))
 
-#checkresiduals(Housing_sell_after_covid_start_2018)
-#The data is not stationary.
+checkresiduals(The_before_during_after_Covid_model)
+(The_before_during_after_Covid_model)
 
-
-diff_Housing_sell_after_covid_start_2018 <- diff(Housing_sell_after_covid_start_2018, lag = 1)
-plot(diff_Housing_sell_after_covid_start_2018)
-#checkresiduals(diff_Housing_sell_after_covid_start_2018)
-
-seasonal_dff_diff_Housing_sell_after_covid_start_2018 <- diff(diff_Housing_sell_after_covid_start_2018, lag = 12)
-checkresiduals(seasonal_dff_diff_Housing_sell_after_covid_start_2018)
-
-model_seaonal_diff <-auto.arima(diff_Housing_sell_after_covid_start_2018, d = 1, D = 1)
-model_Housing_sell_after_covid_start_2018 <- Arima(Housing_sell_after_covid_start_2010, order = c(2, 0, 0), seasonal = list(order = c(0, 0, 1), period = 12))
+#ARIMA(2,1,0)
+print(The_before_during_after_Covid_model)
 
 
-
-#adf.test(Housing_sell_after_covid_start_2018)
-#adf test show that the data may not be stationary. 
-#adf.test(diff(Housing_sell_after_covid_start_2018))
-#The data is staionary.
-
-#model 1 with d =1
-#auto.arima(Housing_sell_after_covid_start_2018, d = 1)
-#model_Housing_sell_after_covid_start_2018_d_1 <- Arima(Housing_sell_after_covid_start_2010, order = c(1, 1, 0), seasonal = list(order = c(0, 0, 1), period = 12))
-
-#model w
-auto.arima(Housing_sell_after_covid_start_2018, d = 1)
-model_Housing_sell_after_covid_start_2018 <- Arima(Housing_sell_after_covid_start_2010, order = c(2, 0, 0), seasonal = list(order = c(0, 0, 1), period = 12))
-
-#accuracy(data = Housing_sell_after_covid_start_2018, model_Housing_sell_after_covid_start_2018_d_1)
-#accuracy(data = Housing_sell_after_covid_start_2018, model_Housing_sell_after_covid_start_2018)
+#4.constructed model 2: what if we only including the data from 2022 alone? 
+#######
+The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2022,1), end= c(2023,2))
+The_2022_along.data_model <- auto.arima(The_2022_along.data, approximation = FALSE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+print(The_2022_along.data_model)
+autoplot(forecast(The_2022_along.data_model, h = 6))
 
 
-# the one with autoarima better, so I just remove rest of it.
+####################
 
-model_Housing_sell_after_covid_start_2018<- forecast(model_Housing_sell_after_covid_start_2010, h = 5)
-autoplot(model_Housing_sell_after_covid_start_2018)
-
-summary(model_Housing_sell_after_covid_start_2018)
-
-
-
-checkresiduals(model_Housing_sell_after_covid_start_2018)
-Pacf(model_Housing_sell_after_covid_start_2018$residuals)
-#still really strong autocorrlation,
 
 
 
