@@ -37,13 +37,10 @@ Pacf(Can_month_housing_sell.ts)
 adf.test(Can_month_housing_sell.ts)
 kpss.test(Can_month_housing_sell.ts)
 
-####################
+#all test suggest this time series is not stationary
+###########################
 
 
-
-#both test suggest this time series is not stationary
-
-#The data is not stationary. 
 #stationary data.
 Can_month_housing_sell_df.ts <- diff(Can_month_housing_sell.ts, lag = 1)
 autoplot(Can_month_housing_sell_df.ts)
@@ -51,13 +48,22 @@ autoplot(Can_month_housing_sell_df.ts)
 checkresiduals(Can_month_housing_sell_df.ts)
 Acf(Can_month_housing_sell_df.ts)
 Pacf(Can_month_housing_sell_df.ts)
+#The graph look stationary enough.
 
-
-#let's doing an other difference.
+#Doing the union root test.
 adf.test(Can_month_housing_sell_df.ts)
-#The adf test tell the data is stationary. 
+kpss.test(Can_month_housing_sell_df.ts)
+# The union root test tell the data is stationary.
 
-auto.arima(Can_month_housing_sell.ts)
+#almost statioanry. 
+#########################
+
+allowdrift = TRUE
+stepwise = TRUE
+
+#now, its time to fit the model.
+
+
 
 #becase
 Model_1<- Arima(Can_month_housing_sell.ts, order = c(0, 1, 1))
