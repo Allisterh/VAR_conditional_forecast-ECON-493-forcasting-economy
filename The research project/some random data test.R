@@ -3,6 +3,7 @@
 #1537905. 
 
 #Step one Lode the all package that necessary. 
+######################
 library("ggplot2")
 library("fpp2")
 library("glmnet")
@@ -16,29 +17,30 @@ library("tseries")
 library("urca")
 library("readxl")
 library("lubridate")
+library("readxl")
 
-#import the data
 
-library(readxl)
-News_release_chart_data_mar_2023 <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", 
-                                               sheet = "Chart A", col_types = c("date", 
-                                                                                "numeric", "numeric", "skip", "skip"))
-
-Can_month_housing_sell.ts <- ts(News_release_chart_data_mar_2023$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+########################import the data
+Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 autoplot(Can_month_housing_sell.ts)
 
 #plot the graphy to check it.
 #autoplot(Can_month_housing_sell.ts)
 #graphy look good.
+##########################
 
-#check the residuals.
 #Are data is stationary? 
 checkresiduals(Can_month_housing_sell.ts)
 Acf(Can_month_housing_sell.ts)
 Pacf(Can_month_housing_sell.ts)
-
 adf.test(Can_month_housing_sell.ts)
 kpss.test(Can_month_housing_sell.ts)
+
+####################
+
+
+
 #both test suggest this time series is not stationary
 
 #The data is not stationary. 
