@@ -17,7 +17,14 @@ library("tseries")
 library("urca")
 library("readxl")
 library("lubridate")
-library("readxl")
+library("cansim")       
+library("OECD")        
+library("WDI")          
+library("fredr")        
+library("tsbox")
+library("RColorBrewer")
+library("wesanderson")
+library("writexl")
 
 
 #Index
@@ -188,11 +195,37 @@ autoplot(forecast(The_2022_along.data_model, h = 6))
 
 
 
+#Part2: play around the data with data.
 #############################################################################################################################
-#The housing sell with normal and real interesting rate.
+#The housing sell with the unemployment rate.
 
 
 
+#########data process function 
+source("functions/ts_cansim.R")
+
+unemployment_rate_raw <- "v2062815"
+unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2007-01-01")
+unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
+unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
+
+#transfer data to the time series time
+c(unemployment_rate_year.st, unemployment_rate_month.st)
+unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
+#now its time series data!
+
+###########
+autoplot(unemployment_rate.ts)
 
 
+#####
+unemployment_rate_model <- auto.arima(unemployment_rate.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+print(unemployment_rate_model)
 
+checkresiduals(unemployment_rate_model)
+
+unemployment_rate_model_2 <- auto.arima(Can_month_housing_sell.ts, xreg=unemployment_rate.ts)
+checkresiduals(unemployment_rate_model_2)
+
+forecast_fit1 <- forecast(unemployment_rate_model_2, xreg=unemployment_rate.ts, h=2)
+autoplot(forecast_fit1)
