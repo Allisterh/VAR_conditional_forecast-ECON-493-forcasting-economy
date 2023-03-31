@@ -25,7 +25,7 @@ library("tsbox")
 library("RColorBrewer")
 library("wesanderson")
 library("writexl")
-
+library("readr")
 
 #Index
   #the data process
@@ -188,24 +188,61 @@ print(The_before_during_after_Covid_model)
 The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2022,1), end= c(2023,2))
 The_2022_along.data_model <- auto.arima(The_2022_along.data, approximation = FALSE, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
 print(The_2022_along.data_model)
-autoplot(forecast(The_2022_along.data_model, h = 6))
+autoplot(forecast(The_2022_along.data_model, h = 2))
 
 
 #############################################################################################################################
 
 
 
-#Part2: play around the data with data.
+#Part2: play around the housing sell data with other data
 #############################################################################################################################
-#The housing sell with the unemployment rate.
+
+#2.2 The data base import 
+everyhingCA_stationary_raw <- read_csv("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/LCDMA_February_2023/balanced_can_md.csv")
+#View(everyhingCA.raw)
+
+everyhingCA_raw<- read_csv("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/LCDMA_February_2023/CAN_MD.csv") 
+#View(everyhingCA_raw)
+######## that is too much data there....
+
+
+############ 2.2 Data process
+
+
+#2.2.1 Housing starts (units)
+#plot(everyhingCA_raw$build_Comm_CAN_new) #the data look good
+#summary(everyhingCA_raw$build_Comm_CAN_new)
+hstart_CAN_new_raw <- everyhingCA_raw$hstart_CAN_new
+hstart_CAN_new.omit <- na.omit(hstart_CAN_new_raw)
+hstart_CAN_new.ts <- ts(hstart_CAN_new.omit, start = c(1990, 1), end = c(2023, 1), frequency = 12)
+#autoplot(hstart_CAN_new.ts)
+#hstart_CAN_new_model <- auto.arima(log(hstart_CAN_new.ts), approximation = FALSE, parallel = T,stepwise = FALSE, max.p = 5,max.q = 5, max.d = 5, max.Q = 5, max.P = 5, max.D = 5)
+#print(hstart_CAN_new_model)
+#The data look good.
+
+
+plot(hstart_CAN_new.ts *100)
+plot(Can_month_housing_sell.ts)
+#2.2.2
 
 
 
-#########data process function 
-source("functions/ts_cansim.R")
 
-unemployment_rate_raw <- "v2062815"
-unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2007-01-01")
+
+
+#v111955443 New housing price indexes house only, frequence = 12
+#v121294115 Seasonally adjusted, Building permits, by type of structure and type of work, current,frequence = 12
+#v122550 bank rate
+
+
+
+
+#2.1 The new
+#housing sell with housing permit.
+#########
+unemployment_rate_raw <- "v111955454"
+unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2000-01-01")
 unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
 unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
 
@@ -213,6 +250,11 @@ unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
 c(unemployment_rate_year.st, unemployment_rate_month.st)
 unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
 #now its time series data!
+autoplot(unemployment_rate.ts)
+
+
+unemployment_rate_raw v730413
+
 
 
 
