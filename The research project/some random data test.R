@@ -4,28 +4,30 @@
 
 #Step one Lode the all package that necessary. 
 ######################
-library("ggplot2")
-library("fpp2")
-library("glmnet")
-library("tidyr")
-library("lmtest")
-library("boot")
-library("forecast")
-library("readr")
-library("ggfortify")
-library("tseries")
-library("urca")
-library("readxl")
-library("lubridate")
-library("cansim")       
-library("OECD")        
-library("WDI")          
-library("fredr")        
-library("tsbox")
-library("RColorBrewer")
-library("wesanderson")
-library("writexl")
-library("readr")
+
+  library("ggplot2")
+  library("fpp2")
+  library("glmnet")
+  library("tidyr")
+  library("lmtest")
+  library("boot")
+  library("forecast")
+  library("readr")
+  library("ggfortify")
+  library("tseries")
+  library("urca")
+  library("readxl")
+  library("lubridate")
+  library("cansim")       
+  library("OECD")        
+  library("WDI")          
+  library("fredr")        
+  library("tsbox")
+  library("RColorBrewer")
+  library("wesanderson")
+  library("writexl")
+  library("readr")
+stopCluster(cl)
 
 #Index
   #the data process
@@ -256,43 +258,78 @@ plot(evil_forcast)
 
 ################# The relationship between housing sell and GPD?
 CA_GDP_raw <- "v65201483"
-CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time = "2006-01-01", end_time = "2023-01-01")
+CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time = "2005-12-01", end_time = "2022-12-01")
 CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
 CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
 #transfer data to the time series time
 c(CA_GDP_year.st, CA_GDP_month.st)
 CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
 plot(CA_GDP.ts)
-CA_GDP_log_diff.ts <- diff(log(CA_GDP.ts))
+
+###
+CA_GDP_diff.ts <- diff(log(CA_GDP.ts))
 plot(CA_GDP_log_diff.ts)
-adf.test(CA_GDP_log_diff.ts)
+#adf.test(CA_GDP_log_diff.ts)
+#The ADF test look good.
+###
+
 #create a new time series object using a subset of the data
-Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2006,2), end = c(2023,1), frequency =12)
+Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2006,1), end = c(2022,12), frequency =12)
+plot(Can_month_housing_sell_GDP_model.ts)
+
+housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, xreg= CA_GDP_diff.ts, approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+print(housing_sell_plus_GDP_model)
+
 #display the resulting time series
 Can_month_housing_sell_GDP_model.ts
 adf.test(Can_month_housing_sell_GDP_model.ts)
-housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, d =1, xreg = CA_GDP_log_diff.ts, approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
-print(housing_sell_plus_GDP_model)
+###
 
-x <- 36
+
+x <- 20
 # initialize an empty vector to store the values
 values <- numeric(length = x)
 for (i in 1:x) {
-  values[i] <- 0.03
+  values[i] <- 0.01
 }
 GDP_new_data <- print(values)
 
-housing_sell_plus_GDP_model_forecast <- forecast(housing_sell_plus_GDP_model, h = 36, xreg = GDP_new_data)
+housing_sell_plus_GDP_model_forecast <- forecast(PI = T, housing_sell_plus_GDP_model, h = 36, xreg = GDP_new_data)
 autoplot(housing_sell_plus_GDP_model_forecast)
 ######### when the inflation high, the housing sell drop.
 
 
 #############
+#How about the housing sell with the average hourly wage rate?
 
 
+fix_1<- nnetar(Can_month_housing_sell_GDP_model.ts, xreg = CA_GDP_diff.ts)
+fix_forecast <- forecast(fix_1,h=20, xreg =  GDP_new_data)
+autoplot(fix_1, PI=f, h = 30)
 
-
-
-
+#THE 
+fix_2
 
 ##############
+#How about the housing sell with the average hourily age? 
+v2132579
+
+hourly_average_wage_raw <- "v2132579"
+hourly_average_wag.st <- get_cansim_vector(hourly_average_wage_raw, start_time = "2005-12-01", end_time = "2022-12-01")
+hourly_average_wage_year.st <- year(hourly_average_wag.st$REF_DATE[1])
+hourly_average_wage_month.st <- month(hourly_average_wag.st$REF_DATE[1])
+#transfer data to the time series time
+c(hourly_average_wage_year.st, hourly_average_wage_month.st)
+hourly_average_wage.ts <-ts(hourly_average_wag.st$VALUE, start = c(hourly_average_wage_year.st, hourly_average_wage_month.st), freq = 12)
+plot(hourly_average_wage.ts)
+
+diff_log_hourly_average_wage.ts <- diff(log(hourly_average_wage.ts))
+plot(Can_month_housing_sell_GDP_model.ts)
+housing_sell_plus_hourly_wage_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, xreg=diff_log_hourly_average_wage.ts, approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+print(housing_sell_plus_hourly_wage_model)
+
+
+
+
+
+
