@@ -259,25 +259,40 @@ CA_GDP_raw <- "v65201483"
 CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time = "2006-01-01", end_time = "2023-01-01")
 CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
 CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
-
 #transfer data to the time series time
 c(CA_GDP_year.st, CA_GDP_month.st)
 CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
-
 plot(CA_GDP.ts)
 CA_GDP_log_diff.ts <- diff(log(CA_GDP.ts))
 plot(CA_GDP_log_diff.ts)
 adf.test(CA_GDP_log_diff.ts)
-
-# create a new time series object using a subset of the data
-Can_month_housing_sell_GDP_model.ts <- window(Can_housing_sell_data.raw$Canada, start = c(2007,1), end = c(2022,12))
-
-# display the resulting time series
+#create a new time series object using a subset of the data
+Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2006,2), end = c(2023,1), frequency =12)
+#display the resulting time series
 Can_month_housing_sell_GDP_model.ts
-
-
-housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, d =1, xreg = CA_GDP_log.ts, approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
+adf.test(Can_month_housing_sell_GDP_model.ts)
+housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, d =1, xreg = CA_GDP_log_diff.ts, approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5)
 print(housing_sell_plus_GDP_model)
 
+x <- 36
+# initialize an empty vector to store the values
+values <- numeric(length = x)
+for (i in 1:x) {
+  values[i] <- 0.03
+}
+GDP_new_data <- print(values)
+
+housing_sell_plus_GDP_model_forecast <- forecast(housing_sell_plus_GDP_model, h = 36, xreg = GDP_new_data)
+autoplot(housing_sell_plus_GDP_model_forecast)
+######### when the inflation high, the housing sell drop.
 
 
+#############
+
+
+
+
+
+
+
+##############
