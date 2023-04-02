@@ -1,0 +1,94 @@
+---
+title: "Habits"
+author: John Doe
+date: March 22, 2005
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 3.5,
+  out.width = '99%'
+)
+```
+
+```{r include=FALSE}
+library("ggplot2")
+library("fpp2")
+library("glmnet")
+library("tidyr")
+library("lmtest")
+library("boot")
+library("forecast")
+library("readr")
+library("ggfortify")
+library("tseries")
+library("urca")
+library("readxl")
+library("lubridate")
+library("cansim")       
+library("OECD")        
+library("WDI")          
+library("fredr")        
+library("tsbox")
+library("RColorBrewer")
+library("wesanderson")
+library("writexl")
+library("readr")
+library("lubridate")
+
+Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
+#yes,they do got other data, which is boring to be honest. 
+
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+```
+
+## The Canadian housing market sell data seasonal adjust
+
+```{r echo=FALSE}
+autoplot(Can_month_housing_sell.ts, 
+         xlab = "time", ylab = "housing sell", main = "Canadian housing sell", 
+         geom = c("line"), label = T, truncate.gaps = FALSE,
+         Label.color = "#90aac0",  colour = "#003b6f" ) + 
+  theme(plot.background = element_rect(fill = "#C0CEDB"),
+        panel.background = element_rect(fill = "#E0E7ED"),
+        plot.caption = element_text(hjust = 0, vjust = 0, margin = margin(t = 5, unit = "pt")))
+```
+
+## Forecast in three different part
+
+-   The forecast for all data
+-   The forecast for the after 2008 finical crash
+-   The forecast from 3 years before and after Covid pandemic
+
+
+## The function I 
+
+## Breakfast
+
+-   Eat eggs
+-   Drink coffee
+
+# In the evening
+
+## Dinner
+
+-   Eat spaghetti
+-   Drink wine
+
+------------------------------------------------------------------------
+
+```{r, cars, fig.cap="A scatterplot.", echo=FALSE}
+plot(cars)
+```
+
+## Going to sleep
+
+-   Get in bed
+-   Count sheep
