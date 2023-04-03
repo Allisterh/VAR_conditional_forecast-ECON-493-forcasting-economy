@@ -3,7 +3,6 @@ title: "Habits"
 author: Tie Ma
 date: March 22, 2005
 output: powerpoint_presentation
-
 ---
 
 ```{r include=FALSE}
@@ -21,6 +20,7 @@ library("cansim")
 library("tsbox")
 library("RColorBrewer")
 library("wesanderson")
+library("zoo")
 
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 #yes,they do got other data, which is boring to be honest. 
@@ -37,13 +37,7 @@ Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007
     -   because this is the only interest data with at least 100 observation related to the housing market.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-autoplot(Can_month_housing_sell.ts, 
-         xlab = "time", ylab = "housing sell", main = "Canadian housing sell", 
-         geom = c("line"), label = T, truncate.gaps = FALSE,
-         Label.color = "#90aac0",  colour = "#003b6f" ) + 
-  theme(plot.background = element_rect(fill = "#C0CEDB"),
-        panel.background = element_rect(fill = "#E0E7ED"),
-        plot.caption = element_text(hjust = 0, vjust = 0, margin = margin(t = 5, unit = "pt")))
+autoplot(Can_month_housing_sell.ts)
 ```
 
 ## Some found on the data.
@@ -93,7 +87,8 @@ AIC(all_data_model_1)
 
 ```
 
-## How about not including the 2008 finical crash? 
+## How about not including the 2008 finical crash?
+
 ```{R echo=FALSE}
 #constructed model 2: what if we do not including the data from before the 2008 the economic crisis?
 after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
@@ -101,30 +96,18 @@ after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7
 autoplot(after_2008_forecasting_data)
 ```
 
-Result
-ARIMA(0,1,1)
-AIC: 3041.171
-ARIMA(2,1,0)
-AIC: 3038.807
-still, random walk with drift? 
+Result ARIMA(0,1,1) AIC: 3041.171 ARIMA(2,1,0) AIC: 3038.807 still, random walk with drift?
 
-
-## How about 3 years before and after 2020 when the covid start to impact canada? 
+## How about 3 years before and after 2020 when the covid start to impact canada?
 
 ```{R}
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2017,1), end= c(2023,2))
 autoplot(The_before_during_after_Covid_model.data)
 ```
 
-still ARIMA(2,1,0) and ARIMA(0,1,1) the random walk drift.
-even the AIC is supre close 
-AIC(The_before_during_after_Covid_model_1)
-#1413.121
-AIC(The_before_during_after_Covid_model_2)
-#1413.473
+still ARIMA(2,1,0) and ARIMA(0,1,1) the random walk drift. even the AIC is supre close AIC(The_before_during_after_Covid_model_1) #1413.121 AIC(The_before_during_after_Covid_model_2) #1413.473
 
-
-## constructed model 2: what if we only including the data from 2020 alone? 
+## constructed model 2: what if we only including the data from 2020 alone?
 
 ```{r, cars, fig.cap="A scatterplot.", echo=FALSE}
 The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2020,1), end= c(2023,2))
@@ -132,8 +115,6 @@ autoplot(The_2022_along.data)
 ```
 
 Both auto.arima suggest the data is random walk with ARIMA(0,1,1)
-
-
 
 ## So, here is my forecasting base on all the model I got from auto.arima
 
@@ -195,7 +176,7 @@ lines(The_2020_along_data_model_2_forecast$mean, col = "#4424D6")
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
 plot(all_data_model_2_forecast$mean, col = "#FE2712", main = "compare all the forecasting outcome", xlab = "time", ylim = c(34000, 34600), lwd = 2)
 lines(all_data_model_1_forecast$mean, col = "#FFA07A", lwd = 2)
 lines(after_2008_forecasting_model_1_forecast$mean, col = "#8b4513", lwd = 2)
@@ -205,12 +186,11 @@ lines(The_before_during_after_Covid_model_2_forecast$mean, col = "#B2D723", lwd 
 lines(The_2020_along_model_1_forecast$mean, col = "#347C98", lwd = 2)
 lines(The_2020_along_data_model_2_forecast$mean, col = "#4424D6", lwd = 2)
 
-legend("bottomleft", legend = c("All Data Model 2", "All Data Model 1", "After 2008 Model 1", "After 2008 Model 2", "Before/During/After COVID Model 1", "Before/During/After COVID Model 2", "2020 Model 1", "2020 Model 2"), col = c("#FE2712", "#FFA07A", "#8b4513", "#FB9902", "#FCCC1A", "#B2D723", "#347C98", "#4424D6"), lty = 1, lwd = 2)
+legend("bottomleft", legend = c("All Data Model 2", "All Data Model 1", "After 2008 Model 1", "After 2008 Model 2", "Before/During/After COVID Model 1", "Before/During/After COVID Model 2", "2020 Model 1", "2020 Model 2"), col = c("#FE2712", "#FFA07A", "#8b4513", "#FB9902", "#FCCC1A", "#B2D723", "#347C98", "#4424D6"), lty = 1, lwd = 2, cex = 0.5)
 
 ```
 
-
-```{r echo=FALSE}
+```{r echo=FALSE, message=TRUE, warning=FALSE, paged.print=FALSE}
 plot(all_data_model_2_forecast$mean, col = "#FE2712", main = "compare all the forecasting outcome", xlab = "time", lwd = 2)
 lines(all_data_model_1_forecast$mean, col = "#FFA07A", lwd = 2)
 lines(after_2008_forecasting_model_1_forecast$mean, col = "#8b4513", lwd = 2)
@@ -220,10 +200,9 @@ lines(The_before_during_after_Covid_model_2_forecast$mean, col = "#B2D723", lwd 
 lines(The_2020_along_model_1_forecast$mean, col = "#347C98", lwd = 2)
 lines(The_2020_along_data_model_2_forecast$mean, col = "#4424D6", lwd = 2)
 
-legend("bottomleft", legend = c("All Data Model 2", "All Data Model 1", "After 2008 Model 1", "After 2008 Model 2", "Before/During/After COVID Model 1", "Before/During/After COVID Model 2", "2020 Model 1", "2020 Model 2"), col = c("#FE2712", "#FFA07A", "#8b4513", "#FB9902", "#FCCC1A", "#B2D723", "#347C98", "#4424D6"), lty = 1, lwd = 2)
+legend("bottomleft", legend = c("All Data Model 2", "All Data Model 1", "After 2008 Model 1", "After 2008 Model 2", "Before/During/After COVID Model 1", "Before/During/After COVID Model 2", "2020 Model 1", "2020 Model 2"), col = c("#FE2712", "#FFA07A", "#8b4513", "#FB9902", "#FCCC1A", "#B2D723", "#347C98", "#4424D6"), lty = 1, lwd = 2, cex = 0.5)
 
 ```
-
 
 ```{R include=FALSE}
 #2.2 The data base import 
@@ -235,7 +214,7 @@ everyhingCA_raw<- read_csv("/Users/tie/Documents/GitHub/ECON-493-forcasting-econ
 
 ```
 
-```{r}
+```{r include=FALSE}
 ######## that is too much data there....
 
 ##########The relationship between the housing sell with bank rate?
@@ -258,40 +237,51 @@ housing_sell_plus_policy_rate_model<- auto.arima(Can_month_housing_sell.ts, d =1
 print(housing_sell_plus_policy_rate_model)
 #Regression with Regression with ARIMA(2,1,2) errors 
 
-x <- 6
+```
+
+```{R echo=FALSE}
+x2 <- 12
 # initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- 4
+New_bank_rate_raw_1 <- numeric(length = x2)
+for (i in 1:x2) {
+  New_bank_rate_raw_1[i] <- 1.25
 }
-new_bank_data_1 <- print(values)
+new_bank_data_1 <- print(New_bank_rate_raw_1)
 
 #print(housing_sell_plus_policy_rate_model)
 #checkresiduals(housing_sell_plus_policy_rate_model)
-evil_forcast <- forecast(housing_sell_plus_policy_rate_model, h = 6, xreg = new_bank_data)
-autoplot(evil_forcast)
+evil_forcast_1 <- forecast(housing_sell_plus_policy_rate_model, h = 12, xreg = new_bank_data_1)
+autoplot(evil_forcast_1) + 
+  labs(title = "When the Policy Rate Remains at 1.25 for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
 
 #it match with the relationship between the housing market and policy rate.
-##################
 
-x <- 6
+
+
+
+x3 <- 12
 # initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- 1
+New_bank_rate_raw_2 <- numeric(length = x3)
+for (i in 1:x3) {
+  New_bank_rate_raw_2[i] <- 4.5
 }
-new_bank_data_1 <- print(values)
+new_bank_data_2 <- print(New_bank_rate_raw_2)
 
-print(housing_sell_plus_policy_rate_model)
+#print(housing_sell_plus_policy_rate_model)
 #checkresiduals(housing_sell_plus_policy_rate_model)
-evil_forcast <- forecast(housing_sell_plus_policy_rate_model, h = 6, xreg = new_bank_data)
-autoplot(evil_forcast)
+evil_forcast_2 <- forecast(housing_sell_plus_policy_rate_model, h = 12, xreg = new_bank_data_2)
+autoplot(evil_forcast_2) + 
+  labs(title = "When the Policy Rate Remains at 4.5 for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
+
 
 
 ```
 
-
-```{r}
+```{r include=FALSE}
 
 ################# The relationship between housing sell and GPD?
 CA_GDP_raw <- "v65201483"
@@ -303,51 +293,67 @@ c(CA_GDP_year.st, CA_GDP_month.st)
 CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
 plot(CA_GDP.ts)
 
-###
-CA_GDP_diff.ts <- diff(log(CA_GDP.ts))
-plot(CA_GDP_log_diff.ts)
+CA_GDP_diff.ts <- diff(log(CA_GDP.ts), lag = 1)
+#plot(CA_GDP_log_diff.ts)
 #adf.test(CA_GDP_log_diff.ts)
 #The ADF test look good.
 ###
 
 #create a new time series object using a subset of the data
 Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2006,1), end = c(2022,12), frequency =12)
-plot(Can_month_housing_sell_GDP_model.ts)
+#plot(Can_month_housing_sell_GDP_model.ts)
 
-housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, xreg= CA_GDP_diff.ts,
-                                         approximation = FALSE, parallel = T, stepwise = FALSE, 
-                                         max.d = 5, max.p = 5, max.q = 5)
+housing_sell_plus_GDP_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, xreg= CA_GDP_diff.ts,approximation = FALSE, parallel = T, stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
 print(housing_sell_plus_GDP_model)
 
+#Regression with ARIMA(1,1,2) errors
+
 #display the resulting time series
-Can_month_housing_sell_GDP_model.ts
-adf.test(Can_month_housing_sell_GDP_model.ts)
+#Can_month_housing_sell_GDP_model.ts
+#adf.test(Can_month_housing_sell_GDP_model.ts)
 ###
 
+```
 
-x <- 20
+```{r echo=FALSE}
+GDP_new_data_time_period<- 12
 # initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- 0.01
+GDP_new_data_raw_1<- numeric(length = GDP_new_data_time_period)
+for (i in 1:GDP_new_data_time_period) {
+  GDP_new_data_raw_1[i] <- 0.4
 }
-GDP_new_data <- print(values)
+The_GDP_new_data_1 <- GDP_new_data_raw_1
 
-housing_sell_plus_GDP_model_forecast <- forecast(PI = T, housing_sell_plus_GDP_model, h = 36, xreg = GDP_new_data)
-autoplot(housing_sell_plus_GDP_model_forecast)
-######### when the inflation high, the housing sell drop.
+housing_sell_plus_GDP_model_forecast <- forecast(housing_sell_plus_GDP_model, h = 12, xreg = The_GDP_new_data_1)
+autoplot(housing_sell_plus_GDP_model_forecast) +  labs(title = "When the CPI remain at 4% for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
 
 
+GDP_new_data_time_period_2 <- 12
+# initialize an empty vector to store the values
+ GDP_new_data_raw_2 <- numeric(length = GDP_new_data_time_period_2)
+for (i in 1:GDP_new_data_time_period_2) {
+  GDP_new_data_raw_2[i] <- 0.2
+}
+GDP_new_data_2<- GDP_new_data_raw_2
+
+housing_sell_plus_GDP_model_forecast_1 <- forecast(housing_sell_plus_GDP_model, h = 12, xreg = GDP_new_data_2)
+autoplot(housing_sell_plus_GDP_model_forecast_1) +  labs(title = "When the CPI remain at 2% for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
+
+
+```
+
+```{R include=FALSE}
 #############
 #How about the housing sell with the average hourly wage rate?
 
 
-fix_1<- nnetar(Can_month_housing_sell_GDP_model.ts, xreg = CA_GDP_diff.ts)
-fix_forecast <- forecast(fix_1,h=20, xreg =  GDP_new_data)
-autoplot(fix_1, PI=f, h = 30)
-
-#THE 
-fix_2
+#fix_1<- nnetar(Can_month_housing_sell_GDP_model.ts, xreg = CA_GDP_diff.ts)
+#fix_forecast <- forecast(fix_1,h=20, xreg =  GDP_new_data)
+#autoplot(fix_1, PI=f, h = 30)
 
 ##############
 #How about the housing sell with the average hourily age? 
@@ -362,42 +368,62 @@ plot(hourly_average_wage.ts)
 
 log_hourly_average_wage.ts <- diff(log(hourly_average_wage.ts))
 
-checkresiduals(log_hourly_average_wage.ts)
-adf.test(log_hourly_average_wage.ts *100)
+#checkresiduals(log_hourly_average_wage.ts)
+#adf.test(log_hourly_average_wage.ts)
 
 #checkresiduals(diff_hourly_average_wage.ts)
 #The data got strong seasonality
 #do other seasonal different. 
 #Check the staionarlity
 ##statioanry check
-adf.test(diff_hourly_average_wage.ts)
+#adf.test(diff_hourly_average_wage.ts)
 # p-value smaller than printed p-value
-kpss.test(seasonaldiff_diff_hourly_average_wage.ts)
+#kpss.test(seasonaldiff_diff_hourly_average_wage.ts)
 ######
 #The data is stationary.
 #we can keep going!
 Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007,1), end = c(2022,12), frequency =12)
 
 housing_sell_plus_hourly_wage_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, 
-                                                 xreg=(log_hourly_average_wage.ts*100), 
+                                                 xreg=(log_hourly_average_wage.ts), 
                                                  approximation = FALSE, parallel = T, stepwise = FALSE,
                                                  max.P = 5, max.Q = 5, max.D = 5,
                                                  max.d = 5, max.p = 5, max.q = 5)
 #Regression with ARIMA(1,1,3) errors 
-summary(housing_sell_plus_hourly_wage_model)
+#print(housing_sell_plus_hourly_wage_model)
 
+```
 
-x <- 36
+```{R echo=FALSE}
+xa<- 12
 # initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- 20
+The_wage_incerase_rate_raw_1 <- numeric(length = xa)
+for (i in 1:xa) {
+  The_wage_incerase_rate_raw_1[i] <- 0.2
   }
-The_wage_incerase_rata <- print(values)
+The_wage_incerase_rate_1 <- The_wage_incerase_rate_raw_1
 
-housing_sell_plus_hourly_wage_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 36, xreg = The_wage_incerase_rata)
-autoplot(housing_sell_plus_hourly_wage_model_forecast)
+housing_sell_plus_hourly_wage_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 12, xreg = The_wage_incerase_rate_1)
+autoplot(housing_sell_plus_hourly_wage_model_forecast) + labs(title = "When the wage increase 20% for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
 
+xa<- 12
+# initialize an empty vector to store the values
+The_wage_incerase_rate_raw_2 <- numeric(length = xa)
+for (i in 1:xa) {
+  The_wage_incerase_rate_raw_2[i] <- 0.00
+  }
+The_wage_incerase_rata_2 <- The_wage_incerase_rate_raw_2
+
+housing_sell_plus_hourly_wage_model_forecast_2 <- forecast( housing_sell_plus_hourly_wage_model, h = 12, xreg = The_wage_incerase_rata_2)
+autoplot(housing_sell_plus_hourly_wage_model_forecast_2) +labs(title = "When the wage increase rate remain at 0 for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
+
+```
+
+```{r include=FALSE}
 
 ###### how about the housing sell with the despotiable income? 
 # Canadian disposable income, quarterly, seasonally adjusted
@@ -435,64 +461,40 @@ housing_sell_plus_disposable_income_model<- auto.arima(Can_month_housing_sell_qu
                                                  max.P = 5, max.Q = 5, max.D = 5,
                                                  max.d = 5, max.p = 5, max.q = 5)
 print(housing_sell_plus_disposable_income_model)
-
-#Three different situion on
-
-
-x <- 6
-# initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- -2
-}
-The_dispoable_income_change_rate <- print(values)
-
-housing_sell_plus_disposable_income_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 6, xreg = The_dispoable_income_change_rate)
-autoplot(housing_sell_plus_disposable_income_model_forecast)
-
-########## how is the relationship between the new housing start.
-
-## import the data. 
-
-The_housing_start.raw <- "v52300157"
-The_housing_start.st <- get_cansim_vector(The_housing_start.raw, start_time = "2007-01-01", end_time = "2022-12-01")
-The_housing_start_year.st <- year(The_housing_start.st$REF_DATE[1])
-The_housing_start_month.st <- month(The_housing_start.st$REF_DATE[1])
-#transfer data to the time series time
-c(The_housing_start_year.st, The_housing_start_month.st)
-The_housing_start.ts <-ts(The_housing_start.st$VALUE, start = c(The_housing_start_year.st, The_housing_start_month.st), freq = 12)
-autoplot(The_housing_start.ts)
-
-adf.test(diff(log(The_housing_start.ts)))
-#one different is enough. 
-
-diff_The_housing_start.ts <- (diff(log(The_housing_start.ts)))
-Can_month_housing_sell_evil.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 2), end = c(2022, 12), frequency = 12)
-
-housing_sell_plus_The_housing_start_model<- auto.arima(Can_month_housing_sell_evil.ts, 
-                                                       xreg=(diff_The_housing_start.ts), 
-                                                       approximation = FALSE, parallel = T, stepwise = FALSE,
-                                                       max.P = 5, max.Q = 5, max.D = 5,
-                                                       max.d = 5, max.p = 5, max.q = 5)
-print(housing_sell_plus_The_housing_start_model)
-#Regression with ARIMA(1,1,3) errors 
-
-
-x <- 12
-# initialize an empty vector to store the values
-values <- numeric(length = x)
-for (i in 1:x) {
-  values[i] <- 0.2
-}
-new_housing_building_rate <- print(values)
-
-housing_sell_plus_The_housing_start_model_forecast <- forecast(PI = T, housing_sell_plus_The_housing_start_model, h = 12, xreg = new_housing_building_rate)
-autoplot(housing_sell_plus_The_housing_start_model_forecast)
+#Regression with ARIMA(1,1,1)(3,0,0)[4] errors
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Three different situion on
+
+The_dispoable_income_change_rate_time_peirod <- 12
+# initialize an empty vector to store the values
+The_dispoable_income_change_rate.raw <- numeric(length = The_dispoable_income_change_rate_time_peirod )
+for (i in 1:The_dispoable_income_change_rate_time_peirod) {
+The_dispoable_income_change_rate.raw[i] <- 0.30}
+
+The_dispoable_income_change_rate_1 <- The_dispoable_income_change_rate.raw
+
+housing_sell_plus_disposable_income_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 12, xreg = The_dispoable_income_change_rate_1)
+autoplot(housing_sell_plus_disposable_income_model_forecast) +labs(title = "When the dispoable income increase 30% for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
+
+
+The_dispoable_income_change_rate_time_peirod <- 12
+# initialize an empty vector to store the values
+The_dispoable_income_change_rate_2.raw <- numeric(length = The_dispoable_income_change_rate_time_peirod )
+for (i in 1:The_dispoable_income_change_rate_time_peirod) {
+The_dispoable_income_change_rate_2.raw[i] <- 0.00
+}
+The_dispoable_income_change_rate_2 <- The_dispoable_income_change_rate_2.raw
+
+housing_sell_plus_disposable_income_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 12, xreg = The_dispoable_income_change_rate_2)
+autoplot(housing_sell_plus_disposable_income_model_forecast) +labs(title = "When the dispoable income no change for 12 Months Continuously",
+       x = "Time",
+       y = "Housing Sales")
 
 
 
 
-
-
+```

@@ -50,13 +50,10 @@ Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-fo
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 #transfor the data to the ts
 
-autoplot(Can_month_housing_sell.ts, 
-         xlab = "time", ylab = "housing sell", main = "Canadian housing sell", 
-         geom = c("line"), label = T, truncate.gaps = FALSE,
-         Label.color = "#90aac0",  colour = "#003b6f" ) + 
-  theme(plot.background = element_rect(fill = "#C0CEDB"),
-        panel.background = element_rect(fill = "#E0E7ED"),
-        plot.caption = element_text(hjust = 0, vjust = 0, margin = margin(t = 5, unit = "pt")))
+autoplot(Can_month_housing_sell.ts)
+checkresiduals(Can_month_housing_sell.ts)
+autoplot(decompose(Can_month_housing_sell.ts))
+pacf(Can_month_housing_sell.ts)
 
 
 decomposed_ts <- decompose(seasonally_adjusted_ts)
@@ -589,6 +586,75 @@ new_housing_building_rate <- print(values)
 
 housing_sell_plus_The_housing_start_model_forecast <- forecast(PI = T, housing_sell_plus_The_housing_start_model, h = 12, xreg = new_housing_building_rate)
 autoplot(housing_sell_plus_The_housing_start_model_forecast)
+
+
+#################### let's compare ARIMA (2,1,0) with ARIMA(0,1,1) to see which one is btter .--
+
+
+
+#### set up the test enviroment 
+
+Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
+#yes,they do got other data, which is boring to be honest. 
+
+Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017, 12), frequency = 12)
+#transfor the data to the ts
+
+
+###### set up model
+
+diff_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
+
+#test_model_one<- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+#print(test_model_one)
+the_model_without_covid_shock <- auto.arima(Can_month_housing_sell.ts)
+#ARIMA(2,0,2)(0,0,1)[12] with zero mean 
+#note: both give the same outcome.
+
+######
+Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+
+The_model_with_covid_shock_one <- auto.arima(Can_month_housing_sell_with_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+The_model_with_covid_shock_two <- auto.arima(Can_month_housing_sell_with_covid_shock.ts)
+###########
+
+#three different model, which one perform better?
+the_model_without_covid_shock
+The_model_with_covid_shock_one 
+The_model_with_covid_shock_two
+###########
+
+########## cross validation time!
+
+# end of training set,2000Q4 
+
+n.end <- 2000.75
+
+# test set: 2018Q1 - 201Q4 
+# set matrix for storage, 48 obs in test set 
+pred <- matrix(rep(NA,144),48,3) # loop 
+
+for(i in 1:48){
+
+tmp0 <- 1970 
+tmp1 <- n.end+(i-1)*1/4 
+tmp <- window(rgdp.gr,tmp0,tmp1) 
+pred[i,1] <- window(rgdp.gr,tmp1+1/4,tmp1+1/4) # actual 
+# compute 
+forecasts pred[i,2] <- forecast(Arima(tmp,order=c(1,0,0)),h=1)$mean 
+pred[i,3] <- forecast(Arima(tmp,order=c(0,0,1)),h=1)$mean
+
+# AR(1) # MA(1)
+}
+
+
+#The test set are start bettwen 2017 to 2018
+
+prediction <- matrix(rep(NA, 144), 12, 12)
+temp1 <- 2018 
+
+
+
 
 
 
