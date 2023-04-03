@@ -29,6 +29,7 @@
   library("writexl")
   library("readr")
   library("lubridate")
+library("gridExtra")
 ##################
 
 #Index
@@ -56,6 +57,41 @@ autoplot(Can_month_housing_sell.ts,
   theme(plot.background = element_rect(fill = "#C0CEDB"),
         panel.background = element_rect(fill = "#E0E7ED"),
         plot.caption = element_text(hjust = 0, vjust = 0, margin = margin(t = 5, unit = "pt")))
+
+
+decomposed_ts <- decompose(seasonally_adjusted_ts)
+
+low1 = lowess(Can_month_housing_sell.ts,f=2/3)
+plot(Can_month_housing_sell.ts)
+lines(low1,lty=2,lwd=3,col="red")
+low2 = lowess(Can_month_housing_sell.ts,f=1/3)
+lines(low2,lty=3,lwd=3,col="green")
+low3 = lowess(Can_month_housing_sell.ts,f=.1)
+lines(low3,lty=4,lwd=3,col="blue")
+
+
+
+
+# Step 5: Analyze the decomposed components
+# Plot the original time series, trend, seasonal, and random components
+plot(decomposed_ts)
+
+attributes(seasonally_adjusted_ts)
+
+# Step 6: Perform seasonal adjustment (if needed)
+# If the seasonal component is significant, you can perform seasonal adjustment
+seasonally_adjusted_adjusted_ts <- seasadj(decomposed_ts)
+plot(seasonally_adjusted_adjusted_ts)
+
+# Plot the seasonally adjusted time series
+
+par(mfrow = c(2, 1))
+p1 <- autoplot(seasonally_adjusted_ts)
+p2 <- autoplot(Can_month_housing_sell.ts)
+
+checkresiduals(seasonally_adjusted_ts
+               )
+
 
 #plot the graphy to check it.
 #autoplot(Can_month_housing_sell.ts)
@@ -102,13 +138,12 @@ all_data_model_1 <- auto.arima(Can_month_housing_sell.ts,
                                 approximation = FALSE, 
                                 parallel = TRUE, 
                                 stepwise = FALSE,
-                                d = 1,
                                 max.Q = 5, max.P = 5, max.D = 5,
                                 max.d = 5, max.p = 5, max.q = 5)
 print(all_data_model_1)     
-#ARIMA(2,1,0) 
+#ARIMA(1,1,2) 
 
-### so, what dos the default autoarima will give me and how long it take?
+### so, what dos the default auto-arima will give me and how long it take?
 #0.025s and ARIMA(0,1,1)
 
 all_data_model_2 <- auto.arima(Can_month_housing_sell.ts)
@@ -168,7 +203,6 @@ after_2008_forecasting_model_1 <- auto.arima(after_2008_forecasting_data,
                                approximation = FALSE, 
                                parallel = TRUE, 
                                stepwise = FALSE,
-                               d = 1,
                                max.Q = 5, max.P = 5, max.D = 5,
                                max.d = 5, max.p = 5, max.q = 5)
 #ARIMA(2,1,0)
@@ -218,8 +252,8 @@ autoplot(after_2008_forecasting_model_forecast)
 ####################### process the data. 
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2017,1), end= c(2023,2))
 
-#plot the graphy
 #autoplot(The_before_during_after_Covid_model.data)
+
 #checkresiduals(The_before_during_after_Covid_model.data)
 #diff_The_before_during_after_Covid_model.data <- diff(The_before_during_after_Covid_model.data, lag = 1)
 #adf.test(diff_The_before_during_after_Covid_model.data)
@@ -228,15 +262,16 @@ The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, star
 
 #the data look coool, now it is the time to play with data.
 
-The_diff_before_during_after_Covid_model.data <- diff(The_before_during_after_Covid_model.data, lag=1)
+autoplot(The_before_during_after_Covid_model.data)
 
-The_before_during_after_Covid_model_1 <- auto.arima(The_diff_before_during_after_Covid_model.data, 
+The_before_during_after_Covid_model_1 <- auto.arima(The_before_during_after_Covid_model.data, 
                                              approximation = FALSE, 
-                                             parallel = T, 
+                                             parallel = F, 
                                              stepwise = FALSE,
                                              max.Q = 5, max.P = 5, max.D = 5,
                                              max.d = 5, max.p = 5, max.q = 5)
 print(The_before_during_after_Covid_model_1)
+
 #ARIMA(2,1,0) 
 
 #####
@@ -264,7 +299,7 @@ print(The_before_during_after_Covid_model)
 
 #4.constructed model 2: what if we only including the data from 2022 alone? 
 #######
-The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2022,1), end= c(2023,2))
+The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2020,1), end= c(2023,2))
 
 The_2022_along_model_1<- auto.arima(The_2022_along.data, 
                                                     approximation = FALSE, 
@@ -279,6 +314,11 @@ print(The_2022_along_model_1)
 The_2022_along.data_model_2 <- auto.arima(The_2022_along.data)
 print(The_2022_along.data_model_2)
 #ARIMA(0,1,0) with drift 
+
+AIC(The_2022_along_model_1)
+AIC(The_2022_along.data_model_2)
+
+
 
 
 ##################
@@ -413,7 +453,7 @@ fix_2
 ##############
 #How about the housing sell with the average hourily age? 
 hourly_average_wage_raw <- "v2132579"
-hourly_average_wag.st <- get_cansim_vector(hourly_average_wage_raw, start_time = "2005-12-01", end_time = "2022-12-01")
+hourly_average_wag.st <- get_cansim_vector(hourly_average_wage_raw, start_time = "2006-12-01", end_time = "2022-12-01")
 hourly_average_wage_year.st <- year(hourly_average_wag.st$REF_DATE[1])
 hourly_average_wage_month.st <- month(hourly_average_wag.st$REF_DATE[1])
 #transfer data to the time series time
@@ -421,11 +461,10 @@ c(hourly_average_wage_year.st, hourly_average_wage_month.st)
 hourly_average_wage.ts <-ts(hourly_average_wag.st$VALUE, start = c(hourly_average_wage_year.st, hourly_average_wage_month.st), freq = 12)
 plot(hourly_average_wage.ts)
 
-log_hourly_average_wage.ts <- diff(diff(hourly_average_wage.ts, lag = 12))
+log_hourly_average_wage.ts <- diff(log(hourly_average_wage.ts))
 
-adf.test(log_hourly_average_wage.ts)
-
-autoplot(log_hourly_average_wage.ts *100)
+checkresiduals(log_hourly_average_wage.ts)
+adf.test(log_hourly_average_wage.ts *100)
 
 #checkresiduals(diff_hourly_average_wage.ts)
 #The data got strong seasonality
@@ -440,21 +479,119 @@ kpss.test(seasonaldiff_diff_hourly_average_wage.ts)
 #we can keep going!
 Can_month_housing_sell_GDP_model.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007,1), end = c(2022,12), frequency =12)
 
-housing_sell_plus_hourly_wage_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, xreg=(log_hourly_average_wage.ts*100), approximation = FALSE, parallel = T, stepwise = FALSE, 
+housing_sell_plus_hourly_wage_model<- auto.arima(Can_month_housing_sell_GDP_model.ts, 
+                                                 xreg=(log_hourly_average_wage.ts*100), 
+                                                 approximation = FALSE, parallel = T, stepwise = FALSE,
+                                                 max.P = 5, max.Q = 5, max.D = 5,
                                                  max.d = 5, max.p = 5, max.q = 5)
 #Regression with ARIMA(1,1,3) errors 
-print(housing_sell_plus_hourly_wage_model)
+summary(housing_sell_plus_hourly_wage_model)
+
 
 x <- 36
 # initialize an empty vector to store the values
 values <- numeric(length = x)
 for (i in 1:x) {
-  values[i] <- 
-}
+  values[i] <- 20
+  }
 The_wage_incerase_rata <- print(values)
 
 housing_sell_plus_hourly_wage_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 36, xreg = The_wage_incerase_rata)
 autoplot(housing_sell_plus_hourly_wage_model_forecast)
+
+
+###### how about the housing sell with the despotiable income? 
+# Canadian disposable income, quarterly, seasonally adjusted
+CA_disable_income.raw <- "v62305869"
+CA_disable_income.st <- get_cansim_vector(CA_disable_income.raw, start_time = "2007-01-01", end_time = "2022-12-01")
+CA_disable_income_year.st <- year(CA_disable_income.st$REF_DATE[1])
+CA_disable_income_month.st <- month(CA_disable_income.st$REF_DATE[1])
+#transfer data to the time series time
+c(CA_disable_income_year.st, CA_disable_income_month.st)
+CA_disable_income.ts <-ts(CA_disable_income.st$VALUE, start = c(CA_disable_income_year.st, CA_disable_income_month.st), freq = 4)
+autoplot(CA_disable_income.ts)
+
+#####stationary data
+
+diff_log_CA_disable_income.ts <- diff(log(CA_disable_income.ts), lag = 1)
+adf.test(diff_log_CA_disable_income.ts)
+checkresiduals(diff_log_CA_disable_income.ts)
+
+#### now the data is stationary, the next step is turn the housing sell data into quarternally data
+
+#start at 2007q2
+Can_month_housing_sell_quarterly.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 4), end = c(2022, 12), frequency = 12)
+
+# Convert to zoo object for easy aggregation
+monthly_data_zoo <- zoo(Can_month_housing_sell_quarterly.ts, order.by = index(Can_month_housing_sell_quarterly.ts))
+
+# Aggregate to quarterly frequency by taking the average of every three consecutive months
+Can_month_housing_sell_quarterly_data <- aggregate(monthly_data_zoo, as.yearqtr, mean)
+
+### now its the quarterly data .
+
+housing_sell_plus_disposable_income_model<- auto.arima(Can_month_housing_sell_quarterly_data, 
+                                                 xreg=(diff_log_CA_disable_income.ts*100), 
+                                                 approximation = FALSE, parallel = T, stepwise = FALSE,
+                                                 max.P = 5, max.Q = 5, max.D = 5,
+                                                 max.d = 5, max.p = 5, max.q = 5)
+print(housing_sell_plus_disposable_income_model)
+
+#Three different situion on
+
+
+x <- 6
+# initialize an empty vector to store the values
+values <- numeric(length = x)
+for (i in 1:x) {
+  values[i] <- -2
+}
+The_dispoable_income_change_rate <- print(values)
+
+housing_sell_plus_disposable_income_model_forecast <- forecast( housing_sell_plus_hourly_wage_model, h = 6, xreg = The_dispoable_income_change_rate)
+autoplot(housing_sell_plus_disposable_income_model_forecast)
+
+########## how is the relationship between the new housing start.
+
+## import the data. 
+
+The_housing_start.raw <- "v52300157"
+The_housing_start.st <- get_cansim_vector(The_housing_start.raw, start_time = "2007-01-01", end_time = "2022-12-01")
+The_housing_start_year.st <- year(The_housing_start.st$REF_DATE[1])
+The_housing_start_month.st <- month(The_housing_start.st$REF_DATE[1])
+#transfer data to the time series time
+c(The_housing_start_year.st, The_housing_start_month.st)
+The_housing_start.ts <-ts(The_housing_start.st$VALUE, start = c(The_housing_start_year.st, The_housing_start_month.st), freq = 12)
+autoplot(The_housing_start.ts)
+
+adf.test(diff(log(The_housing_start.ts)))
+#one different is enough. 
+
+diff_The_housing_start.ts <- (diff(log(The_housing_start.ts)))
+Can_month_housing_sell_evil.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 2), end = c(2022, 12), frequency = 12)
+
+housing_sell_plus_The_housing_start_model<- auto.arima(Can_month_housing_sell_evil.ts, 
+                                                       xreg=(diff_The_housing_start.ts), 
+                                                       approximation = FALSE, parallel = T, stepwise = FALSE,
+                                                       max.P = 5, max.Q = 5, max.D = 5,
+                                                       max.d = 5, max.p = 5, max.q = 5)
+print(housing_sell_plus_The_housing_start_model)
+#Regression with ARIMA(1,1,3) errors 
+
+
+x <- 12
+# initialize an empty vector to store the values
+values <- numeric(length = x)
+for (i in 1:x) {
+  values[i] <- 0.2
+}
+new_housing_building_rate <- print(values)
+
+housing_sell_plus_The_housing_start_model_forecast <- forecast(PI = T, housing_sell_plus_The_housing_start_model, h = 12, xreg = new_housing_building_rate)
+autoplot(housing_sell_plus_The_housing_start_model_forecast)
+
+
+
 
 
 

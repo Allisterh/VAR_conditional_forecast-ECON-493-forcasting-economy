@@ -1,4 +1,4 @@
-## ----setup, include=FALSE------------------------------------------------
+----setup include=FALSE------------------------------------------------
 knitr::opts_chunk$set(
   echo = TRUE, cache = FALSE, warning = FALSE, message = FALSE, 
   fig.align = "center",
