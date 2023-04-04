@@ -507,3 +507,32 @@ autoplot(housing_sell_plus_disposable_income_model_forecast) +labs(title = "When
 
 
 ```
+
+```{r}
+
+
+# Fit three ARIMA models to predict housing sales
+model1 <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(2, 1, 2), seasonal = list(order = c(0, 0, 1), period = 12))
+model2 <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(2, 1, 0))
+model3 <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(0, 1, 1))
+
+# Generate forecasts for each model
+forecast1 <- forecast(model1, h = length(test_set.ts))
+forecast2 <- forecast(model2, h = length(test_set.ts))
+forecast3 <- forecast(model3, h = length(test_set.ts))
+
+# Calculate accuracy measures for each forecast
+accuracy1 <- accuracy(forecast1, test_set.ts)
+accuracy2 <- accuracy(forecast2, test_set.ts)
+accuracy3 <- accuracy(forecast3, test_set.ts)
+
+# Combine accuracy measures into a matrix and add row names
+accuracy_matrix <- rbind(accuracy1, accuracy2, accuracy3)
+
+# Print the accuracy measures matrix
+cat("Accuracy measures for the three ARIMA models:\n")
+print(accuracy_matrix)
+
+
+``
+```

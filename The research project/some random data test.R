@@ -2,6 +2,7 @@
 #Tie.Ma. 
 #1537905. 
 
+
 #Step one Lode the all package that necessary or not? 
 #yes, I just copy it around, so I did not need to check around.
 
@@ -32,13 +33,25 @@
 library("gridExtra")
 ##################
 
+##################
+#This code has the data analysis and forecasting for the canadian housing reslare data published by the CREA
+#I Did realize this code is too much and too massy to read, here is the index.
+
+
 #Index
-  #the data process
-  #play with data alone
-    #all data ARIMA model
-    #After 2008 ARIMA model
-    #before and after covid ARIMA model
-    #After covid model.
+
+#1.the data process
+
+#2.the data analysis and forecast (including the Covid-shock)
+  #2.2 all data ARIMA model
+  #2.3 After 2008 ARIMA model
+  #2.4before and after covid ARIMA model
+  #2.5 After covid model.
+
+#3 The data analysis and forecast (without the Covid-shock)
+
+#4 Compare the model from #2 and #3
+#5 Conditional forecast
 
 
 
@@ -663,9 +676,36 @@ diff_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
 
 #test_model_one<- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
 #print(test_model_one)
-the_model_without_covid_shock <- auto.arima(Can_month_housing_sell.ts)
+the_model_without_covid_shock <- auto.arima(Can_month_housing_sell_without_covid_shock.ts)
 #ARIMA(2,0,2)(0,0,1)[12] with zero mean 
+
+
+
+The_best_model<- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(2, 1, 2), seasonal = list(order = c(0, 0, 1), period = 12))
+
+
+#############
+
+(abest_model <- Arima(Can_month_housing_sell.ts, order = c(2, 1, 2), seasonal = list(order = c(0, 0, 1), period = 12)))
+(model2 <- Arima(Can_month_housing_sell.ts, order = c(2, 1, 0)))
+(model3 <- Arima(Can_month_housing_sell.ts, order = c(0, 1, 1)))
+
+
+
+
+
+forecast_data <- forecast(abest_model, h = 6)
+
+# Plot the forecast using autoplot
+autoplot(forecast_data)
+
+
+
+
+
+
 #note: both give the same outcome.
+
 
 ######
 Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 12), frequency = 12)
@@ -706,15 +746,12 @@ acc_1 <- accuracy(forecast_1, test_set.ts)
 acc_2 <- accuracy(forecast_2, test_set.ts)
 acc_3 <- accuracy(forecast_3, test_set.ts)
 
-# Print out the accuracy measures for the three models
-cat("Accuracy measures for the model without Covid shock:\n")
-print(acc_1)
+# Combine accuracy measures into a matrix
+accuracy_matrix <- rbind(acc_1, acc_2, acc_3)
 
-cat("Accuracy measures for the model with Covid shock one:\n")
-print(acc_2)
+# Print the accuracy measures matrix
+print(accuracy_matrix)
 
-cat("Accuracy measures for the model with Covid shock two:\n")
-print(acc_3)
 
 #############
 #play around with data 2
