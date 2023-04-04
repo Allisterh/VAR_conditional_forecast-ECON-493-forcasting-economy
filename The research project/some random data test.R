@@ -297,93 +297,96 @@ plot.ts(forecasts, main = "Forecast Graph for 4 ARIMA Models", xlab = "Period", 
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 #yes,they do got other data, which is boring to be honest. 
 
-Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017, 12), frequency = 12)
-#transfor the data to the ts
-plot(Can_month_housing_sell_without_covid_shock.ts)
+Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 12), frequency = 12)
+after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell.ts, start= c(2009,6), end= c(2019, 12))
+The_before_during_after_Covid_without_covid_shock_data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2017, 12))
 
-###### check the stationary.
-diff_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
+####model time
+test_model_one<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+test_model_one_after_2008_forecasting_without_covid_shock<- auto.arima(after_2008_forecasting_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+test_model_one_The_before_during_after_Covid_without_covid_shock_data<- auto.arima(The_before_during_after_Covid_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
 
-#both auto.arima give the same outcome
+print(test_model_one)
+#ARIMA(2,1,1)(0,0,2)[12] 
+print(test_model_one_after_2008_forecasting_without_covid_shock)
+#ARIMA(2,1,1)(1,0,1)[12]
 
-#test_model_one<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-#print(test_model_one)
-the_model_without_covid_shock <- auto.arima(Can_month_housing_sell_without_covid_shock.ts)
-#ARIMA(2,0,2)(0,0,1)[12] with zero mean 
-checkresiduals(the_model_without_covid_shock)
+wee <- auto.arima(The_before_during_after_Covid_without_covid_shock_data)
+
+autoplot(Can_month_housing_sell_without_covid_shock.ts)
+autoplot(after_2008_forecasting_without_covid_shock_data)
+
+#####
+print(test_model_one)
+print(test_model_one_after_2008_forecasting_without_covid_shock)
+#ARIMA(3,1,1)(0,0,1)[12]
+print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)
+
+
 
 
 #####################################
 #Part 4:compare the three model for the entire data
 #ARIMA (2,1,0)
 #ARIMA (0.1.1)
-#ARIMA ARIMA(2,0,2)(0,0,1)[12] with zero mean 
+#ARIMA ARIMA(2,1,2)(0,0,1)[12] with zero mean 
+#ARIMA(3,1,1)(0,0,1)[12]
 
 
-#first, compare 
+#first, compare the AICc of the model for overall proferement
 
-(abest_model <- Arima(Can_month_housing_sell.ts, order = c(2, 1, 2), seasonal = list(order = c(0, 0, 1), period = 12)))
-(model2 <- Arima(Can_month_housing_sell.ts, order = c(2, 1, 0)))
-(model3 <- Arima(Can_month_housing_sell.ts, order = c(0, 1, 1)))
+# Fit the ARIMA(2,1,0) model
+model1 <- arima(Can_month_housing_sell.ts, order=c(2,1,0))
+
+# Fit the ARIMA(0,1,1) model
+model2 <- arima(Can_month_housing_sell.ts, order=c(0,1,1))
+
+# Fit the ARIMA(2,1,2)(0,0,2)[12] model with zero mean
+model3 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
+
+# Fit the ARIMA(2,1,1)(1,0,1)[12] model
+model4 <- arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
+
+#ARIMA(2,1,2)(0,0,1)[12] 
+model5 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
 
+#AIC matrix
+AIC_Matrix <- matrix (ncol = 1, nrow = 5)
+colnames(AIC_Matrix) <-c("AIC")
+rownames(AIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,2)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]")
+AIC_Matrix[1,1] <- AIC(model1)
+AIC_Matrix[2,1] <- AIC(model2)
+AIC_Matrix[3,1] <- AIC(model3)
+AIC_Matrix[4,1] <- AIC(model4)
+AIC_Matrix[5,1] <- AIC(model5)
 
+print(AIC_Matrix)
 
 
 forecast_data <- forecast(abest_model, h = 6)
 
-# Plot the forecast using autoplot
-autoplot(forecast_data)
+######### cross validation
+Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017,12), frequency = 12)
+test_set.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2018, 1), end = c(2018, 12), frequency = 12)
 
-
-
-
-
-
-#note: both give the same outcome.
-
-
-######
-Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 12), frequency = 12)
-test_set.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
-
-
-autoplot(Can_month_housing_sell_with_covid_shock.ts)
-
-The_model_with_covid_shock_one <- auto.arima(Can_month_housing_sell_with_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-The_model_with_covid_shock_two <- auto.arima(Can_month_housing_sell_with_covid_shock.ts)
-###########
-
-#three different model, which one perform better?
-autoplot(the_model_without_covid_shock)
-The_model_with_covid_shock_one 
-The_model_with_covid_shock_two
-###########
-
-#let's compare with the 3 model
-
-AIC(the_model_without_covid_shock)
-AIC(The_model_with_covid_shock_one)
-AIC(The_model_with_covid_shock_two)
-
-
-# Fit the three ARIMA models
-the_model_without_covid_shock <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(2,1,2), seasonal = list(order = c(0,0,1), period = 12))
-The_model_with_covid_shock_one <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(2,1,0))
-The_model_with_covid_shock_two <- Arima(Can_month_housing_sell_without_covid_shock.ts, order = c(0,1,1))
 
 # Generate forecasts for the three models
-forecast_1 <- forecast(the_model_without_covid_shock, h = length(test_set.ts))
-forecast_2 <- forecast(The_model_with_covid_shock_one, h = length(test_set.ts))
-forecast_3 <- forecast(The_model_with_covid_shock_two, h = length(test_set.ts))
+forecast_1 <- forecast(model1, h = length(test_set.ts))
+forecast_2 <- forecast(model2, h = length(test_set.ts))
+forecast_3 <- forecast(model3, h = length(test_set.ts))
+forecast_4 <- forecast(model4, h = length(test_set.ts))
 
 # Calculate accuracy measures for the three models
-acc_1 <- accuracy(forecast_1, test_set.ts)
+
+
 acc_2 <- accuracy(forecast_2, test_set.ts)
 acc_3 <- accuracy(forecast_3, test_set.ts)
+acc_4 <- accuracy(forecast_4, test_set.ts)
+
 
 # Combine accuracy measures into a matrix
-accuracy_matrix <- rbind(acc_1, acc_2, acc_3)
+accuracy_matrix <- rbind(acc_1, acc_2, acc_3, acc_4)
 
 # Print the accuracy measures matrix
 print(accuracy_matrix)
@@ -413,7 +416,8 @@ plot()
 
 
 
-
+evil11<-window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 12))
+autoplot(evil11)
 
 
 

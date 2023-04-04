@@ -536,3 +536,88 @@ print(accuracy_matrix)
 
 ``
 ```
+
+```{r}
+
+#Part 3: The model construction without the covid shock
+#############################################################################################################################
+#### set up the test enviroment 
+
+Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
+#yes,they do got other data, which is boring to be honest. 
+
+Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017, 12), frequency = 12)
+after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2017, 12))
+The_before_during_after_Covid_without_covid_shock_data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2017, 12))
+evil11<-window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 12))
+
+
+The_evil_data <- window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 12))
+
+The_evil_model<- auto.arima(The_evil_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+print(The_evil_model)
+#####
+
+####model time
+####
+test_model_one<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+####
+test_model_one_after_2008_forecasting_without_covid_shock<- auto.arima(after_2008_forecasting_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+
+
+####
+test_model_one_The_before_during_after_Covid_without_covid_shock_data<- auto.arima(The_before_during_after_Covid_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+#####
+
+wwww <-autoxs
+
+print(test_model_one)
+print(test_model_one_after_2008_forecasting_without_covid_shock)
+#ARIMA(3,1,1)(0,0,1)[12]
+print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)
+
+
+
+
+
+
+#####################################
+#Part 4:compare the three model for the entire data
+#ARIMA (2,1,0)
+#ARIMA (0.1.1)
+#ARIMA ARIMA(2,1,2)(0,0,1)[12] with zero mean 
+#ARIMA(3,1,1)(0,0,1)[12]
+
+
+#first, compare the AICc of the model for overall proferement
+
+# Fit the ARIMA(2,1,0) model
+model1 <- arima(Can_month_housing_sell.ts, order=c(2,1,0))
+
+# Fit the ARIMA(0,1,1) model
+model2 <- arima(Can_month_housing_sell.ts, order=c(0,1,1))
+
+# Fit the ARIMA(2,1,2)(1,0,1)[12] model with zero mean
+model3 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(1,0,1), period=12), include.mean=FALSE)
+
+# Fit the ARIMA(3,1,1)(0,0,1)[12] model
+model4 <- arima(Can_month_housing_sell.ts, order=c(3,1,1), seasonal=list(order=c(0,0,1), period=12))
+
+# Fit the ARIMA(2,1,2)(0,0,1)[12] model
+model5 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+
+#AIC matrix
+AIC_Matrix <- matrix (ncol = 1, nrow = 4)
+colnames(AIC_Matrix) <-c("AIC")
+rownames(AIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(3,1,1)(0,0,1)[12]")
+AIC_Matrix[1,1] <- AIC(model1)
+AIC_Matrix[2,1] <- AIC(model2)
+AIC_Matrix[3,1] <- AIC(model3)
+AIC_Matrix[4,1] <- AIC(model4)
+
+print(AIC_Matrix)
+
+weeeeeea<- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = F,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+
+
+```
