@@ -162,17 +162,26 @@ The_2020_along_data_model_2_forecast <- forecast(The_2020_along_data_model_2, h 
 ```
 
 ```{R echo=FALSE}
-# Plot the first forecast
-plot(all_data_model_1_forecast, main = "Forecasts for all model", xlab = "Time", ylab = "Housing Sell", col = "black")
+#his is a r rode "# Add the other forecasts to the plot using lines()
 
-# Add the other forecasts to the plot using lines()
-lines(all_data_model_2_forecast$mean, col = "#FE2712")
-lines(after_2008_forecasting_model_1_forecast$mean, col = "#FC600A")
-lines(after_2008_forecasting_model_2_forecast$mean, col = "#FB9902")
-lines(The_before_during_after_Covid_model_1_forecast$mean, col = "#FCCC1A")
-lines(The_before_during_after_Covid_model_2_forecast$mean, col = "#B2D723")
-lines(The_2020_along_model_1_forecast$mean, col = "#347C98")
-lines(The_2020_along_data_model_2_forecast$mean, col = "#4424D6")
+all_data_model_1_forecast <- forecast(all_data_model_1, h = 36)
+autoplot(all_data_model_1_forecast, xlim = c(2019, 2024))
+
+
+
+
+
+line(The_before_during_after_Covid_model_1_forecast$mean, col = "#FCCC1A")
+line(The_before_during_after_Covid_model_2_forecast$mean, col = "#B2D723")
+line(The_2020_along_model_1_forecast$mean, col = "#347C98")
+line(The_2020_along_data_model_2_forecast$mean, col = "#4424D6")
+
+
+
+
+
+
+
 
 ```
 
