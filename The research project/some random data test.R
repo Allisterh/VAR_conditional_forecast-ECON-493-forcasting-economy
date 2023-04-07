@@ -30,9 +30,7 @@
   library("writexl")
   library("readr")
   library("lubridate")
-library("gridExtra")###############################################################################################################
-############################################################################################################
-##############
+library("gridExtra")
 #####################Introduction########################################################################################################
 #This code has the data analysis and forecasting for the canadian housing reslare data published by the CREA
 #I Did realize this code is too much and too massy to read, here is the index.
@@ -61,8 +59,10 @@ library("gridExtra")############################################################
 #note: have a good day :)
 #to be honest, I have no idea what I am doing half of time.
 
-#########################################################################################
-#####################1 The data processing########################################################################################
+
+
+
+#####################1.import the data########################################################################################
 
 #1 The bacis data processing
 ########################import the data
@@ -78,13 +78,12 @@ checkresiduals(Can_month_housing_sell.ts)
 autoplot(decompose(Can_month_housing_sell.ts))
 pacf(Can_month_housing_sell.ts)
 
-#1.1 basics data analysis################################################################################
-#####################The data exam#####################
+##########################1.1 basics data analysis
+#####################1.1 The data exam#####################
 #Are data is stationary? 
 adf.test(Can_month_housing_sell.ts)
 kpss.test(Can_month_housing_sell.ts)
 #all test suggest this time series is not stationary
-########################################################################################
 #####################stationary data################################################################
 Can_month_housing_sell_df.ts <- diff(Can_month_housing_sell.ts, lag = 1)
 autoplot(Can_month_housing_sell_df.ts)
@@ -92,12 +91,10 @@ autoplot(Can_month_housing_sell_df.ts)
 adf.test(Can_month_housing_sell_df.ts)
 kpss.test(Can_month_housing_sell_df.ts)
 # The union root test tell the data is stationary.
-#almost statioanry. ######################################################################################
 
 
 #############################################################################################################################
 #2.the data analysis and forecast (including the COVID-shock)################################################################
-
 #############################################################################################################################
 #########################2.1 all data ARIMA model############################################################
 
@@ -144,7 +141,6 @@ all_data_forecast_2 <- forecast(all_data_model_2, h = 6)
 autoplot(all_data_forecast)
 autoplot(all_data_forecast_2)
 
-###########################################################
 #############################################################################################################################
 #########################2.2. while if we only forecast the data after 2008?##########################################################################################
 
@@ -167,12 +163,12 @@ print(after_2008_forecasting_model_1)
 
 after_2008_forecasting_model_2 <- auto.arima(after_2008_forecasting_data)
 print(after_2008_forecasting_model_2)
-#ARIMA(0,1,1) still random walk.##############################################
+#ARIMA(0,1,1) still random walk.
 #########################2.2.1#which one is better?############################################################
 AIC(after_2008_forecasting_model_2)
 #3041.171
 AIC(after_2008_forecasting_model_1)
-#3038.807#######################################################################
+#3038.807
 #############################################################################################################################
 #########################2.2.2forecasting time####################################################################################################
 after_2008_forecasting_model_forecast <- forecast(after_2008_forecasting_model, h = 5)
@@ -192,7 +188,6 @@ autoplot(after_2008_forecasting_model_forecast)
 # Add the forecast from the all_data_forecast model
 #lines(forecast(all_data_model_1, h = 20)$mean , col = "red")
 # Add a legend
-############################################################################
 #########################2.3: what if we only including the data from 2016 - 2023 alone? ####################################
 ####################### process the data. 
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2023,1))
@@ -226,7 +221,6 @@ print(The_before_during_after_Covid_model_2)
 
 The_before_during_after_Covid_model_2_forecast <- forecast(The_before_during_after_Covid_model_1, h = 5)
 autoplot(The_before_during_after_Covid_model_2)
-#################################
 #########################2.3.1:Compare the model.####################################################################################################
 AIC(The_before_during_after_Covid_model_1)
 #1413.121
@@ -236,7 +230,6 @@ checkresiduals(The_before_during_after_Covid_model)
 (The_before_during_after_Covid_model)
 
 #ARIMA(2,1,0)
-print(The_before_during_after_Covid_model)#########################################################################
 #############################################################################################################################
 #########################2.4 how about the data from 2020 alone?#############################################################
 #########################2.4.1 process the data ##############################################################################################################
@@ -254,13 +247,11 @@ print(The_2022_along_model_1)
 The_2022_along.data_model_2 <- auto.arima(The_2022_along.data)
 print(The_2022_along.data_model_2)
 #ARIMA(0,1,0) with drift 
-##########################################################################
 #########################2.4.2 compare the model##################################################################################
 AIC(The_2022_along_model_1)
 AIC(The_2022_along.data_model_2)
 
 
-##########################################################################
 #############################################################################################################################
 #########################2.5 some conclution?################################################################################
 #########################2.5.1 plot the all forecast outcome#######################################################
@@ -349,10 +340,14 @@ print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)####
 #ARIMA (2,1,0)
 #ARIMA (0.1.1)
 #ARIMA ARIMA(2,1,2)(0,0,1)[12] with zero mean 
-#ARIMA(3,1,1)(0,0,1)[12]################################################################################
+#ARIMA(3,1,1)(0,0,1)[12]
+#ARIMA(2,1,2)(1,0,1)[12]
 #########################4.2 fit all the model into ARIMA ####################################################################
 
 #first, compare the AICc of the model for overall proferement
+
+
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 # Fit the ARIMA(2,1,0) model
 model1 <- arima(Can_month_housing_sell.ts, order=c(2,1,0))
@@ -368,63 +363,113 @@ model4 <- arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c
 
 #ARIMA(2,1,2)(0,0,1)[12] 
 model5 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-#################################################################
-#########################4.2.2 generated AIC for al the model and put all the output into a matrix############################
+
+
+#########################4.3 compare all model in both AIC and BIC############################
 
 #AIC matrix
-AIC_Matrix <- matrix (ncol = 1, nrow = 5)
-colnames(AIC_Matrix) <-c("AIC")
-rownames(AIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,2)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]")
-AIC_Matrix[1,1] <- AIC(model1)
-AIC_Matrix[2,1] <- AIC(model2)
-AIC_Matrix[3,1] <- AIC(model3)
-AIC_Matrix[4,1] <- AIC(model4)
-AIC_Matrix[5,1] <- AIC(model5)
+AIC_and_BIC_Matrix <- matrix (ncol = 2, nrow = 5)
+colnames(AIC_and_BIC_Matrix) <-c("AIC","BIC")
+rownames(AIC_and_BIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,2)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]")
+AIC_and_BIC_Matrix[1,1] <- AIC(model1)
+AIC_and_BIC_Matrix[2,1] <- AIC(model2)
+AIC_and_BIC_Matrix[3,1] <- AIC(model3)
+AIC_and_BIC_Matrix[4,1] <- AIC(model4)
+AIC_and_BIC_Matrix[5,1] <- AIC(model5)
+AIC_and_BIC_Matrix[1,2] <- BIC(model1)
+AIC_and_BIC_Matrix[2,2] <- BIC(model2)
+AIC_and_BIC_Matrix[3,2] <- BIC(model3)
+AIC_and_BIC_Matrix[4,2] <- BIC(model4)
+AIC_and_BIC_Matrix[5,2] <- BIC(model5)
 
-print(AIC_Matrix)
-
-
-forecast_data <- forecast(abest_model, h = 6)
-
-######### cross validation
-Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017,12), frequency = 12)
-test_set.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2018, 1), end = c(2018, 12), frequency = 12)
+print(AIC_and_BIC_Matrix)
 
 
-# Generate forecasts for the three models
-forecast_1 <- forecast(model1, h = length(test_set.ts))
-forecast_2 <- forecast(model2, h = length(test_set.ts))
-forecast_3 <- forecast(model3, h = length(test_set.ts))
-forecast_4 <- forecast(model4, h = length(test_set.ts))
+#########################4.4: The cross validation##############################################################################
 
-# Calculate accuracy measures for the three models
+# end of training set
+n.end <- 2017
+
+# The number of observation.
+n_test <- 12 * (2019 - 2018)
+
+n_models <- 5  #the number of model
+
+autoplot(Can_month_housing_sell.ts)
+
+pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix | 初始化预测矩阵
+
+# Loop through the test observations | 遍历测试观测值
+for (i in 1:n_test) {
+  # Set the window for the training data | 设置训练数据窗口
+  tmp0 <- 2007
+  tmp1 <- n.end + (i - 1) * (1/12)
+  tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1)
+  
+  # Actual value | 实际值
+  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
+  
+  # Fit the ARIMA models on the rolling training data | 在滚动训练数据上拟合ARIMA模型
+  model1_train <- arima(tmp, order=c(2,1,0))
+  model2_train <- arima(tmp, order=c(0,1,1))
+  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
+  model4_train <- arima(tmp, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
+  model5_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  
+  # Forecast one step ahead | 预测提前一步
+  pred[i, 2] <- forecast(model1_train, h=1)$mean
+  pred[i, 3] <- forecast(model2_train, h=1)$mean
+  pred[i, 4] <- forecast(model3_train, h=1)$mean
+  pred[i, 5] <- forecast(model4_train, h=1)$mean
+  pred[i, 6] <- forecast(model5_train, h=1)$mean
+}
+
+# Calculate error metrics for each model | 计算每个模型的误差指标
+errors <- (pred[, -1] - pred[, 1])
+me <- colMeans(errors)
+rmse <- sqrt(colMeans(errors^2))
+mae <- colMeans(abs(errors))
+mpe <- colMeans((errors / pred[, 1]) * 100)
+mape <- colMeans(abs((errors / pred[, 1]) * 100))
+
+# Print error metrics for each model | 打印每个模型的误差指标
+cat("ME: ", me, "\n")
+cat("RMSE: ", rmse, "\n")
+cat("MAE: ", mae, "\n")
+cat("MPE: ", mpe, "\n")
+cat("MAPE: ", mape, "\n")
+    
+# Create a data frame to store the error metrics for each model | 为每个模型创建一个存储误差指标的数据框
+error_metrics <- data.frame(
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,1)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]"),
+  ME = me,
+  RMSE = rmse,
+  MAE = mae,
+  MPE = mpe,
+  MAPE = mape
+)
+
+# Print the table with error metrics for each model | 打印每个模型的误差指标表格
+print(error_metrics)
 
 
 
 
 
+#########################4.4.2: the underhandedness test: Variance##############################################################################
 
-acc_2 <- accuracy(forecast_2, test_set.ts)
-acc_3 <- accuracy(forecast_3, test_set.ts)
-acc_4 <- accuracy(forecast_4, test_set.ts)
-
-
-
-
-# Combine accuracy measures into a matrix
-accuracy_matrix <- rbind(acc_1, acc_2, acc_3, acc_4)
-
-# Print the accuracy measures matrix
-print(accuracy_matrix)
+par(mfrow=c(3,2))
+plot(residuals(model1), main="Model 1 Residuals", ylab="Residuals")
+plot(residuals(model2), main="Model 2 Residuals", ylab="Residuals")
+plot(residuals(model3), main="Model 3 Residuals", ylab="Residuals")
+plot(residuals(model4), main="Model 4 Residuals", ylab="Residuals")
+plot(residuals(model5), main="Model 5 Residuals", ylab="Residuals")
 
 
 
-
-
-
-
-
-
+rmse_values <- sqrt(mse_values)
+names(rmse_values) <- c("model1", "model2", "model3", "model4", "model5")
+rmse_values
 
 
 #Part2: play around the housing sell data with other data  #######################
