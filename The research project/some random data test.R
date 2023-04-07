@@ -53,9 +53,14 @@ library("gridExtra")
 
 #4 Compare the model from #2 and #3
 #5 Conditional forecast (still fixing)
+#6 additional part just for testing my idea. 
+
+#7 The Var model
+#working on it now
 
 #note: have a good day :)
 #to be honest, I have no idea what I am doing half of time.
+
 
 ############################################################################################################
 
@@ -731,5 +736,46 @@ the_model_without_covid_shock
 The_model_with_covid_shock_one 
 The_model_with_covid_shock_two
 ###########
+
+Can_test_one.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+
+#####################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

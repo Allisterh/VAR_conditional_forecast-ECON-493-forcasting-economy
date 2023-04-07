@@ -26,9 +26,13 @@ library("gridExtra")
 ############################################################
 
 library(readxl)
-housing_sell_supre_raw <- read_excel("The research project/Tie Ma - UofAB - unadjusted residential monthly sales - provincial - Jan 1980 to Feb 2023.xlsx")
 
-Alberta_unit_sell <- ts(housing_sell_supre_raw$Alberta, start = c(1980,1), end = c(2022,12), frequency =12)
+sing_sell_supre_raw <- read_excel("The research project/Tie Ma - UofAB - unadjusted residential monthly sales - provincial - Jan 1980 to Feb 2023.xlsx")
+
+plot(sing_sell_supre_raw$Canada, type = "l")
+
+
+Canadian_housing_resale.ts<- ts(sing_sell_supre_raw$Canada, end = c(2023/02), start = c(1980/01), frequency = 12)
 
 
 autoplot(diff(log(Alberta_unit_sell)))
