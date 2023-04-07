@@ -6,7 +6,7 @@
 #Step one Lode the all package that necessary or not? 
 #yes, I just copy it around, so I did not need to check around.
 
-######################
+####package#########################################################################################################
   library("ggplot2")
   library("fpp2")
   library("glmnet")
@@ -30,10 +30,10 @@
   library("writexl")
   library("readr")
   library("lubridate")
-library("gridExtra")
-##################
-
-##################
+library("gridExtra")###############################################################################################################
+############################################################################################################
+##############
+#####################Introduction########################################################################################################
 #This code has the data analysis and forecasting for the canadian housing reslare data published by the CREA
 #I Did realize this code is too much and too massy to read, here is the index.
 
@@ -61,8 +61,8 @@ library("gridExtra")
 #note: have a good day :)
 #to be honest, I have no idea what I am doing half of time.
 
-
-############################################################################################################
+#########################################################################################
+#####################1 The data processing########################################################################################
 
 #1 The bacis data processing
 ########################import the data
@@ -78,31 +78,29 @@ checkresiduals(Can_month_housing_sell.ts)
 autoplot(decompose(Can_month_housing_sell.ts))
 pacf(Can_month_housing_sell.ts)
 
-#1.1 basics data analysis
-##########################
+#1.1 basics data analysis################################################################################
+#####################The data exam#####################
 #Are data is stationary? 
 adf.test(Can_month_housing_sell.ts)
 kpss.test(Can_month_housing_sell.ts)
 #all test suggest this time series is not stationary
-
-##########################
-#stationary data.
+########################################################################################
+#####################stationary data################################################################
 Can_month_housing_sell_df.ts <- diff(Can_month_housing_sell.ts, lag = 1)
 autoplot(Can_month_housing_sell_df.ts)
 
 adf.test(Can_month_housing_sell_df.ts)
 kpss.test(Can_month_housing_sell_df.ts)
 # The union root test tell the data is stationary.
-#almost statioanry. 
-#############################################################################################################################
+#almost statioanry. ######################################################################################
 
 
 #############################################################################################################################
-#2.the data analysis and forecast (including the Covid-shock)
-########################################################################################################################
+#2.the data analysis and forecast (including the COVID-shock)################################################################
 
-#2.1 all data ARIMA model
-########################
+#############################################################################################################################
+#########################2.1 all data ARIMA model############################################################
+
 ### This code force auto,arima to search 15625 combinations of ARIMA
     #from ARIMA(1,1,1)(1,1,1) go to ARIMA (5,5,5)(5,5,5)
     #it will consume a huge amount of computing point, it took me 36s
@@ -131,9 +129,8 @@ AIC(all_data_model_2)
 AIC(all_data_model_1)
 #AIC = 3582.467
 #while, they both seem good almost idendical.
-#and the data seem to be randomly walk...
-#########################################################################################################
-
+#and the data seem to be randomly walk...#########################################################################
+#########################2.1.1 all data ARIMA model forecasting################################################################################
 #ARIMA(2,1,0)
 print(all_data_model_1)
 #check the model
@@ -147,12 +144,11 @@ all_data_forecast_2 <- forecast(all_data_model_2, h = 6)
 autoplot(all_data_forecast)
 autoplot(all_data_forecast_2)
 
-
-###################################################################################################################
-#2.2. while if we only forcast the data after 2008?
+###########################################################
+#############################################################################################################################
+#########################2.2. while if we only forecast the data after 2008?##########################################################################################
 
 ######################### after_2008_forecasting.
-
 #constructed model 2: what if we do not including the data from before the 2008 the economic crisis?
 after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
 
@@ -171,19 +167,19 @@ print(after_2008_forecasting_model_1)
 
 after_2008_forecasting_model_2 <- auto.arima(after_2008_forecasting_data)
 print(after_2008_forecasting_model_2)
-#ARIMA(0,1,1) still random walk.
-#######
-######
-#which one is better?
+#ARIMA(0,1,1) still random walk.##############################################
+#########################2.2.1#which one is better?############################################################
 AIC(after_2008_forecasting_model_2)
 #3041.171
 AIC(after_2008_forecasting_model_1)
-#3038.807
-##################################################################################################
-
-########### forecasting time
+#3038.807#######################################################################
+#############################################################################################################################
+#########################2.2.2forecasting time####################################################################################################
 after_2008_forecasting_model_forecast <- forecast(after_2008_forecasting_model, h = 5)
 autoplot(after_2008_forecasting_model_forecast)
+
+
+
 
 ##############################################################################v#############v
 
@@ -196,14 +192,8 @@ autoplot(after_2008_forecasting_model_forecast)
 # Add the forecast from the all_data_forecast model
 #lines(forecast(all_data_model_1, h = 20)$mean , col = "red")
 # Add a legend
-#legend("topright", legend = c("Original data", "After 2008 forecast", "All data forecast"), col = c("black", "blue", "red"), lty = 1)
-########################################################################################################################
-
-########################################################################################################################
-#2.3: what if we only including the data from 2016 - 2023 alone? 
-#The_before_during_after_Covid_model.
-#######################
-
+############################################################################
+#########################2.3: what if we only including the data from 2016 - 2023 alone? ####################################
 ####################### process the data. 
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2023,1))
 
@@ -229,33 +219,27 @@ print(The_before_during_after_Covid_model_1)
 #ARIMA(2,1,0)
 
 
-#####
+
 The_before_during_after_Covid_model_2 <- auto.arima(The_before_during_after_Covid_model.data, d=1)
 print(The_before_during_after_Covid_model_2)
 #ARIMA(0,1,1) the random walk drift.
 
 The_before_during_after_Covid_model_2_forecast <- forecast(The_before_during_after_Covid_model_1, h = 5)
 autoplot(The_before_during_after_Covid_model_2)
-
-##### Compare the model.
+#################################
+#########################2.3.1:Compare the model.####################################################################################################
 AIC(The_before_during_after_Covid_model_1)
 #1413.121
 AIC(The_before_during_after_Covid_model_2)
 #1413.473
-######
-
 checkresiduals(The_before_during_after_Covid_model)
 (The_before_during_after_Covid_model)
 
 #ARIMA(2,1,0)
-print(The_before_during_after_Covid_model)
-########################################################################################################################
-########################################################################################################################
-
-
-########################################################################################################################
-########################################################################################################################
-#2.4 how about the data from 2022 alone?
+print(The_before_during_after_Covid_model)#########################################################################
+#############################################################################################################################
+#########################2.4 how about the data from 2020 alone?#############################################################
+#########################2.4.1 process the data ##############################################################################################################
 The_2022_along.data<-window(Can_month_housing_sell.ts, start= c(2020,1), end= c(2023,2))
 The_2022_along_model_1<- auto.arima(The_2022_along.data, 
                                                     approximation = FALSE, 
@@ -270,13 +254,16 @@ print(The_2022_along_model_1)
 The_2022_along.data_model_2 <- auto.arima(The_2022_along.data)
 print(The_2022_along.data_model_2)
 #ARIMA(0,1,0) with drift 
-
+##########################################################################
+#########################2.4.2 compare the model##################################################################################
 AIC(The_2022_along_model_1)
 AIC(The_2022_along.data_model_2)
 
-##############################################################################################################################
-##############################################################################################################################
-#2.5 some conclution?
+
+##########################################################################
+#############################################################################################################################
+#########################2.5 some conclution?################################################################################
+#########################2.5.1 plot the all forecast outcome#######################################################
 # Create a matrix to store the forecasts
 forecasts <- matrix(rep(NA,24),6,4)
 
@@ -286,18 +273,39 @@ forecasts[,2] <- forecast(The_before_during_after_Covid_model_1,h=6)$mean
 forecasts[,3] <- forecast(after_2008_forecasting_model_1,h=6)$mean
 forecasts[,4] <- forecast(all_data_model_1,h=6)$mean
 
+
 # Plot the forecasts in one graph
 plot.ts(forecasts, main = "Forecast Graph for 4 ARIMA Models", xlab = "Period", ylab = "Forecasted Values", col = 1:4)
 
-#some conclusion, my data along are close to the random walk........
-#help?
+
+
+
+
+####################let's compare ARIMA (2,1,0) with ARIMA(0,1,1) to see which one is btter .
+
+
+#### set up the test enviroment 
+Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
+#yes,they do got other data, which is boring to be honest. 
+
+Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017, 12), frequency = 12)
+#transfor the data to the ts
+
+
+###### set up model
+
+diff_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
+
+#test_model_one<- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+#print(test_model_one)
+the_model_without_covid_shock <- auto.arima(Can_month_housing_sell.ts)
+#ARIMA(2,0,2)(0,0,1)[12] with zero mean 
+#note: both give the same outcome.##############################################################
 
 #############################################################################################################################
-
-
 #Part 3: The model construction without the covid shock
 #############################################################################################################################
-#### set up the test enviroment 
+#########################3.1 set up the test environment######################################################################
 
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 #yes,they do got other data, which is boring to be honest. 
@@ -305,11 +313,16 @@ Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-fo
 Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 12), frequency = 12)
 after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell.ts, start= c(2009,6), end= c(2019, 12))
 The_before_during_after_Covid_without_covid_shock_data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2017, 12))
-
+##################################################################
+#########################3.2 modeling time###################################################################################################################
 ####model time
 test_model_one<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
 test_model_one_after_2008_forecasting_without_covid_shock<- auto.arima(after_2008_forecasting_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
 test_model_one_The_before_during_after_Covid_without_covid_shock_data<- auto.arima(The_before_during_after_Covid_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
+
+
+dm.test(test_model_one, test_model_one_after_2008_forecasting_without_covid_shock, h = 4)
+
 
 print(test_model_one)
 #ARIMA(2,1,1)(0,0,2)[12] 
@@ -317,26 +330,27 @@ print(test_model_one_after_2008_forecasting_without_covid_shock)
 #ARIMA(2,1,1)(1,0,1)[12]
 
 wee <- auto.arima(The_before_during_after_Covid_without_covid_shock_data)
-
+################################################################################
+#########################3.3 plot the graphy###############################################################################################################################################
 autoplot(Can_month_housing_sell_without_covid_shock.ts)
 autoplot(after_2008_forecasting_without_covid_shock_data)
 
-#####
+#####3.
 print(test_model_one)
 print(test_model_one_after_2008_forecasting_without_covid_shock)
 #ARIMA(3,1,1)(0,0,1)[12]
-print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)
+print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)##############################################################################
+#############################################################################################################################
 
 
-
-
-#####################################
+##############################################################################################################################
 #Part 4:compare the three model for the entire data
+#########################4.1 the model list##################################################################################
 #ARIMA (2,1,0)
 #ARIMA (0.1.1)
 #ARIMA ARIMA(2,1,2)(0,0,1)[12] with zero mean 
-#ARIMA(3,1,1)(0,0,1)[12]
-
+#ARIMA(3,1,1)(0,0,1)[12]################################################################################
+#########################4.2 fit all the model into ARIMA ####################################################################
 
 #first, compare the AICc of the model for overall proferement
 
@@ -354,7 +368,8 @@ model4 <- arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c
 
 #ARIMA(2,1,2)(0,0,1)[12] 
 model5 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-
+#################################################################
+#########################4.2.2 generated AIC for al the model and put all the output into a matrix############################
 
 #AIC matrix
 AIC_Matrix <- matrix (ncol = 1, nrow = 5)
@@ -385,9 +400,15 @@ forecast_4 <- forecast(model4, h = length(test_set.ts))
 # Calculate accuracy measures for the three models
 
 
+
+
+
+
 acc_2 <- accuracy(forecast_2, test_set.ts)
 acc_3 <- accuracy(forecast_3, test_set.ts)
 acc_4 <- accuracy(forecast_4, test_set.ts)
+
+
 
 
 # Combine accuracy measures into a matrix
@@ -397,32 +418,17 @@ accuracy_matrix <- rbind(acc_1, acc_2, acc_3, acc_4)
 print(accuracy_matrix)
 
 
-#############
-#play around with data 2
-
-after_2008_forecasting_data
-Only_covid_data<- ts(Can_housing_sell_data.raw$Canada, start = c(2019, 12), end = c(2023, 3), frequency = 12)
-
-
-
-
-
-Only_covid_data_model<- auto.arima(Only_covid_data, approximation = FALSE, parallel = T, stepwise = FALSE,
-                                   max.P = 5, max.Q = 5, max.D = 5,
-                                   max.d = 5, max.p = 5, max.q = 5)
-
-autoplot(forecast(Only_covid_data_model, h = 6))
-forecast(Only_covid_data_model, h = 36)
-
-plot()
 
 
 
 
 
 
-evil11<-window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 12))
-autoplot(evil11)
+
+
+
+#Part2: play around the housing sell data with other data  #######################
+##############################################################################################################################
 
 
 
@@ -433,29 +439,6 @@ autoplot(evil11)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Part2: play around the housing sell data with other data
-#############################################################################################################################
 
 #2.2 The data base import 
 everyhingCA_stationary_raw <- read_csv("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/LCDMA_February_2023/CAN_MD_asd.xlsx")
@@ -699,48 +682,6 @@ new_housing_building_rate <- print(values)
 
 housing_sell_plus_The_housing_start_model_forecast <- forecast(PI = T, housing_sell_plus_The_housing_start_model, h = 12, xreg = new_housing_building_rate)
 autoplot(housing_sell_plus_The_housing_start_model_forecast)
-
-
-#################### let's compare ARIMA (2,1,0) with ARIMA(0,1,1) to see which one is btter .--
-
-
-
-#### set up the test enviroment 
-
-Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
-#yes,they do got other data, which is boring to be honest. 
-
-Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2017, 12), frequency = 12)
-#transfor the data to the ts
-
-
-###### set up model
-
-diff_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
-
-#test_model_one<- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-#print(test_model_one)
-the_model_without_covid_shock <- auto.arima(Can_month_housing_sell.ts)
-#ARIMA(2,0,2)(0,0,1)[12] with zero mean 
-#note: both give the same outcome.
-
-######
-Can_month_housing_sell_with_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
-
-The_model_with_covid_shock_one <- auto.arima(Can_month_housing_sell_with_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-The_model_with_covid_shock_two <- auto.arima(Can_month_housing_sell_with_covid_shock.ts)
-###########
-
-#three different model, which one perform better?
-the_model_without_covid_shock
-The_model_with_covid_shock_one 
-The_model_with_covid_shock_two
-###########
-
-Can_test_one.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
-
-#####################################################################################################################
-
 
 
 
