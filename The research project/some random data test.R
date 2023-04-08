@@ -350,19 +350,19 @@ print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)####
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 # Fit the ARIMA(2,1,0) model
-model1 <- arima(Can_month_housing_sell.ts, order=c(2,1,0))
+model1 <- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 
 # Fit the ARIMA(0,1,1) model
-model2 <- arima(Can_month_housing_sell.ts, order=c(0,1,1))
+model2 <- Arima(Can_month_housing_sell.ts, order=c(0,1,1))
 
 # Fit the ARIMA(2,1,2)(0,0,2)[12] model with zero mean
-model3 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
+model3 <- Arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
 
 # Fit the ARIMA(2,1,1)(1,0,1)[12] model
-model4 <- arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
+model4 <- Arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
 
 #ARIMA(2,1,2)(0,0,1)[12] 
-model5 <- arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+model5 <- Arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
 
 #########################4.3 compare all model in both AIC and BIC############################
@@ -387,16 +387,14 @@ print(AIC_and_BIC_Matrix)
 
 #########################4.4: The cross validation##############################################################################
 
-# end of training set
-n.end <- 2017
+library(forecast)  # Load the forecast package | 加载预测包
 
-# The number of observation.
-n_test <- 12 * (2019 - 2018)
+# End of training set | 训练集结束
+n.end <- 2019
 
-n_models <- 5  #the number of model
-
-autoplot(Can_month_housing_sell.ts)
-
+# Set matrix for storage, assuming monthly data | 设置存储矩阵，假设月度数据
+n_test <- 12 * (2023 - 2019)  # Number of test observations | 测试观测值数量
+n_models <- 5  # Number of models | 模型数量
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix | 初始化预测矩阵
 
 # Loop through the test observations | 遍历测试观测值
@@ -432,13 +430,16 @@ mae <- colMeans(abs(errors))
 mpe <- colMeans((errors / pred[, 1]) * 100)
 mape <- colMeans(abs((errors / pred[, 1]) * 100))
 
-# Print error metrics for each model | 打印每个模型的误差指标
+  
+# Print error metrics for each model
 cat("ME: ", me, "\n")
 cat("RMSE: ", rmse, "\n")
 cat("MAE: ", mae, "\n")
 cat("MPE: ", mpe, "\n")
 cat("MAPE: ", mape, "\n")
-    
+
+# Create a data frame to store the error metrics for each
+
 # Create a data frame to store the error metrics for each model | 为每个模型创建一个存储误差指标的数据框
 error_metrics <- data.frame(
   Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,1)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]"),
@@ -454,6 +455,35 @@ print(error_metrics)
 
 
 
+#########################4.4.1: the underhandedness test: mean.   #############################################################################
+# Calculate mean and variance of errors for each model | 计算每个模型误差的均值和方差
+mean_errors <- colMeans(errors)
+var_errors <- apply(errors, 2, var)
+
+model_one_error <- errors[, 1]
+pred[, 1]
+
+
+the_unbiasednedd_of_mean <- lm(pred[, 1] ~ errors[, 3])
+coeftest(the_unbiasednedd_of_mean)
+
+
+dm.test(pred[, 1], pred[, 2], h = 1, power =2 )
+
+
+#the unbiasedness of the mean forecast.
+
+
+
+# Create a data frame to store the mean and variance of errors for each model | 为每个模型创建一个存储误差均值和方差的数据框
+unbiasedness_test <- data.frame(
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,1)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]"),
+  Mean = mean_errors,
+  Variance = var_errors
+)
+
+# Print the table with mean and variance of errors for each model | 打印每个模型的误差均值和方差表格
+print(unbiasedness_test)
 
 
 #########################4.4.2: the underhandedness test: Variance##############################################################################
@@ -471,6 +501,83 @@ rmse_values <- sqrt(mse_values)
 names(rmse_values) <- c("model1", "model2", "model3", "model4", "model5")
 rmse_values
 
+
+
+#######################################################################################################################################
+#5.0 The Var model
+#Var data collection
+Evil.begain <- "2007/01/01"
+Evil.end <- "2022/12/31"
+
+#5.1 input the data################################################################################
+
+#The GDP data Canada [11124]; Seasonally adjusted at annual rates; 2012 constant prices; All industries
+CA_GDP_raw <- "v65201483"
+CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time = Evil.begain, end_time = Evil.end)
+CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
+CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
+#transfer data to the time series time
+c(CA_GDP_year.st, CA_GDP_month.st)
+CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
+#plot(CA_GDP.ts)
+
+autoplot(CA_GDP.ts)
+
+#get the data form statistic Canada
+unemployment_rate_raw <- "v2062815" #Unemployment rate (Percentage); Both sexes; 15 years and over; Estimate; SA, Monthly.
+unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = Evil.begain, end_time = Evil.end)
+unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
+unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
+#transfer data to the time series time
+c(unemployment_rate_year.st, unemployment_rate_month.st)
+unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
+#now its time series data!
+#plot(unemployment_rate.ts)
+
+
+#we are assuming we are in no late 2023/1/17 
+#Consumer Price Index (CPI)
+core_inflation_raw <- "v41690914" #Consumer Price Index, monthly, seasonally adjusted, monthly (2002=100) 
+core_inflation.st <- get_cansim_vector(core_inflation_raw, start_time = Evil.begain, end_time = Evil.end)
+core_inflation_year.st <- year(core_inflation.st$REF_DATE[1])
+core_inflation_month.st <- month(core_inflation.st$REF_DATE[1])
+#transfer data to the time series time
+c(core_inflation_year.st, core_inflation_month.st)
+core_inflation.ts<- ts(core_inflation.st$VALUE, start = c(core_inflation_year.st, core_inflation_month.st), freq = 12)
+#now its time series data!
+#plot(core_inflation.ts)
+
+#The bank rate 
+Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
+Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = Evil.begain, end_time = Evil.end)
+Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
+Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
+
+#transfer data to the time series time
+c(Bank_rate_year.st, Bank_rate_month.st)
+Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_month.st), freq = 12)
+#now its time series data!
+#plot(Bank_rate.ts)
+
+####################
+#5.2 Variable Transformation########################################
+  #5.2.1 stationary CA_GDP.ts 
+stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), 12)
+  #5.2.2 stationary unemployment_rate.ts
+stationary_unemployment_rate.ts <-100 *diff(log(unemployment_rate.ts),12)
+plot(stationary_unemployment_rate.ts)
+  #5.2.3 stationary core_inflation.ts
+stationary_core_inflation.ts <-100 * (diff(log(core_inflation.ts)),12)
+  #5.2.4 
+statioanry_Bank_rate.ts <- (diff(diff(Bank_rate.ts)))
+
+plot(statioanry_Bank_rate.ts)
+
+
+############################################################
+
+
+ndiffs(CA_GDP.ts)
 
 #Part2: play around the housing sell data with other data  #######################
 ##############################################################################################################################
@@ -531,6 +638,7 @@ autoplot(evil_forcast)
 
 
 ##################
+
 
 ################# The relationship between housing sell and GPD?
 CA_GDP_raw <- "v65201483"
