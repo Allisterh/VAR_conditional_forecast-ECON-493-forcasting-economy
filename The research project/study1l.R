@@ -1,156 +1,104 @@
-library("ggplot2")
-library("fpp2")
-library("glmnet")
-library("tidyr")
-library("lmtest")
-library("boot")
-library("forecast")
-library("readr")
-library("ggfortify")
-library("tseries")
-library("urca")
-library("readxl")
-library("lubridate")
-library("cansim")       
-library("OECD")        
-library("WDI")          
-library("fredr")        
-library("tsbox")
-library("RColorBrewer")
-library("wesanderson")
-library("writexl")
-library("readr")
-library("lubridate")
-library("gridExtra")
+#######################################
+# ECON 485
+# Conditional VAR Forecasting using 1-step Ahead Forecast Iteration
+
+# Initialize
+rm(list = ls())
+#dev.off(dev.list()["RStudioGD"])
+
+#setwd("C:/Users/James/My Drive/R/gov_chall/The-Governor-s-Challenge")
+setwd("G:/My Drive/University/Econ 485/R")
+
+# Packages
+library(cansim)       # Get data from StatsCan
+library(fredr)        # Get data from FRED
+library(forecast)     # Time Series Forecasting
+library(vars)         # Vector Autoregression
+library(lubridate)    # Easy date conversions
+library(openxlsx)
+library(gdata)
+library(stringr)
+library(xts)
+library(tsbox)
+
+# Functions
+source("functions/ts_cansim.R")
+source("functions/ts_fred.R")
+source("functions/ts_oecd.R")
+source("functions/forecast_conditional_var.R")
+
+######################################
+## Parameters
+
+date.start <- '1993-01-01'
 
 
-#1 The bacis data processing
-########################import the data
-Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
-#yes,they do got other data, which is boring to be honest. 
+###################################### 
 
-#transfore the data in to ts
-Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+## 1. Data ----
 
-##
-# end of training set
-n.end <- 2019
 
-# The number of observatin.
-n_test <- 12 * (2023 - 2019)
+# 1.1 Reading in Data
+# You should document where your data comes from (not like me here!)
+cpi <- ts_cansim("v41690914", start = date.start)
+gdp <- ts_cansim("v65201210", start = date.start)
+gdp.old <- ts_cansim("v41881478", start = date.start)  # GDP with older base year (terminated)
+ten.year <- ts_cansim("v122543", start = date.start)
+wage <- ts_cansim("v103451670", start = date.start)
+target.d <- ts_cansim("v39079", start = date.start)    # daily target rate 
+u <- ts_cansim("v2062815", start = date.start)
 
-n_models <- 5  #the number of model
+fredr_set_key('7b15ffc9ff456a8d5e3e579d2b04a9f8')
+wti <- ts_fred('MCOILWTICO', start = date.start) # WTI oil price
 
-pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow =n_test, ncol = (n_models + 1)))
+# Get Monthly US GDP
+## Monthly US GDP estimates from: https://ihsmarkit.com/products/us-monthly-gdp-index.html
+url.usgdp <- "https://cdn.ihsmarkit.com/www/default/1020/US-Monthly-GDP-History-Data.xlsx"
+df.usgdp <- read.xlsx(url.usgdp, sheet = 'Data')
+gdp.us <- ts(df.usgdp$Monthly.Real.GDP.Index, start = c(1992, 1), freq = 12)
 
-pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix | 初始化预测矩阵
+# Get Monthly US GDP
+## Monthly US GDP estimates from: https://ihsmarkit.com/products/us-monthly-gdp-index.html
+url.gscpi <- "https://www.newyorkfed.org/medialibrary/research/interactives/gscpi/downloads/gscpi_data.xlsx"
+df.gscpi <- read.xls(url.gscpi, sheet = 'GSCPI Monthly Data', blank.lines.skip=TRUE)
+gscpi <- ts(df.gscpi$Monthly.Real.GDP.Index, start = c(1992, 1), freq = 12)
 
-# Loop through the test observations | 遍历测试观测值
-for (i in 1:n_test) {
-  # Set the window for the training data | 设置训练数据窗口
-  tmp0 <- 2007
-  tmp1 <- n.end + (i - 1) * (1/12)
-  tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1)
-  
-  # Actual value | 实际值
-  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
-  
-  # Fit the ARIMA models on the rolling training data | 在滚动训练数据上拟合ARIMA模型
-  model1_train <- arima(tmp, order=c(2,1,0))
-  model2_train <- arima(tmp, order=c(0,1,1))
-  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
-  model4_train <- arima(tmp, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
-  model5_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-  
-  # Forecast one step ahead | 预测提前一步
-  pred[i, 2] <- forecast(model1_train, h=1)$mean
-  pred[i, 3] <- forecast(model2_train, h=1)$mean
-  pred[i, 4] <- forecast(model3_train, h=1)$mean
-  pred[i, 5] <- forecast(model4_train, h=1)$mean
-  pred[i, 6] <- forecast(model5_train, h=1)$mean
+# 1.2 Variable Transformations
+
+## a) Converting daily target rate to monthly
+# convert to xts object
+seq.time <- seq(as.Date(date.start), by = 'day', length.out =  length(target.d))
+target.xts.d <- xts(as.numeric(target.d), seq.time)
+# create the most frequent value aggregation function
+calculate_mode <- function(x) {
+  uniqx <- unique(na.omit(x))
+  uniqx[which.max(tabulate(match(x, uniqx)))]
 }
+# aggregate
+target.xts <- aggregate(target.xts.d, as.yearmon, calculate_mode)
+#target.xts <- apply.monthly(target.xts.d, calculate_mode) # Leave as rate
+target <- as.ts(target.xts)
 
-# Calculate error metrics for each model | 计算每个模型的误差指标
-errors <- (pred[, -1] - pred[, 1])
-me <- colMeans(errors)
-rmse <- sqrt(colMeans(errors^2))
-mae <- colMeans(abs(errors))
-mpe <- colMeans((errors / pred[, 1]) * 100)
-mape <- colMeans(abs((errors / pred[, 1]) * 100))
+## b) Splicing Monthly GDP data together
+plot(cbind(gdp,gdp.old))
+# regress gdp.old on gdp.new
+ind.overlap <- complete.cases(cbind(gdp, gdp.old))
+ind.predict <- is.na(cbind(gdp, gdp.old)[,'gdp'])
+df.overlap <- as.data.frame(cbind(gdp, gdp.old)[ind.overlap,])
+df.predict <- as.data.frame(cbind(gdp, gdp.old)[ind.predict,])
+mod.splice <- lm(gdp ~ gdp.old, data = df.overlap)
+# predict new values for old dates
+gdp.hat <- predict(mod.splice, newdata = df.predict)
+gdp.splice <- ts(c(gdp.hat, gdp), start = c(year(date.start),month(date.start)), freq = 12)
+# check
+plot(gdp.splice)
+lines(gdp, col = 'red')
+# looks good
 
-# Print error metrics for each model | 打印每个模型的误差指标
-cat("ME: ", me, "\n")
-cat("RMSE: ", rmse, "\n")
-cat("MAE: ", mae, "\n")
-cat("MPE: ", mpe, "\n")
-cat("MAPE: ", mape, "\n")
-
-#########################################################################################################
-
-#The end of training set
-n.end <- 2019
-n.test <- (2023 - 2019) * 12
-n.model <- 5
-
-#The test set 2020 to 2023
-#Set hte matrix for the storeage
-
-
-pred <- matrix(rep(NA, n_test * (n_models + 1), nrow=n_test, ncol=(n_models + 1)))
-
-
-
-for (i in 1:n_test) {
-  # Set the window for the training data | 设置训练数据窗口
-  tmp0 <- 2007
-  tmp1 <- n.end + (i - 1) * (1/12)
-  tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1)
-  
-  # Actual value | 实际值
-  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
-  
-
-  # Fit the ARIMA models on the rolling training data | 在滚动训练数据上拟合ARIMA模型
-  model1_train <- arima(tmp, order=c(2,1,0))
-  model2_train <- arima(tmp, order=c(0,1,1))
-  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
-  model4_train <- arima(tmp, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
-  model5_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-  
-  # Forecast one step ahead | 预测提前一步
-  pred[i, 2] <- forecast(model1_train, h=1)$mean
-  pred[i, 3] <- forecast(model2_train, h=1)$mean
-  pred[i, 4] <- forecast(model3_train, h=1)$mean
-  pred[i, 5] <- forecast(model4_train, h=1)$mean
-  pred[i, 6] <- forecast(model5_train, h=1)$mean
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## c) Making Series Stationary
+GDP <- diff(log(gdp.splice), 12)       # Convert to yoy GDP growth
+INF <- diff(log(cpi), 12)       # Convert to yoy inflation
+U <- u                          # Leave as rate
+TARGET <- target                # Leave as rate
+GDP.US <- diff(log(gdp.us), 12) # Convert to yoy GDP growth
+WTI <- wti                      # Leave as price level
