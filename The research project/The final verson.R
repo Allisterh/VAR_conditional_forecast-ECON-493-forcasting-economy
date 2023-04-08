@@ -33,6 +33,8 @@ library(writexl)
 library(gridExtra)
 library(vars)
 
+install.packages("tinytex")
+
 
 
 #1.import the data
@@ -155,6 +157,8 @@ print(from_2007_to_2017_1)
 print(from_2007_to_2017_2)
 #ARIMA(2,1,2)(0,0,1)[12] 
 
+
+#############################
 #All the possible combination
 
 #ARIMA(2,1,0)
@@ -162,162 +166,119 @@ print(from_2007_to_2017_2)
 #ARIMA(2,1,2)(0,0,1)[12]
 #ARIMA(0,1,0)
 
+#############################
+#fit the model into the entire data.
+Can_month_housing_sell_without_Covid.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
+
+# Fit the ARIMA(2,1,0) model
+model1_Without_Covid<- Arima(Can_month_housing_sell_without_Covid.ts, order=c(2,1,0))
+
+# Fit the ARIMA(0,1,1) model
+model2_Without_Covid<- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,1,1))
+
+# Fit the ARIMA(2,1,2)(0,0,1)[12] model with zero mean
+model3_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+
+# Fit the ARIMA(0,1,0) model
+model4_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,1,1))
 
 
 
-################################################################################
-#########################3.3 plot the graphy###############################################################################################################################################
-autoplot(Can_month_housing_sell_without_covid_shock.ts)
-autoplot(after_2008_forecasting_without_covid_shock_data)
-
-#####3.
-print(test_model_one)
-print(test_model_one_after_2008_forecasting_without_covid_shock)
-#ARIMA(3,1,1)(0,0,1)[12]
-print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)
-
-
-
-
-#############################################################################################################################
-#########################2.5 some conclution?################################################################################
-#########################2.5.1 plot the all forecast outcome#######################################################
-# Create a matrix to store the forecasts
-forecasts <- matrix(rep(NA,24),6,4)
-
-# Generate forecasts for the next 6 periods using each model
-forecasts[,1] <- forecast(The_2022_along_model_1,h=6)$mean
-forecasts[,2] <- forecast(The_before_during_after_Covid_model_1,h=6)$mean
-forecasts[,3] <- forecast(after_2008_forecasting_model_1,h=6)$mean
-forecasts[,4] <- forecast(all_data_model_1,h=6)$mean
-
-
-# Plot the forecasts in one graph
-plot.ts(forecasts, main = "Forecast Graph for 4 ARIMA Models", xlab = "Period", ylab = "Forecasted Values", col = 1:4)
-
-
-##################################################################
-#########################3.2 modeling time###################################################################################################################
-####model time
-test_model_one<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-test_model_one_after_2008_forecasting_without_covid_shock<- auto.arima(after_2008_forecasting_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-test_model_one_The_before_during_after_Covid_without_covid_shock_data<- auto.arima(The_before_during_after_Covid_without_covid_shock_data, approximation = FALSE, parallel = T,stepwise = FALSE, max.Q = 5, max.P = 5, max.D = 5,max.d = 5, max.p = 5, max.q = 5)
-
-
-dm.test(test_model_one, test_model_one_after_2008_forecasting_without_covid_shock, h = 4)
+#4.3 AIC and BIC for data without covid.
+AIC_and_BIC_Matrix_for_without_covid<- matrix (ncol = 2, nrow = 4)
+colnames(AIC_and_BIC_Matrix_for_without_covid) <-c("AIC","BIC")
+rownames(AIC_and_BIC_Matrix_for_without_covid) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)")
+AIC_and_BIC_Matrix_for_without_covid[1,1] <- AIC(model1_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[2,1] <- AIC(model2_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[3,1] <- AIC(model3_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[4,1] <- AIC(model4_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[1,2] <- BIC(model1_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[2,2] <- BIC(model2_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[3,2] <- BIC(model3_Without_Covid)
+AIC_and_BIC_Matrix_for_without_covid[4,2] <- BIC(model4_Without_Covid)
+print(AIC_and_BIC_Matrix_for_without_covid)
 
 
 
-wee <- auto.arima(The_before_during_after_Covid_without_covid_shock_data)
-################################################################################
-#########################3.3 plot the graphy###############################################################################################################################################
-autoplot(Can_month_housing_sell_without_covid_shock.ts)
-autoplot(after_2008_forecasting_without_covid_shock_data)
-
-#####3.
-print(test_model_one)
-print(test_model_one_after_2008_forecasting_without_covid_shock)
-#ARIMA(3,1,1)(0,0,1)[12]
-print(test_model_one_The_before_during_after_Covid_without_covid_shock_data)##############################################################################
-#############################################################################################################################
 
 
-##############################################################################################################################
-#Part 4:compare the three model for the entire data
-#########################4.1 the model list##################################################################################
-#ARIMA (2,1,0)
-#ARIMA (0.1.1)
-#ARIMA ARIMA(2,1,2)(0,0,1)[12] with zero mean 
-#ARIMA(3,1,1)(0,0,1)[12]
-#ARIMA(2,1,2)(1,0,1)[12]
-#########################4.2 fit all the model into ARIMA ####################################################################
-
-#first, compare the AICc of the model for overall proferement
 
 
+#Compare the data without covid-19 impact.
+
+#fit the model into the entire data.
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 # Fit the ARIMA(2,1,0) model
-model1 <- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
+model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 
 # Fit the ARIMA(0,1,1) model
-model2 <- Arima(Can_month_housing_sell.ts, order=c(0,1,1))
+model2<- Arima(Can_month_housing_sell.ts, order=c(0,1,1))
 
-# Fit the ARIMA(2,1,2)(0,0,2)[12] model with zero mean
-model3 <- Arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
+# Fit the ARIMA(2,1,2)(0,0,1)[12] model with zero mean
+model3 <- Arima(Can_month_housing_sell.ts , order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
-# Fit the ARIMA(2,1,1)(1,0,1)[12] model
-model4 <- Arima(Can_month_housing_sell.ts, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
+# Fit the ARIMA(0,1,0) model
+model4<- Arima(Can_month_housing_sell.ts , order=c(0,1,1))
 
-#ARIMA(2,1,2)(0,0,1)[12] 
-model5 <- Arima(Can_month_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-
-
-#########################4.3 compare all model in both AIC and BIC############################
-
-#AIC matrix
-AIC_and_BIC_Matrix <- matrix (ncol = 2, nrow = 5)
+#AIC and BIC for the entire data
+AIC_and_BIC_Matrix <- matrix (ncol = 2, nrow = 4)
 colnames(AIC_and_BIC_Matrix) <-c("AIC","BIC")
-rownames(AIC_and_BIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,2)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]")
+rownames(AIC_and_BIC_Matrix) <-c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)")
 AIC_and_BIC_Matrix[1,1] <- AIC(model1)
 AIC_and_BIC_Matrix[2,1] <- AIC(model2)
 AIC_and_BIC_Matrix[3,1] <- AIC(model3)
 AIC_and_BIC_Matrix[4,1] <- AIC(model4)
-AIC_and_BIC_Matrix[5,1] <- AIC(model5)
 AIC_and_BIC_Matrix[1,2] <- BIC(model1)
 AIC_and_BIC_Matrix[2,2] <- BIC(model2)
 AIC_and_BIC_Matrix[3,2] <- BIC(model3)
 AIC_and_BIC_Matrix[4,2] <- BIC(model4)
-AIC_and_BIC_Matrix[5,2] <- BIC(model5)
-
 print(AIC_and_BIC_Matrix)
+
+
+
 
 
 #########################4.4: The cross validation##############################################################################
 
-library(forecast)  # Load the forecast package | 加载预测包
+# Set the end of the training data
+n.end <- 2018
 
-# End of training set | 训练集结束
-n.end <- 2019
+# Set the matrix for storage, assuming monthly data
+n_test <- 12 * (2022 - 2019)  # Number of test observations
+n_models <- 4  # Number of models
+pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix
 
-# Set matrix for storage, assuming monthly data | 设置存储矩阵，假设月度数据
-n_test <- 12 * (2023 - 2019)  # Number of test observations | 测试观测值数量
-n_models <- 5  # Number of models | 模型数量
-pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix | 初始化预测矩阵
-
-# Loop through the test observations | 遍历测试观测值
+# Loop through the test observations
 for (i in 1:n_test) {
-  # Set the window for the training data | 设置训练数据窗口
+  # Set the window for the training data
   tmp0 <- 2007
   tmp1 <- n.end + (i - 1) * (1/12)
   tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1)
   
-  # Actual value | 实际值
+  # Actual value
   pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
   
-  # Fit the ARIMA models on the rolling training data | 在滚动训练数据上拟合ARIMA模型
+  # Fit the ARIMA models on the rolling training data
   model1_train <- arima(tmp, order=c(2,1,0))
   model2_train <- arima(tmp, order=c(0,1,1))
-  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,2), period=12))
-  model4_train <- arima(tmp, order=c(2,1,1), seasonal=list(order=c(1,0,1), period=12))
-  model5_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  model4_train <- arima(tmp, order=c(0,1,0))
   
-  # Forecast one step ahead | 预测提前一步
+  # Forecast one step ahead
   pred[i, 2] <- forecast(model1_train, h=1)$mean
   pred[i, 3] <- forecast(model2_train, h=1)$mean
   pred[i, 4] <- forecast(model3_train, h=1)$mean
   pred[i, 5] <- forecast(model4_train, h=1)$mean
-  pred[i, 6] <- forecast(model5_train, h=1)$mean
 }
 
-# Calculate error metrics for each model | 计算每个模型的误差指标
+# Calculate error metrics for each model
 errors <- (pred[, -1] - pred[, 1])
 me <- colMeans(errors)
 rmse <- sqrt(colMeans(errors^2))
 mae <- colMeans(abs(errors))
 mpe <- colMeans((errors / pred[, 1]) * 100)
 mape <- colMeans(abs((errors / pred[, 1]) * 100))
-
 
 # Print error metrics for each model
 cat("ME: ", me, "\n")
@@ -326,11 +287,9 @@ cat("MAE: ", mae, "\n")
 cat("MPE: ", mpe, "\n")
 cat("MAPE: ", mape, "\n")
 
-# Create a data frame to store the error metrics for each
-
-# Create a data frame to store the error metrics for each model | 为每个模型创建一个存储误差指标的数据框
+# Create a data frame to store the error metrics for each model
 error_metrics <- data.frame(
-  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,2)[12]", "ARIMA(2,1,1)(1,0,1)[12]", "ARIMA(2,1,2)(0,0,1)[12]"),
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)"),
   ME = me,
   RMSE = rmse,
   MAE = mae,
@@ -338,21 +297,80 @@ error_metrics <- data.frame(
   MAPE = mape
 )
 
-# Print the table with error metrics for each model | 打印每个模型的误差指标表格
+# Print the table with error metrics for each model
 print(error_metrics)
 
 
 
+
+###### cross validation as the quarter
+
+# Convert the monthly data to quarterly data
+Can_quarter_housing_sell.ts <- aggregate(Can_month_housing_sell.ts, nfrequency = 4, FUN = sum)
+
+n.end <- 2018.75  # Update the end date
+
+# Set matrix for storage, assuming quarterly data
+n_test <- 4 * (2022 - 2018)  # Number of test observations
+n_models <- 4  # Number of models
+pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix
+
+# Loop through the test observations
+for (i in 1:n_test) {
+  # Set the window for the training data
+  tmp0 <- 2007
+  tmp1 <- n.end + (i - 1) * (1/4)
+  tmp <- window(Can_quarter_housing_sell.ts, start=tmp0, end=tmp1)
+  
+  # Actual value
+  pred[i, 1] <- window(Can_quarter_housing_sell.ts, start=tmp1 + (1/4), end=tmp1 + (1/4))
+  
+  # Fit the ARIMA models on the rolling training data
+  model1_train <- arima(tmp, order=c(2,1,0))
+  model2_train <- arima(tmp, order=c(0,1,1))
+  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=4))
+  model4_train <- arima(tmp, order=c(0,1,0))
+  
+  # Forecast one step ahead
+  pred[i, 2] <- forecast(model1_train, h=1)$mean
+  pred[i, 3] <- forecast(model2_train, h=1)$mean
+  pred[i, 4] <- forecast(model3_train, h=1)$mean
+  pred[i, 5] <- forecast(model4_train, h=1)$mean
+}
+
+# Calculate error metrics for each model
+errors <- (pred[, -1] - pred[, 1])
+me <- colMeans(errors)
+rmse <- sqrt(colMeans(errors^2))
+mae <- colMeans(abs(errors))
+mpe <- colMeans((errors / pred[, 1]) * 100)
+mape <- colMeans(abs((errors / pred[, 1]) * 100))
+
+# Print error metrics for each model
+cat("ME: ", me, "\n")
+cat("RMSE: ", rmse, "\n")
+cat("MAE: ", mae, "\n")
+cat("MPE: ", mpe, "\n")
+cat("MAPE: ", mape, "\n")
+
+# Create a data frame to store the error metrics for each model
+error_metrics <- data.frame(
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[4]", "ARIMA(0,1,0)"),
+  ME = me,
+  RMSE = rmse,
+  MAE = mae,
+  MPE = mpe,
+  MAPE = mape
+)
+
+print(error_metrics)
+
+# Print the table with error metrics for
+
 #########################4.4.1: the underhandedness test: mean.   #############################################################################
 # Calculate mean and variance of errors for each model | 计算每个模型误差的均值和方差
-mean_errors <- colMeans(errors)
-var_errors <- apply(errors, 2, var)
 
-model_one_error <- errors[, 1]
-pred[, 1]
-
-
-the_unbiasednedd_of_mean <- lm(pred[, 1] ~ errors[, 3])
+the_unbiasednedd_of_mean <- lm(pred[, 1] ~ errors[, 4])
 coeftest(the_unbiasednedd_of_mean)
 
 
@@ -388,6 +406,16 @@ plot(residuals(model5), main="Model 5 Residuals", ylab="Residuals")
 rmse_values <- sqrt(mse_values)
 names(rmse_values) <- c("model1", "model2", "model3", "model4", "model5")
 rmse_values
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -466,10 +494,33 @@ autoplot(all_data)
 #The adjustment here
 
 ############################################################
-VARselect(all_data, lag.max = 10, type="const")
-#lag = 4
 
-model_evil <- VAR(all_data, p= 4)
+VARselect(all_data, lag.max = 10, type="const")
+
+##### model selection 
+Var_lag_4 <- VAR(all_data, p= 4)
+Var_Lag_3 <- VAR(all_data, p= 3)
+Var_lag_2 <- VAR(all_data, p= 2)
+
+#The serial test
+serial.test(Var_lag_4, lags.pt=10, type="PT.asymptotic")
+serial.test(Var_Lag_3, lags.pt=10, type="PT.asymptotic")
+serial.test(Var_lag_2 , lags.pt=10, type="PT.asymptotic")
+
+#The lag 4 and lag 3 does not have residual serial correlation
+
+#Compare the preformance base on the BIC test
+BIC(Var_Lag_3)
+BIC(Var_lag_4)
+#The lag 3 is proform better.
+
+#Cross validation xf 
+
+
+
+
+
+
 
 
 # 5.3 Granger Causality Tests
