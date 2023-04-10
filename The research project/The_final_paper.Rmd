@@ -1,8 +1,9 @@
 ---
 output:
-  pdf_document: default
+  word_document: default
   html_document: default
   latex_engine: xelatex
+  pdf_document: default
 fontsize: 12pt
 mainfont: Times New Roman
 ---
@@ -31,12 +32,13 @@ library(wesanderson)
 library(writexl)
 library(gridExtra)
 library(vars)
+library("ggthemes")
 ```
 
 The data set used this paper are published by the whatever it is
 
 
-```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+```{r message=FALSE, include=FALSE, paged.print=FALSE}
 #1.import the data
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 
@@ -54,11 +56,48 @@ Author using the housing reslce data m and ther avalidalt macro data to consturi
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+autoplot(Can_month_housing_sell.ts) +
+   theme_fivethirtyeight() + 
+   xlab("Year") +
+  ylab("Housing Sell") +
+  ggtitle("Canaidan housing resales from 2007 to 2023") +
+   theme(axis.title = element_text())
 
-autoplot(Can_month_housing_sell.ts)
+  
+
+#1.1.2 the seaonal plot
+Can_month_housing_sell_plot_ts<- ts(Can_housing_sell_data.raw$Canada, start = c(2010, 1), end = c(2019, 1), frequency = 12)
+
+#1.1.3 the seasonality graphy
+ggsubseriesplot(Can_month_housing_sell_plot_ts) +
+  ylab("number of home saled") +
+   theme_fivethirtyeight() +
+   xlab("month") +
+  ylab("Housing Sell") +
+  ggtitle("Canadian housing resales Sesaonal") +
+  labs(subtitle = "housing resales are higher in the summary") + 
+  theme(axis.title = element_text())
+
+
+#stationary_CA_GDP.ts
+
+#autoplot(stationary_CA_GDP.ts) +
+   theme_fivethirtyeight() + 
+   xlab("Year") +
+  ylab("percentage") +
+  ggtitle("Canadian norminal GDP growth rate (2002 = 100)") +
+   theme(axis.title = element_text())
+
+
+
+
 ```
 As shown in this graph, we can easily identify the trend of housing with the business cycle. The first drop can be explained as the dramatic impact of the 2008 financial crisis on the housing market. Another significant jump occurred around the beginning of 2020, when the first COVID-19 case was discovered in Canada, and COVID-19 became a global pandemic. Furthermore, as COVID-19 cases increased, the Canadian federal and provincial governments implemented COVID-19 restrictions to curb the spread, and the Bank of Canada lowered its policy rate to support the Canadian economy. As a result, there was a significant spike in housing sales. However, once the COVID-19 situation began to improve, and the war in Korea pushed up global energy prices, inflation in Canada reached an 8% 40-year high, resulting in a rising policy rate. As a result, the housing market began to cool down, and housing sales started to decline. 
+
+
+
+
 
 Part One: Constructing the ARIMA Model
 
@@ -67,10 +106,10 @@ To better analyze the data, the author constructed four ARIMA models using diffe
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 #data
 #The entire data 
-Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 1), frequency = 12)
 
 #The data set without 2008
-after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
+after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,1))
 
 #the Data from 2016 to 2023
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2023,2))
@@ -154,7 +193,6 @@ After doing het different airma function 12 times, we got 12 different arime fun
 model_table_2 <- data.frame(
   Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)")
 )
-
 print(model_table_2)
 
 ```
@@ -179,7 +217,7 @@ model2_Without_Covid<- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,
 model3_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
 # Fit the ARIMA(0,1,0) model
-model4_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,1,1))
+model4_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,1,0))
 
 
 
@@ -204,7 +242,7 @@ As the output show, the ARIMA(2,1,2)(0,0,1)[12], it may relace to this combinati
 compare the AIC and BIC model base on the data that including the covid influence.
 ```{r echo=FALSE}
 #fit the model into the entire data.
-Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 1), frequency = 12)
 
 # Fit the ARIMA(2,1,0) model
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
@@ -216,7 +254,7 @@ model2<- Arima(Can_month_housing_sell.ts, order=c(0,1,1))
 model3 <- Arima(Can_month_housing_sell.ts , order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
 # Fit the ARIMA(0,1,0) model
-model4<- Arima(Can_month_housing_sell.ts , order=c(0,1,1))
+model4<- Arima(Can_month_housing_sell.ts , order=c(0,1,0))
 
 #AIC and BIC for the entire data
 AIC_and_BIC_Matrix <- matrix (ncol = 2, nrow = 4)
@@ -242,11 +280,17 @@ the cross valdation
 Furthermore, let's perform cross-validation on four models using data that includes and excludes the COVID period. The cross-validation process involves training the models using data up to 2016 and testing them using data from 2016 to 2019. Assuming that the relationship between housing sales and other macroeconomic factors remains the same in the post-COVID period, we can focus on the market's behavior during normal times and ignore the impact of COVID. Therefore, this cross-validation test starts with the training set from 2007 to 2015 and uses the dataset from 2016 to 2018 for testing to evaluate the model's goodness.
 
 
+The training set: 2007 - 2020
+The test set: 2020 - 2022
 ```{r echo=FALSE, paged.print=FALSE}
 
-n.end <- 2015
-n_test <- 12 * (2019- 2016) #the times we need go
+Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
+
+#(2023 - 2018)
+n.end <- 2020
+n_test <- 12 * (2023 - 2020) #the times we need go
 n_models <- 4  
+h.val <- 1 
 
 #set the martix pred
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
@@ -255,7 +299,7 @@ pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1
 for (i in 1: n_test ) {
   tmp0 <- 2007 #the training start at 2007 
   tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
-  tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1) 
+  tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
   #the training data set from 2007 to the date to its end
   #2007 to 2016 + (observation windos)
 
@@ -264,16 +308,16 @@ for (i in 1: n_test ) {
   pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
   
 #moding time!
-  model1 <- Arima(tmp, order=c(2,1,0))
-  model2 <- Arima(tmp, order=c(0,1,1))
-  model3 <- Arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-  model4 <- Arima(tmp, order=c(0,1,0))
+  fit1 <- Arima(tmp, order=c(2,1,0))
+  fit2 <- Arima(tmp, order=c(0,1,1))
+  fit3 <- Arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  fit4 <- Arima(tmp, order=c(0,1,0))
   
 #one step
-  pred[i, 2] <- forecast(model1, h=1)$mean
-  pred[i, 3] <- forecast(model2, h=1)$mean
-  pred[i, 4] <- forecast(model3, h=1)$mean
-  pred[i, 5] <- forecast(model4, h=1)$mean
+  pred[i, 2] <- forecast(fit1, h= h.val)$mean[h.val]
+  pred[i, 3] <- forecast(fit2, h= h.val)$mean[h.val]
+  pred[i, 4] <- forecast(fit3, h= h.val)$mean[h.val]
+  pred[i, 5] <- forecast(fit4, h= h.val)$mean[h.val]
 }
 
 #calculate the error
@@ -300,10 +344,275 @@ print(The_evil_df)
 
 ```
 
+
+The training set: 2007 - 2021
+The test set: 2023 - 2022
+
+
+
+
+
+
+
+
+
 Based on the provided error metrics, the best model appears to be ARIMA(0,1,1) as it has the lowest MAE (1977.793) and the second-lowest MAPE (5.568452). Lower error metrics indicate better model performance.
 however, ARIMA(2,1,0) has the lowest AIC in both with or without covid influence.it suggests that this model might be the best balance between model complexity and goodness of fit.Given this new information, The ARIMA(2,1,0 to consider the ARIMA(2,1,0) model as the best 
 
+Forecasting
+```{R echo=FALSE, message=TRUE, warning=TRUE}
+
+model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
+model1_forecast <- forecast( model1, h = 12)
+autoplot(model1_forecast) + 
+  theme_fivethirtyeight() +
+  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
+  labs(subtitle = "12 month forceast of model ARIMA (2,1,0)") + 
+  theme(axis.title = element_text())
+
+model1
+  
+
+
+```
+
+
+The conditional forecasting
+```{r The_conditional_forecasting_1, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+#The bank rate
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
+Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
+Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2006/11/01", end_time = "2022/12/31")
+Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
+Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
+
+#transfer data to the time series time
+c(Bank_rate_year.st, Bank_rate_month.st)
+Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_month.st), freq = 12)
+
+mean(Bank_rate.ts)
+
+Bank_rate.ts_2 <- diff(diff(Bank_rate.ts))
+
+
+The_conditional_forecasting_1<- auto.arima(Can_month_housing_sell.ts, xreg = Bank_rate.ts_2,
+                                  approximation = FALSE, parallel = TRUE, stepwise = FALSE,
+                                  num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
+                                  start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
+                                  max.d = 5, max.p = 5, max.q = 5)
+print(The_conditional_forecasting_1)
+
+
+
+```
+What is the policy rate remain 4.5 for next 6 month? how it will impact the housing relae market
+what if the policy go back to 2019 levl at 1.75
+
+
+```{r The_conditional_forecasting_, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+new_bank_rate45 <- numeric(length = 12)
+for (i in 1:12) {
+  new_bank_rate45[i] <- 4.5
+}
+evil_forcast <- forecast(The_conditional_forecasting_1, h = 12, xreg = new_bank_rate45)
+
+
+new_bank_rate175 <- numeric(length = 12)
+for (i in 1:12) {
+  new_bank_rate175[i] <- 1.75
+}
+evil_forcast_2 <- forecast(The_conditional_forecasting_1, h = 12, xreg = new_bank_rate175)
+
+
+#GDP_canada_arima <- auto.arima(CA_GDP.ts)
+
+
+autoplot(evil_forcast) + 
+theme_fivethirtyeight() +
+  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
+  labs(subtitle = "Policy rate at 4.5% for next 12 months") + 
+  theme(axis.title = element_text())
+
+ autoplot(evil_forcast_2) + 
+   theme_fivethirtyeight() +
+  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
+  labs(subtitle = "Policy rate at 1.75% for next 12 months") + 
+  theme(axis.title = element_text())
+ 
+
+ autoplot( Bank_rate.ts) + 
+   theme_fivethirtyeight() +
+  labs(title = "Canadian polise rate from 2007 to 2022", x = "Year", y = "rate") +
+  theme(axis.title = element_text())
+
+```
+
+
+
+Part 2 VAR model 
+
+For better understand and forecasting the reltionahup between the canadian housing relase and other macro economic data relative to the business cycle. I contrucede model include the bank rate, gdp and infaltion and unmpleotymenr rate
+
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Evil.begain <- "2007/01/01"
+Evil.end <- "2022/12/31"
+
+
+#The GDP data Canada [11124]; Seasonally adjusted at annual rates; 2012 constant prices; All industries
+CA_GDP_raw <- "v65201483"
+CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time =  "2007/01/01", end_time = "2022/12/31")
+CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
+CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
+#transfer data to the time series time
+c(CA_GDP_year.st, CA_GDP_month.st)
+CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
+plot(CA_GDP.ts)
+#autoplot(CA_GDP.ts)
+
+#get the data form statistic Canada
+unemployment_rate_raw <- "v2062815" #Unemployment rate (Percentage); Both sexes; 15 years and over; Estimate; SA, Monthly.
+unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
+unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
+unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
+#transfer data to the time series time
+c(unemployment_rate_year.st, unemployment_rate_month.st)
+unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
+#now its time series data!
+#plot(unemployment_rate.ts)
+
+
+#we are assuming we are in no late 2023/1/17 
+#Consumer Price Index (CPI)
+CPI_raw <- "v41690914" #Consumer Price Index, monthly, seasonally adjusted, monthly (2002=100) 
+CPI.st <- get_cansim_vector(CPI_raw, start_time = "2007/01/01", end_time = "2022/12/31")
+CPI_year.st <- year(CPI.st$REF_DATE[1])
+CPI_month.st <- month(CPI.st$REF_DATE[1])
+#transfer data to the time series time
+c(CPI_year.st, CPI_month.st)
+CPI.ts<- ts(CPI.st$VALUE, start = c(CPI_year.st, CPI_month.st), freq = 12)
+#now its time series data!
+#plot(CPI.ts)
+
+#The bank rate 
+Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
+Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
+Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
+Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
+
+#transfer data to the time series time
+c(Bank_rate_year.st, Bank_rate_month.st)
+Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_month.st), freq = 12)
+#now its time series data!
+#plot(Bank_rate.ts)
+
+Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
+
+
+
+#we are assuming we are in no late 2023/1/17 
+#New housing price index, monthly, monthly (Index, 201612=100) 
+New_housing_price_index_raw <- "v111955442" 
+New_housing_price_index.st <- get_cansim_vector(New_housing_price_index_raw, start_time = Evil.begain, end_time = Evil.end)
+New_housing_price_index_year.st <- year(New_housing_price_index.st$REF_DATE[1])
+New_housing_price_index_month.st <- month(New_housing_price_index.st$REF_DATE[1])
+#transfer data to the time series time
+c(New_housing_price_index_year.st, New_housing_price_index_month.st)
+New_housing_price_index.ts<- ts(New_housing_price_index.st$VALUE, start = c(New_housing_price_index_year.st, New_housing_price_index_month.st), freq = 12)
+#now its time series data!
+#autoplot(New_housing_price_index.ts)
 
 
 
 
+#The bank rate 
+Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
+Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2007/02/01", end_time = "2022/12/31")
+Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
+Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
+
+
+
+####################
+#5.2 Variable Transformation########################################
+  #5.2.1 stationary CA_GDP.ts 
+stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
+  #5.2.2 leacve unemployment rate as it is  unemployment_rate.ts
+  #5.2.3 stationary CPI.0ts
+  Stationary_CPI.ts<- 100 * diff(log(CPI.ts), lag = 12)
+  #5.2.4 leave bank rate as it is
+  #5.2.5 stationary the housing sell 
+stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell.ts), lag = 12)
+stationary_New_housing_price_index.ts <- 100*(diff(log(New_housing_price_index.ts), lag=12))
+
+#5.2.5 put all data together
+all_data <- cbind(stationary_Can_month_housing_sell.ts,stationary_CA_GDP.ts, unemployment_rate.ts, Stationary_CPI.ts, Bank_rate.ts)
+#autoplot(all_data)
+#The adjustment here
+
+############################################################
+```
+
+
+
+
+
+```{r eval=FALSE, message=FALSE, include=FALSE}
+VARselect(all_data, lag.max = 12, type="const")
+
+```
+
+
+
+
+```{R}
+The_evil_model <- VAR(all_data, p = 3 ,type = "const")
+
+
+```
+
+
+
+```{R echo=FALSE, message=FALSE, warning=FALSE}
+# 5.3 Granger Causality Tests
+
+housing_gdp_causality <- causality(The_evil_model, cause = "stationary_CA_GDP.ts")
+housing_unemployment_causality <- causality(The_evil_model, cause = "unemployment_rate.ts")
+housing_CPI_causality <- causality(The_evil_model, cause = "Stationary_CPI.ts")
+housing_bank_rate_causality <- causality(The_evil_model, cause = "Bank_rate.ts")
+
+
+print(housing_gdp_causality)
+print(housing_unemployment_causality)
+print(housing_CPI_causality)
+print(housing_bank_rate_causality)
+```
+interrdting enroughh that the unemploymetn rate has vey litter granfger causality test with the rest of data. 
+
+
+```{r echo=FALSE}
+#5.4 the root test
+roots(The_evil_model)
+
+# the root test show that the var is stable.
+
+The_Var_model <- forecast(The_evil_model, h = 30)
+# Extract the forecast for the 'stationary_Can_month_housing_sell.ts' variable
+#print(The_Var_model$forecast$stationary_Can_month_housing_sell.ts)
+
+autoplot(The_Var_model)
+
+
+#autoplot(The_Var_model)
+autoplot(The_Var_model$forecast$stationary_Can_month_housing_sell.ts) + 
+  theme_bw() + 
+  xlab("Year") +
+  ylab("Housing Sell") +
+  ggtitle("Canadian housing relace market forecast") + 
+  labs(subtitle = "housing resales 12 months forecast") 
+
+```
+
+heel

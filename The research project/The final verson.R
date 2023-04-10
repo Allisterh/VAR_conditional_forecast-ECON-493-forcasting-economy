@@ -120,7 +120,7 @@ entil_data_without_covid_shock_2 <- auto.arima(Can_month_housing_sell_without_co
 
 test_model_one_after_2008_forecasting_without_covid_shock_2 <- auto.arima(after_2008_forecasting_without_covid_shock_data)
 
-from_2007_to_2017_1 <- auto.arima(from_2007_to_2017,
+from_2007_to_2017_1 <- auto.arima(,
                                   approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                   num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                   start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
@@ -210,16 +210,16 @@ print(AIC_and_BIC_Matrix_for_without_covid)
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 # Fit the ARIMA(2,1,0) model
-model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
+model1<- Arima(Can_quarter_housing_sell.ts, order=c(2,1,0))
 
 # Fit the ARIMA(0,1,1) model
-model2<- Arima(Can_month_housing_sell.ts, order=c(0,1,1))
+model2<- Arima(Can_quarter_housing_sell.ts, order=c(0,1,1))
 
 # Fit the ARIMA(2,1,2)(0,0,1)[12] model with zero mean
-model3 <- Arima(Can_month_housing_sell.ts , order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+model3 <- Arima(Can_quarter_housing_sell.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
 # Fit the ARIMA(0,1,0) model
-model4<- Arima(Can_month_housing_sell.ts , order=c(0,1,1))
+model4<- Arima(Can_quarter_housing_sell.ts, order=c(0,1,1))
 
 #AIC and BIC for the entire data
 AIC_and_BIC_Matrix <- matrix (ncol = 2, nrow = 4)
@@ -235,70 +235,7 @@ AIC_and_BIC_Matrix[3,2] <- BIC(model3)
 AIC_and_BIC_Matrix[4,2] <- BIC(model4)
 print(AIC_and_BIC_Matrix)
 
-
-
-
-
-#########################4.4: The cross validation##############################################################################
-
-# Set the end of the training data
-n.end <- 2018
-
-# Set the matrix for storage, assuming monthly data
-n_test <- 12 * (2022 - 2019)  # Number of test observations
-n_models <- 4  # Number of models
-pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1))  # Initialize the prediction matrix
-
-# Loop through the test observations
-for (i in 1:n_test) {
-  # Set the window for the training data
-  tmp0 <- 2007
-  tmp1 <- n.end + (i - 1) * (1/12)
-  tmp <- window(Can_month_housing_sell.ts, start=tmp0, end=tmp1)
-  
-  # Actual value
-  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
-  
-  # Fit the ARIMA models on the rolling training data
-  model1_train <- arima(tmp, order=c(2,1,0))
-  model2_train <- arima(tmp, order=c(0,1,1))
-  model3_train <- arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-  model4_train <- arima(tmp, order=c(0,1,0))
-  
-  # Forecast one step ahead
-  pred[i, 2] <- forecast(model1_train, h=1)$mean
-  pred[i, 3] <- forecast(model2_train, h=1)$mean
-  pred[i, 4] <- forecast(model3_train, h=1)$mean
-  pred[i, 5] <- forecast(model4_train, h=1)$mean
-}
-
-# Calculate error metrics for each model
-errors <- (pred[, -1] - pred[, 1])
-me <- colMeans(errors)
-rmse <- sqrt(colMeans(errors^2))
-mae <- colMeans(abs(errors))
-mpe <- colMeans((errors / pred[, 1]) * 100)
-mape <- colMeans(abs((errors / pred[, 1]) * 100))
-
-# Print error metrics for each model
-cat("ME: ", me, "\n")
-cat("RMSE: ", rmse, "\n")
-cat("MAE: ", mae, "\n")
-cat("MPE: ", mpe, "\n")
-cat("MAPE: ", mape, "\n")
-
-# Create a data frame to store the error metrics for each model
-error_metrics <- data.frame(
-  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)"),
-  ME = me,
-  RMSE = rmse,
-  MAE = mae,
-  MPE = mpe,
-  MAPE = mape
-)
-
-# Print the table with error metrics for each model
-print(error_metrics)
+auto.arima(Can_quarter_housing_sell.ts)
 
 
 
