@@ -451,8 +451,10 @@ The_conditional_forecasting_1<- auto.arima(pure_evil, xreg = Stationary_CPI_stat
 
 Stationary_CPI_ARIMA.ts <- numeric(length = 12)
 for (i in 1:12) {
-  Stationary_CPI_ARIMA.ts [i] <- 6.07866570
+  Stationary_CPI_ARIMA.ts [i] <- 2000
 }
+
+#6.07866570
 
 print(forecast(The_conditional_forecasting_1, h = 12, xreg = Stationary_CPI_ARIMA.ts))
 
@@ -644,7 +646,9 @@ Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
 Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
 
 
+```
 
+```{r}
 ####################
 #5.2 Variable Transformation########################################
   #5.2.1 stationary CA_GDP.ts 
@@ -665,25 +669,27 @@ all_data <- cbind(stationary_Can_month_housing_sell.ts,stationary_CA_GDP.ts, une
 ############################################################
 ```
 
-
-
-
-
 ```{r eval=FALSE, message=FALSE, include=FALSE}
 VARselect(all_data, lag.max = 12, type="const")
 
+checkresiduals(The_evil_model)
+
+
+acf(residuals(The_evil_model)[,2])
+acf(residuals(The_evil_model)[,3])
+acf(residuals(The_evil_model)[,4])
+acf(residuals(The_evil_model)[,5])
+acf(residuals(The_evil_model)[,1])
+
 ```
-
-
-
 
 ```{R}
 The_evil_model <- VAR(all_data, p = 3 ,type = "const")
 
+checkresiduals()
+
 
 ```
-
-
 
 ```{R echo=FALSE, message=FALSE, warning=FALSE}
 # 5.3 Granger Causality Tests
@@ -729,3 +735,53 @@ autoplot(The_Var_model$forecast$stationary_Can_month_housing_sell.ts) +
 ```
 
 heel
+
+
+
+```{r}
+
+library(glmnet)
+
+# Combine all time series into a single data frame
+
+all_data <- cbind(stationary_Can_month_housing_sell.ts, stationary_CA_GDP.ts, unemployment_rate.ts, Stationary_CPI.ts, Bank_rate.ts)
+
+data_combined <- data.frame(all_data)
+
+colnames(data_combined) <- c("stationary_Can_month_housing_sell.ts", "stationary_CA_GDP.ts", "unemployment_rate.ts", "Stationary_CPI.ts", "Bank_rate.ts")
+
+# Make sure all time series have the same length
+data_combined <- na.omit(data_combined)
+
+# Create a lagged version of Can_month_housing_sell.ts
+lagged_Can_month_housing_sell <- c(NA, head(Can_month_housing_sell.ts, -1))
+
+# Combine all time series into a single data frame
+data_combined <- data.frame(CA_GDP.ts, unemployment_rate.ts, CPI.ts, Bank_rate.ts, New_housing_price_index.ts, Can_month_housing_sell.ts, lagged_Can_month_housing_sell)
+colnames(data_combined) <- c("CA_GDP", "unemployment_rate", "CPI", "Bank_rate", "New_housing_price_index", "Can_month_housing_sell", "lagged_Can_month_housing_sell")
+
+# Make sure all time series have the same length
+data_combined <- na.omit(data_combined)
+ 
+
+# Prepare the data for glmnet
+x <- as.matrix(data_combined[, 1:5]) # predictors
+y <- data_combined$lagged_Can_month_housing_sell # response variable
+
+# LASSO regression with cross-validation
+lasso_model <- cv.glmnet(x, y, alpha = 1, nfolds = 10)
+plot(lasso_model)
+
+# Ridge regression with cross-validation
+ridge_model <- cv.glmnet(x, y, alpha = 0, nfolds = 10)
+plot(ridge_model)
+
+
+
+```
+
+
+
+
+
+
