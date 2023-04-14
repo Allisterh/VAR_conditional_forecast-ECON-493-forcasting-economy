@@ -369,8 +369,6 @@ print(The_evil_df)
 ```
 
 
-
-
 Cross validation two
 The training set: 2007 - 2020
 The test set: 2020 - 2022
@@ -439,7 +437,6 @@ print(The_evil_df)
 
 
 ```{R echo=FALSE, message=TRUE, warning=TRUE}
-
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 model1_forecast <- forecast( model1, h = 12)
 autoplot(model1_forecast) + 
@@ -447,9 +444,6 @@ autoplot(model1_forecast) +
   labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
   labs(subtitle = "12 month forceast of model ARIMA (2,1,0)") + 
   theme(axis.title = element_text())
-
-model1
-
 
 ```
 
@@ -497,18 +491,22 @@ CPI_ARIMA.ts<- ts(CPI_ARIMA.st$VALUE, start = c(CPI_ARIMA_year.st, CPI_ARIMA_mon
 #plot(CPI.ts)
 ####
 ```
+
+
+
 ```{r}
 Can_month_housing_sell_ARIMA.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
 
 ###### station CPI and housing resale#
 #stationary_CPI_ARIMA.ts <- (100 * diff(log(CPI_ARIMA.ts), lag = 12))
 Stationary_housing_resale_ARIMA.ts <- 100* diff(log(Can_month_housing_sell_ARIMA.ts), lag = 12)
-adf.test(Stationary_housing_resale_ARIMA.ts)
-
-Housing_sell_Stationary_CPI.ts <- cbind(Stationary_housing_resale_ARIMA.ts,  Bank_rate_ARIMA.ts)
+#adf.test(Stationary_housing_resale_ARIMA.ts)
+Housing_sell_Stationary_CPI.ts <- cbind(Stationary_housing_resale_ARIMA.ts, Bank_rate_ARIMA.ts)
 ```
 
 
+
+Try the lag test
 ```{r}
 # The_lage_test
 BankRate <- cbind(
@@ -528,30 +526,24 @@ fit4 <- auto.arima(Housing_sell_Stationary_CPI.ts[4:40, 1], xreg=BankRate[4:40, 
 # Show AICc values
 cat("AICc values:", fit1[["aicc"]], fit2[["aicc"]], fit3[["aicc"]], fit4[["aicc"]], "\n")
 
+#only lag one? 
 ```
 
+
+
+
+now is generate the dynamatic regression's acutally arima model.
 ```{r}
 
-##### bind the data together
-Housing_sell_Stationary_CPI.ts <- cbind(Stationary_housing_resale_ARIMA.ts,  Bank_rate_ARIMA.ts)
-
-The_conditional_forecasting_1 <- auto.arima(Housing_sell_Stationary_CPI.ts[4:40, 1], xreg=BankRate[4:40, 1], stationary=TRUE, approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10)
-
-
-The_conditional_forecasting_2 <- auto.arima(Stationary_housing_resale_ARIMA.ts, xreg= Bank_rate_ARIMA.ts, stationary=TRUE, approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10)
-
-
-
-#adf.test( Bank_rate_ARIMA.ts )
-
-#autoplot(Housing_sell_Stationary_CPI.ts, facets = T )
+The_conditional_forecasting_2 <- auto.arima(Stationary_housing_resale_ARIMA.ts, xreg = Bank_rate_ARIMA.ts,  approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10)
 
 ```
 
+
+What if the policy rate remain 4.5 for next 12 month
 ```{R}
 
-Stationary_Bank_ARIMA_forecasting_1.ts <- matrix(rep(2, times = 12), ncol = 1)
-#6.07866570
+Stationary_Bank_ARIMA_forecasting_1.ts <- matrix(rep(4.5, times = 12), ncol = 1)
 
 
 autoplot(forecast(The_conditional_forecasting_2, 
@@ -564,96 +556,32 @@ autoplot(forecast(The_conditional_forecasting_2,
   labs(subtitle = "If the policy rate stay at 4.5% current level for 12 months") +
   theme(axis.title = element_text())
 
-
-
+#it not working very good?
+#but why?
 ```
 
+What if the policy rate remain 1.75 for next 12 month (the average in 2019)
 
 ```{r}
-nothing <- cbind(stationary_CA_GDP.ts, unemployment_rate.ts, Stationary_CPI.ts, Bank_rate.ts)
-The_conditional_forecasting_1<- auto.arima(Can_month_housing_sell.ts, xreg = nothing) 
-print(The_conditional_forecasting_1)
-#######
-new_ Bank_rate_ARIMA.ts <- numeric(length = 12)
-for (i in 1:12) {
-  new_ Bank_rate_ARIMA.ts[i] <- 4.5
-}
-
-stationary_CA_GDP_ARIMA.ts <- numeric(length = 12)
-for (i in 1:12) {
-  stationary_CA_GDP_ARIMA.ts[i] <- 2.36565785
-}
-unemployment_rate_ARIMA.ts <- numeric(length = 12)
-for (i in 1:12) {
-  unemployment_rate_ARIMA.ts[i] <- 5
-}
+Stationary_Bank_ARIMA_forecasting_2.ts <- matrix(rep(1.75, times = 12), ncol = 1)
 
 
-Stationary_CPI_ARIMA.ts <- numeric(length = 12)
-for (i in 1:12) {
-  Stationary_CPI_ARIMA.ts [i] <- 2.07866570
-}
+autoplot(forecast(The_conditional_forecasting_2, 
+                 h = 12, 
+                 xreg = Stationary_Bank_ARIMA_forecasting_2.ts)) +
+  theme_fivethirtyeight() +
+  xlab("Year") +
+  ylab("Percentage") +
+  ggtitle("Forecasting of Canadian Housing Resales") +
+  labs(subtitle = "If the policy rate stay at 4.5% current level for 12 months") +
+  theme(axis.title = element_text())
 
-
-nothing_2 <- cbind(stationary_CA_GDP_ARIMA.ts, unemployment_rate_ARIMA.ts, Stationary_CPI_ARIMA.ts, new_ Bank_rate_ARIMA.ts)
-
-
-
-autoplot(forecast(The_conditional_forecasting_1, h = 12, xreg = nothing_2))
-
-
-
-######
-
-
-checkresiduals(The_conditional_forecasting_1)
-
-
-
+#it not working very good?
+#but why?
 
 ```
-What is the policy rate remain 4.5 for next 6 month? how it will impact the housing relae market
-what if the policy go back to 2019 levl at 1.75
 
 
-```{r The_conditional_forecasting_, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-
-new_bank_rate45 <- numeric(length = 12)
-for (i in 1:12) {
-  new_bank_rate45[i] <- 2.36565785
-}
-evil_forcast <- forecast(The_conditional_forecasting_1, h = 12, xreg = new_bank_rate45)
-
-
-new_bank_rate175 <- numeric(length = 12)
-for (i in 1:12) {
-  new_bank_rate175[i] <- 2
-}
-evil_forcast_2 <- forecast(The_conditional_forecasting_1, h = 12, xreg = new_bank_rate175)
-
-
-#GDP_canada_arima <- auto.arima(CA_GDP.ts)
-
-
-autoplot(evil_forcast) + 
-theme_fivethirtyeight() +
-  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
-  labs(subtitle = "Policy rate at 4.5% for next 12 months") + 
-  theme(axis.title = element_text())
-
- autoplot(evil_forcast_2) + 
-   theme_fivethirtyeight() +
-  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
-  labs(subtitle = "Policy rate at 1.75% for next 12 months") + 
-  theme(axis.title = element_text())
- 
-
- autoplot( Bank_rate.ts) + 
-   theme_fivethirtyeight() +
-  labs(title = "Canadian polise rate from 2007 to 2022", x = "Year", y = "rate") +
-  theme(axis.title = element_text())
-
-```
 
 
 
@@ -663,6 +591,7 @@ For better understand and forecasting the reltionahup between the canadian housi
 
 
 
+First: data collection
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 Evil.begain <- "2007/01/01"
 Evil.end <- "2022/12/31"
@@ -735,16 +664,16 @@ new_housing_price_index_VAR.ts <- window(New_housing_price_index_VAR.raw, start=
 
 ###
 
- Prime_rate_raw <- "v80691311" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
-
+ Prime_rate_raw <- "V80691311" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
  Prime_rate.st <- get_cansim_vector(Prime_rate_raw, start_time = "2008/01/01", end_time = "2022/12/01")
+ print(Prime_rate.st)
+ 
+ 
  Prime_rate_year.st <- year( Prime_rate.st$REF_DATE[1])
  Prime_rate_month.st <- month( Prime_rate.st$REF_DATE[1])
- Prime_rate_week.st <- week(Prime_rate.st$REF_DATE[1])
- 
   c(Prime_rate_year.st,  Prime_rate_month.st)
-
- Prime_rate.ts<- ts( Prime_rate.st$VALUE, start = c( Prime_rate_year.st, Prime_rate_month.st), freq = 52)
+  
+  Prime_rate.ts<- ts(Prime_rate.st$VALUE, start = c( Prime_rate_year.st, Prime_rate_month.st), freq = 52)
 
 prime_rate_monthly <- ts(aggregate(Prime_rate.ts, nfrequency = 52/12, FUN = mean), start = c(2008, 1), end = c(2022, 12), frequency = 12)
 prime_rate_monthly_full.ts<- na.interp(prime_rate_monthly)
@@ -753,8 +682,7 @@ prime_rate_monthly_full.ts<- na.interp(prime_rate_monthly)
 #### The housing price index
 
 The_housing_price<- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", 
-    sheet = "Chart 4", col_types = c("date", 
-        "skip",  "numeric", "numeric", "text"))
+    sheet = "Chart 4", col_types = c("date", "skip",  "numeric", "numeric", "text"))
 
 
 The_housing_price_raw.ts <- ts(The_housing_price$`MLS® HPI Aggregate Composite Benchmark†`, start = c(2005, 1), end = c(2023, 2), frequency = 12)
@@ -765,21 +693,21 @@ The_housing_price_VAR_stationary.raw <-100* diff(log(The_housing_price_raw.ts), 
 #pass the stationary check
 #adf.test(The_housing_price_VAR_stationary)
 #0.01565 pass the stationary 
-
 #cut to the suitable size
-
 The_housing_price_VAR_stationary.ts <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
 
 ```
 
 
 ```{r}
-####################
-#5.2 Variable Transformation########################################
+
+#Variable Transformation########################################
+
   #5.2.1 stationary CA_GDP.ts 
 stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
-  #5.2.2 leacve unemployment rate as it is  unemployment_rate.ts
-  #5.2.3 stationary CPI.0ts
+  #5.2.2 leacve unemployment rate as it is 
+      #unemployment_rate.ts
+  #5.2.3 stationary CPI.ts
   Stationary_CPI.ts<- 100 * diff(log(CPI.ts), lag = 12)
   #5.2.4 leave bank rate as it is
   #5.2.5 stationary the housing sell 
@@ -788,18 +716,11 @@ stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell_var.
 #5.2.5 put all data together
 all_data <- cbind(stationary_Can_month_housing_sell.ts,stationary_CA_GDP.ts, Stationary_CPI.ts, prime_rate_monthly_full.ts, The_housing_price_VAR_stationary.ts, new_housing_price_index_VAR.ts, Bank_rate.ts, unemployment_rate.ts)
 
-
-
-
-#autoplot(all_data)
-#The adjustment 
-
-############################################################
 ```
 
 
-
-doing a lasso and reg regression 
+doing the best subselection
+why? because var model crashed....
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 
 library(leaps)
@@ -851,20 +772,35 @@ SGPD, SCPI, HP, NPH, UR
 
 ```{r}
 
+#the Var data
 Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, stationary_CA_GDP.ts, Stationary_CPI.ts, The_housing_price_VAR_stationary.ts, new_housing_price_index_VAR.ts, unemployment_rate.ts)
 
+#check if the data has similar trend
+#autoplot(Var_all_data, facets = T)
+  #not really? 
 
+
+#need to do something relative to the causality here? 
+#the unemployment rate going because it did not pass the granger causality test
+
+#the actally var data 
 Var_all_data <-cbind(stationary_Can_month_housing_sell.ts, SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, HP = The_housing_price_VAR_stationary.ts,  NPH = new_housing_price_index_VAR.ts)
+
+#The covid dummy variable
 The_covid_dummy_VAR.ts <- ts(The_covid_dummy$Covid_dummy, start = c(2008, 1), end = c(2022, 12), frequency = 12)
+ 
+#put bank rate with covid dummy variable together.
+exogen_variable <- cbind(The_covid_dummy_VAR.ts, Bank_rate.ts)
+
+#we can see how the bank rate and covid dummy variable impact on the entire housing resale market.
 
 
 VARselect(Var_all_data, exogen = exogen_variable,  type="const", lag.max = 11)
+#according to the instructor, using BIC! 
+#lag 2!!!!!!!
 
-exogen_variable <- cbind(The_covid_dummy_VAR.ts, Bank_rate.ts)
 
-
-autoplot(Var_all_data, facets = T)
-
+#At here I was planning to do the cross validation for 4 different model, then I gived up.
 two_exogen_Var_model <- VAR(Var_all_data,  exogen = exogen_variable, p = 2, type="const")
 
 Bankrate_Var_model <- VAR(Var_all_data,  exogen = Bank_rate.ts, p = 2, type="const")
@@ -890,12 +826,11 @@ housing_CPI_causality <- causality(The_evil_model, cause = "SCPI")$Granger
 housing_houing_price_causality <- causality(The_evil_model, cause = "HP")$Granger
 housing_new_houing_price_causality <- causality(The_evil_model, cause = "NPH")$Granger
 housing_new_houing_price_causality <- causality(The_evil_model, cause = "cobi")$Granger
-
-
 housing_prime_rate_causality <- causality(The_evil_model, cause = "The_covid_dummy_VAR.ts")$Granger
 
 
-Var_all_data <-cbind(stationary_Can_month_housing_sell.ts, SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, HP = The_housing_price_VAR_stationary.ts,  NPH = new_housing_price_index_VAR.ts, UR = unemployment_rate.ts)
+#put here so I can copy and past it...
+#Var_all_data <-cbind(stationary_Can_month_housing_sell.ts, SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, HP = The_housing_price_VAR_stationary.ts,  NPH = new_housing_price_index_VAR.ts, UR = unemployment_rate.ts)
 
 
 
@@ -907,115 +842,13 @@ print(housing_houing_price_causality)
 print(housing_new_houing_price_causality)
 print(housing_prime_rate_causality)
 
-autoplot(forecast(The_evil_model, h = 12))
+#missing the var without exgon...
+#now need to do the function first...
+#autoplot(forecast(The_evil_model, h = 12))
 
 ```
 interrdting enroughh that the unemploymetn rate has vey litter granfger causality test with the rest of data. 
 
-```{r}
-
-Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
-
-#(2023 - 2018)
-n.end <- 2019
-n_test <- 12 * 4#the times we need go
-n_models <- 4  
-h.val <- 1 
-
-#set the martix pred
-pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
-
-# the for loop
-for (i in 1: n_test ) {
-  tmp0 <- 2007 #the training start at 2007 
-  tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
-  tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
-  #the training data set from 2007 to the date to its end
-  #2007 to 2016 + (observation windos)
-
-  
-#The acutally value
-  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
-  
-#moding time!
-  fit1 <- Arima(tmp, order=c(2,1,0))
-  fit2 <- Arima(tmp, order=c(0,1,1))
-  fit3 <- Arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
-  fit4 <- Arima(tmp, order=c(0,1,0))
-  
-#one step
-  pred[i, 2] <- forecast(fit1, h= h.val)$mean[h.val]
-  pred[i, 3] <- forecast(fit2, h= h.val)$mean[h.val]
-  pred[i, 4] <- forecast(fit3, h= h.val)$mean[h.val]
-  pred[i, 5] <- forecast(fit4, h= h.val)$mean[h.val]
-}
-
-#calculate the error
-
-error <- (pred[, -1] - pred[, 1])
-mse <- colMeans(error)
-rmse <- sqrt(colMeans(error^2))
-mae <- colMeans(abs(error))
-mpe <- colMeans((error/ pred[, 1]) * 100)
-mape <- colMeans(abs((error/ pred[, 1]) * 100))
-
-#The outcome
-The_evil_df <- data.frame(
-  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]",  "ARIMA(0,1,0)"),
-  ME = mse,
-  RMSE = rmse,
-  MAE = mae,
-  MPE = mpe,
-  MAPE = mape
-)
-
-print(The_evil_df)
-
-
-
-```
-
-
-
-```{r echo=FALSE}
-#5.4 the root test
-roots(The_evil_model)
-
-# the root test show that the var is stable.
-
-The_Var_model <- forecast(The_evil_model, h = 12)
-# Extract the forecast for the 'stationary_Can_month_housing_sell.ts' variable
-#print(The_Var_model$forecast$stationary_Can_month_housing_sell.ts)
-
-#autoplot(The_Var_model)
-#stationary_Can_month_housing_sell.t
-
-#autoplot(The_Var_model)
-autoplot(The_Var_model$forecast$stationary_Can_month_housing_sell.ts) + 
-   theme_fivethirtyeight() + 
-  xlab("Year") +
-  ylab("percentage") +
-  ggtitle("Canadian housing relace market forecast") + 
-  labs(subtitle = "housing resales 12 months forecast") 
-
-autoplot(The_Var_model$forecast$Stationary_CPI.ts ) + 
-   theme_fivethirtyeight() + 
-  xlab("Year") +
-  ylab("percentage") +
-  ggtitle("Canadian CPI forecast") + 
-  labs(subtitle = "CPI 12 months forecast")
-
-
-autoplot(The_Var_model$forecast$stationary_CA_GDP.ts) + 
-   theme_fivethirtyeight() + 
-  xlab("Year") +
-  ylab("percentage") +
-  ggtitle("Canadian GDP forecasting") + 
-  labs(subtitle = "Canadian GDP 12 months forecast") 
-
-
-
-```
 
 
 
