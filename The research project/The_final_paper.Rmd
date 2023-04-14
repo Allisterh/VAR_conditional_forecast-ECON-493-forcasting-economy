@@ -7,7 +7,7 @@ output:
 fontsize: 12pt
 mainfont: Times New Roman
 ---
-package
+loding the package
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 library(ggplot2)
 library(fpp2)
@@ -35,7 +35,7 @@ library(vars)
 library("ggthemes")
 ```
 
-The data set used this paper are published by the whatever it is
+
 
 loading the data
 ```{r message=FALSE, include=FALSE, paged.print=FALSE}
@@ -46,7 +46,7 @@ Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-fo
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 ```
 
-The over all data polit with seaonality plot
+#The overall data and seasonal plot
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 autoplot(Can_month_housing_sell.ts) +
    theme_fivethirtyeight() + 
@@ -85,14 +85,16 @@ ggsubseriesplot(Can_month_housing_sell_plot_ts) +
 
 ```
 
-All ARIMA model without dummy varialbe
+Lode all ARIMA combination data 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 #data
 #The entire data 
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+The_covid_dummy.ts <- ts(The_covid_dummy, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 #The data set without 2008
 after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
+The_covid_dummy_after_208.ts <- ts(The_covid_dummy, start = c(2009, 7), end = c(2023, 2), frequency = 12)
 
 #the Data from 2016 to 2023
 The_before_during_after_Covid_model.data<-window(Can_month_housing_sell.ts, start= c(2016,1), end= c(2023,2))
@@ -106,16 +108,20 @@ after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell
 from_2007_to_2017 <- window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 1))
   
 
+```
+
+
+```{r}
 #construed model
-all_data_model_1 <- auto.arima(Can_month_housing_sell.ts, 
-                               approximation = FALSE, parallel = TRUE, stepwise = FALSE,
+edall_data_model_1 <- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
                                max.d = 5, max.p = 5, max.q = 5)
 
+
 all_data_model_2 <- auto.arima(Can_month_housing_sell.ts)
 
-after_2008_forecasting_model_1 <- auto.arima(after_2008_forecasting_data, 
+after_2008_forecasting_model_1 <- auto.arima(after_2008_forecasting_data, d = 1,
                                              approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                              num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                              start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
@@ -170,19 +176,53 @@ print(models_table)
 ```
 
 
-Trying to do the ARIMA with dummy variable 
-```{R}
-The_covid_dummy <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/The covid dummy.xlsx")
+Trying to do the ARIMA with dummy variable
+(its work! but no idea how to do cross validation of it)
+give up on it
 
-The_covid_dummy.ts <- ts(The_covid_dummy, start = c(2007, 1), end = c(2023, 2), frequency = 12)
-SD_Can_month_housing_sell.ts <- diff(Can_month_housing_sell.ts)
+```{r}
 
 
-ARIMA_with_Covid_dummy <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10, d = 1)
+#generate the random noise
+set.seed(123)
+error <- rnorm(196, mean = 0, sd = 1)
+error_evil <- (error - mean(error))*1/10
+#make the noises smaller? 
+
+#transfer the error data into the time series
+error_evil.ts <- ts(error_evil, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+
+#The covid dummy variable
+The_covid_dummy.raw <- ts(The_covid_dummy$Covid_dummy, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+
+#put them together!
+The_covid_dummy.ts <- (error_evil.ts + The_covid_dummy.raw )
+
+
+#draw the graphy
+plot(cd.ts)
+
+
+ARIMA_with_Covid_dummy <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy.ts,  approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10, d = 1)
 print(ARIMA_with_Covid_dummy)
 
-,
+
+
+# Create future covid dummy for the next 12 months
+covid_dummy_future <- numeric(length = 12)
+for (i in 1:12) {
+  covid_dummy_future[i] <- 0
+}
+
+# Convert covid_dummy_future to a time series object
+covid_dummy_future.ts <- ts(covid_dummy_future, start = c(2023, 3), frequency = 12)
+
+
+model_dummy_forecast <- forecast(ARIMA_with_Covid_dummy, xreg = covid_dummy_future.ts, h = 12)
+
+autoplot(model_dummy_forecast)
 ```
+
 
 
 
@@ -264,6 +304,74 @@ print(AIC_and_BIC_Matrix)
 ```
 
 
+Cross validation one 
+The training set 2007 - 2015
+the test set 2016 - 2018
+```{r}
+
+Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
+
+#(2023 - 2018)
+n.end <- 2016
+n_test <- 12 * 3
+n_models <- 4
+h.val <- 1 
+
+#set the martix pred
+pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
+
+# the for loop
+for (i in 1: n_test ) {
+  tmp0 <- 2007 #the training start at 2007 
+  tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
+  tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
+  #the training data set from 2007 to the date to its en
+  #2007 to 2016 + (observation windos)
+
+  
+#The acutally value
+  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
+  
+#moding time!
+  fit1 <- Arima(tmp, order=c(2,1,0))
+  fit2 <- Arima(tmp, order=c(0,1,1))
+  fit3 <- Arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  fit4 <- Arima(tmp, order=c(0,1,0))
+  
+#one step
+  pred[i, 2] <- forecast(fit1, h= h.val)$mean[h.val]
+  pred[i, 3] <- forecast(fit2, h= h.val)$mean[h.val]
+  pred[i, 4] <- forecast(fit3, h= h.val)$mean[h.val]
+  pred[i, 5] <- forecast(fit4, h= h.val)$mean[h.val]
+}
+
+#calculate the error
+
+error <- (pred[, -1] - pred[, 1])
+mse <- colMeans(error)
+rmse <- sqrt(colMeans(error^2))
+mae <- colMeans(abs(error))
+mpe <- colMeans((error/ pred[, 1]) * 100)
+mape <- colMeans(abs((error/ pred[, 1]) * 100))
+
+#The outcome
+The_evil_df <- data.frame(
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]",  "ARIMA(0,1,0)"),
+  ME = mse,
+  RMSE = rmse,
+  MAE = mae,
+  MPE = mpe,
+  MAPE = mape
+)
+
+print(The_evil_df)
+
+```
+
+
+
+
+Cross validation two
 The training set: 2007 - 2020
 The test set: 2020 - 2022
 ```{r echo=FALSE, paged.print=FALSE}
@@ -332,7 +440,6 @@ print(The_evil_df)
 
 ```{R echo=FALSE, message=TRUE, warning=TRUE}
 
-
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 model1_forecast <- forecast( model1, h = 12)
 autoplot(model1_forecast) + 
@@ -342,10 +449,10 @@ autoplot(model1_forecast) +
   theme(axis.title = element_text())
 
 model1
-  
 
 
 ```
+
 
 
 The conditional forecasting 1 the bank 
@@ -460,7 +567,6 @@ autoplot(forecast(The_conditional_forecasting_2,
 
 
 ```
-
 
 
 ```{r}
@@ -584,7 +690,6 @@ unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_yea
 #now its time series data!
 #plot(unemployment_rate.ts)
 
-
 #we are assuming we are in no late 2023/1/17 
 #Consumer Price Index (CPI)
 CPI_raw <- "v41690914" #Consumer Price Index, monthly, seasonally adjusted, monthly (2002=100) 
@@ -597,6 +702,7 @@ CPI.ts<- ts(CPI.st$VALUE, start = c(CPI_year.st, CPI_month.st), freq = 12)
 #now its time series data!
 #plot(CPI.ts)
 
+####
 #The bank rate 
 Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
 Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
@@ -609,54 +715,63 @@ Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_mon
 #now its time series data!
 #plot(Bank_rate.ts)
 
-Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
+Can_month_housing_sell_var<- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
 
-
+####
 
 #we are assuming we are in no late 2023/1/17 
 #New housing price index, monthly, monthly (Index, 201612=100) 
 New_housing_price_index_raw <- "v111955442" 
-New_housing_price_index.st <- get_cansim_vector(New_housing_price_index_raw, start_time = Evil.begain, end_time = Evil.end)
+New_housing_price_index.st <- get_cansim_vector(New_housing_price_index_raw, start_time = "2006/01/01", end_time = Evil.end)
 New_housing_price_index_year.st <- year(New_housing_price_index.st$REF_DATE[1])
 New_housing_price_index_month.st <- month(New_housing_price_index.st$REF_DATE[1])
 #transfer data to the time series time
 c(New_housing_price_index_year.st, New_housing_price_index_month.st)
 New_housing_price_index.ts<- ts(New_housing_price_index.st$VALUE, start = c(New_housing_price_index_year.st, New_housing_price_index_month.st), freq = 12)
 #now its time series data!
-#autoplot(New_housing_price_index.ts)
+#autoplot()
+New_housing_price_index_VAR.raw <- 100* diff(log(New_housing_price_index.ts), lag = 12)
+new_housing_price_index_VAR.ts <- window(New_housing_price_index_VAR.raw, start= c(2008,1), end= c(2022,12))
 
+###
 
-
- #V80691311 Chartered bank administered interest rates - Prime_rate(02-Jan-1957 to 05-Apr-2023, Data: 3458)
-
-source("functions/ts_cansim.R")
-
-Prime_rate.st <-get_cansim_vector ("v80691311", start  = "2007/01/01", end  = "2022/12/31")
-Prime_rate_rate <- ts(Prime_rate.st$VALUE)
-Prime_rate_time <-ts(Prime_rate.st$REF_DATE)
-
-Prime_rate.ts <-  cbind(Prime_rate_time, Prime_rate_rate)
-autoplot(Prime_rate.ts)
-
-  st.date <- as.Date(xx$REF_DATE[1])
-  end.date
  Prime_rate_raw <- "v80691311" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
 
- Prime_rate.st <- get_cansim_vector(Prime_rate_raw, start_time = "2007/01/01", end_time = "2022/12/31")
+ Prime_rate.st <- get_cansim_vector(Prime_rate_raw, start_time = "2008/01/01", end_time = "2022/12/01")
  Prime_rate_year.st <- year( Prime_rate.st$REF_DATE[1])
  Prime_rate_month.st <- month( Prime_rate.st$REF_DATE[1])
  Prime_rate_week.st <- week(Prime_rate.st$REF_DATE[1])
  
   c(Prime_rate_year.st,  Prime_rate_month.st)
 
- Prime_rate.ts<- ts( Prime_rate.st$VALUE, start = c( Prime_rate_year.st,  Prime_rate_month.st), freq = 52)
+ Prime_rate.ts<- ts( Prime_rate.st$VALUE, start = c( Prime_rate_year.st, Prime_rate_month.st), freq = 52)
 
- na.omit()
- autoplot(Prime_rate.ts)
+prime_rate_monthly <- ts(aggregate(Prime_rate.ts, nfrequency = 52/12, FUN = mean), start = c(2008, 1), end = c(2022, 12), frequency = 12)
+prime_rate_monthly_full.ts<- na.interp(prime_rate_monthly)
 
 
+#### The housing price index
+
+The_housing_price<- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", 
+    sheet = "Chart 4", col_types = c("date", 
+        "skip",  "numeric", "numeric", "text"))
+
+
+The_housing_price_raw.ts <- ts(The_housing_price$`MLS® HPI Aggregate Composite Benchmark†`, start = c(2005, 1), end = c(2023, 2), frequency = 12)
+
+#I really need to learn how to cut the size of my variable name lol
+The_housing_price_VAR_stationary.raw <-100* diff(log(The_housing_price_raw.ts), lag = 12)
+
+#pass the stationary check
+#adf.test(The_housing_price_VAR_stationary)
+#0.01565 pass the stationary 
+
+#cut to the suitable size
+
+The_housing_price_VAR_stationary.ts <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
 
 ```
+
 
 ```{r}
 ####################
@@ -668,49 +783,198 @@ stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
   Stationary_CPI.ts<- 100 * diff(log(CPI.ts), lag = 12)
   #5.2.4 leave bank rate as it is
   #5.2.5 stationary the housing sell 
-stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell.ts), lag = 12)
-stationary_New_housing_price_index.ts <- 100*(diff(log(New_housing_price_index.ts), lag=12))
+stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell_var.ts), lag = 12)
 
 #5.2.5 put all data together
-all_data <- cbind(stationary_Can_month_housing_sell.ts,stationary_CA_GDP.ts, Stationary_CPI.ts)
+all_data <- cbind(stationary_Can_month_housing_sell.ts,stationary_CA_GDP.ts, Stationary_CPI.ts, prime_rate_monthly_full.ts, The_housing_price_VAR_stationary.ts, new_housing_price_index_VAR.ts, Bank_rate.ts, unemployment_rate.ts)
+
+
+
+
 #autoplot(all_data)
-#The adjustment here
+#The adjustment 
 
 ############################################################
 ```
 
-```{r eval=FALSE, message=FALSE, include=FALSE}
-VARselect(all_data, lag.max = 26, type="const")
+
+
+doing a lasso and reg regression 
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(leaps)
+
+#best subset selection
+#transfer data into the df
+all_data_df <- data.frame(all_data)
+
+all_dat_fun <-cbind(SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, PR = prime_rate_monthly_full.ts, HP = The_housing_price_VAR_stationary.ts, BK = Bank_rate.ts, NPH = new_housing_price_index_VAR.ts, UR = unemployment_rate.ts)
+
+
+####
+
+# plot results
+par(mfrow=c(1,3))
+plot(reg.summary$rss, xlab = "Number of Variables", ylab = "SSR", type = "l")
+plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+m.bic <- which.min(reg.summary$bic)
+points(m.bic, reg.summary$bic[m.bic], col = "green", cex = 2, pch = 20)
+plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+m.cp <- which.min(reg.summary$cp)
+points(m.cp, reg.summary$cp[m.cp], col = "yellow", cex = 2, pch = 20)
+layout(1)
+
+#the best varialbe. = 5 
+
+
+#####
+
+ data2 <- data.frame(all_dat_fun, stationary_Can_month_housing_sell.ts)
+
+regfit.all <- regsubsets(stationary_Can_month_housing_sell.ts ~. , data = data2, nvmax = 100, really.big = TRUE, method = "exhaustive")
+
+
+
+reg.summary <- summary(regfit.all)
+
+plot(regfit.all, scale = "bic")
 
 
 
 ```
 
-```{R}
-The_evil_model <- VAR(all_data, p = 3 ,type = "const")
+The idea variable are 5
+SGPD, SCPI, HP, NPH, UR
+
+
+
+
+```{r}
+
+Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, stationary_CA_GDP.ts, Stationary_CPI.ts, The_housing_price_VAR_stationary.ts, new_housing_price_index_VAR.ts, unemployment_rate.ts)
+
+
+Var_all_data <-cbind(stationary_Can_month_housing_sell.ts, SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, HP = The_housing_price_VAR_stationary.ts,  NPH = new_housing_price_index_VAR.ts)
+The_covid_dummy_VAR.ts <- ts(The_covid_dummy$Covid_dummy, start = c(2008, 1), end = c(2022, 12), frequency = 12)
+
+
+VARselect(Var_all_data, exogen = exogen_variable,  type="const", lag.max = 11)
+
+exogen_variable <- cbind(The_covid_dummy_VAR.ts, Bank_rate.ts)
+
+
+autoplot(Var_all_data, facets = T)
+
+two_exogen_Var_model <- VAR(Var_all_data,  exogen = exogen_variable, p = 2, type="const")
+
+Bankrate_Var_model <- VAR(Var_all_data,  exogen = Bank_rate.ts, p = 2, type="const")
+
+Covid_var_model <-  VAR(Var_all_data,  exogen = The_covid_dummy_VAR.ts, p = 2, type="const")
+  
+var_model <- VAR(Var_all_data, p = 2, type="const")
+
+
 
 
 
 ```
+
+
 
 ```{R echo=FALSE, message=FALSE, warning=FALSE}
 # 5.3 Granger Causality Tests
 
-housing_gdp_causality <- causality(The_evil_model, cause = "stationary_CA_GDP.ts")
-#housing_unemployment_causality <- causality(The_evil_model, cause = "unemployment_rate.ts")
-housing_CPI_causality <- causality(The_evil_model, cause = "Stationary_CPI.ts")
-#housing_bank_rate_causality <- causality(The_evil_model, cause = "Bank_rate.ts")
+# Run Granger causality tests
+housing_gdp_causality <- causality(The_evil_model, cause = "SGDP")$Granger
+housing_CPI_causality <- causality(The_evil_model, cause = "SCPI")$Granger
+housing_houing_price_causality <- causality(The_evil_model, cause = "HP")$Granger
+housing_new_houing_price_causality <- causality(The_evil_model, cause = "NPH")$Granger
+housing_new_houing_price_causality <- causality(The_evil_model, cause = "cobi")$Granger
 
 
-#housing_bank_rate_causality <- causality(The_conditional_forecasting_1, cause = "Stationary_CPI_stationary.ts")
+housing_prime_rate_causality <- causality(The_evil_model, cause = "The_covid_dummy_VAR.ts")$Granger
 
+
+Var_all_data <-cbind(stationary_Can_month_housing_sell.ts, SGDP = stationary_CA_GDP.ts, SCPI = Stationary_CPI.ts, HP = The_housing_price_VAR_stationary.ts,  NPH = new_housing_price_index_VAR.ts, UR = unemployment_rate.ts)
+
+
+
+# Print the results
 
 print(housing_gdp_causality)
-#print(housing_unemployment_causality)
 print(housing_CPI_causality)
-#print(housing_bank_rate_causality)
+print(housing_houing_price_causality)
+print(housing_new_houing_price_causality)
+print(housing_prime_rate_causality)
+
+autoplot(forecast(The_evil_model, h = 12))
+
 ```
 interrdting enroughh that the unemploymetn rate has vey litter granfger causality test with the rest of data. 
+
+```{r}
+
+Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
+
+#(2023 - 2018)
+n.end <- 2019
+n_test <- 12 * 4#the times we need go
+n_models <- 4  
+h.val <- 1 
+
+#set the martix pred
+pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
+
+# the for loop
+for (i in 1: n_test ) {
+  tmp0 <- 2007 #the training start at 2007 
+  tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
+  tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
+  #the training data set from 2007 to the date to its end
+  #2007 to 2016 + (observation windos)
+
+  
+#The acutally value
+  pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
+  
+#moding time!
+  fit1 <- Arima(tmp, order=c(2,1,0))
+  fit2 <- Arima(tmp, order=c(0,1,1))
+  fit3 <- Arima(tmp, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
+  fit4 <- Arima(tmp, order=c(0,1,0))
+  
+#one step
+  pred[i, 2] <- forecast(fit1, h= h.val)$mean[h.val]
+  pred[i, 3] <- forecast(fit2, h= h.val)$mean[h.val]
+  pred[i, 4] <- forecast(fit3, h= h.val)$mean[h.val]
+  pred[i, 5] <- forecast(fit4, h= h.val)$mean[h.val]
+}
+
+#calculate the error
+
+error <- (pred[, -1] - pred[, 1])
+mse <- colMeans(error)
+rmse <- sqrt(colMeans(error^2))
+mae <- colMeans(abs(error))
+mpe <- colMeans((error/ pred[, 1]) * 100)
+mape <- colMeans(abs((error/ pred[, 1]) * 100))
+
+#The outcome
+The_evil_df <- data.frame(
+  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]",  "ARIMA(0,1,0)"),
+  ME = mse,
+  RMSE = rmse,
+  MAE = mae,
+  MPE = mpe,
+  MAPE = mape
+)
+
+print(The_evil_df)
+
+
+
+```
+
 
 
 ```{r echo=FALSE}
