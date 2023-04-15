@@ -35,6 +35,7 @@ library(writexl)
 library(gridExtra)
 library(vars)
 library("ggthemes")
+library(leaps)
 ```
 
 
@@ -93,21 +94,9 @@ Lode all ARIMA combination data
 ##### covid start at 2019/12 
 ##### 2008 recession end in 2008/07
 
-
-
-
-
-#The data set without 
-after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
-The_covid_dummy_after_208.ts <- ts(The_covid_dummy, start = c(2009, 7), end = c(2023, 2), frequency = 12)
-
-#The data from 2007 to 2019 (the entire data without Covid shock)
-Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
-
-#The data from 2008 to 2019 (After recession without covid shock)
-after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2019, 1))
-
-
+#excel is way better on doing the dummy variable
+The_covid_dummy <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/The covid dummy.xlsx", 
+    col_types = c("skip", "numeric"))
 
 ```
 
@@ -119,10 +108,10 @@ after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell
 ######## all data model
 #The entire data
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
-The_covid_dummy.ts <- ts(The_covid_dummy, start = c(2007, 1), end = c(2023, 2), frequency = 12)
+The_covid_dummy_ARIMA.ts <- ts(The_covid_dummy, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
 #moding time
-dall_data_model_1 <- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE,
+all_data_model_1 <- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
                                max.d = 5, max.p = 5, max.q = 5)
@@ -131,13 +120,26 @@ all_data_model_2 <- auto.arima(Can_month_housing_sell.ts)
 
 # all data plus dummy variable
 
-all_data_dummy_1 <- auto.arima(Can_month_housing_sell.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE,
+all_data_dummy_1 <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy_ARIMA.ts, approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
-                               max.d = 5, max.p = 5, max.q = 5)
+                               max.d = 5, max.p = 5, max.q = 5, d = 1)
+#Regression with ARIMA(2,1,0) errors 
+
+all_data_dummy_2 <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy_ARIMA.ts, d = 1) 
+
+#print(all_data_dummy_2)
+#Regression with ARIMA(0,1,1) errors 
 
 
-############
+```
+
+```{r}
+############ 
+
+#The data set without 
+after_2008_forecasting_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2023,2))
+The_covid_dummy_after_208.ts <- ts(The_covid_dummy, start = c(2009, 7), end = c(2023, 2), frequency = 12)
 
 
 ####### after_2008_forecasting_model_1
@@ -149,17 +151,33 @@ after_2008_forecasting_model_1 <- auto.arima(after_2008_forecasting_data, d = 1,
 
 after_2008_forecasting_model_2 <- auto.arima(after_2008_forecasting_data)
 
-##########
 
 
+past_2008_dummy_1 <- auto.arima(after_2008_forecasting_data, d = 1, xreg = The_covid_dummy_after_208.ts,
+                                             approximation = FALSE, parallel = TRUE, stepwise = FALSE,
+                                             num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
+                                             start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
+                                             max.d = 5, max.p = 5, max.q = 5)
+#print(past_2008_dummy_1)
+#Regression with ARIMA(1,1,2) errors 
 
-The_before_during_after_Covid_model_1 <- auto.arima(The_before_during_after_Covid_model.data, d = 1,
-                                                    approximation = FALSE, parallel = TRUE, stepwise = FALSE,
-                                                    num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
-                                                    start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
-                                                    max.d = 5, max.p = 5, max.q = 5)
+past_2008_dummy_2 <- auto.arima(after_2008_forecasting_data, xreg = The_covid_dummy_after_208.ts)
 
-The_before_during_after_Covid_model_2 <- auto.arima(The_before_during_after_Covid_model.data, d=1)
+#print(past_2008_dummy_2)
+#Regression with ARIMA(0,1,1) errors 
+
+
+```
+
+```{r}
+
+########## entire data without covid shocl
+
+#The data from 2007 to 2019 (the entire data without Covid shock)
+Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
+
+##### model 
+
 
 entil_data_without_covid_shock_1<- auto.arima(Can_month_housing_sell_without_covid_shock.ts, 
                                               approximation = FALSE, parallel = TRUE, stepwise = FALSE,
@@ -167,15 +185,32 @@ entil_data_without_covid_shock_1<- auto.arima(Can_month_housing_sell_without_cov
                                               start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
                                               max.d = 5, max.p = 5, max.q = 5)
 
+entil_data_without_covid_shock_2 <- auto.arima(Can_month_housing_sell_without_covid_shock.ts)
+
+
+```
+
+```{r}
+#########
+
+#The data from 2008 to 2019 (After recession without covid shock)
+after_2008_forecasting_without_covid_shock_data <- window(Can_month_housing_sell.ts, start= c(2009,7), end= c(2019, 1))
+
+
 test_model_one_after_2008_forecasting_without_covid_shock_1 <- auto.arima(after_2008_forecasting_without_covid_shock_data,
                                                                           approximation = FALSE, parallel = TRUE, stepwise = FALSE,
                                                                           num.cores = 10, start.p = 0, start.q = 0, start.P = 0, 
                                                                           start.Q = 0, max.Q = 5, max.P = 5, max.D = 5,
                                                                           max.d = 5, max.p = 5, max.q = 5)
 
-entil_data_without_covid_shock_2 <- auto.arima(Can_month_housing_sell_without_covid_shock.ts)
 
 test_model_one_after_2008_forecasting_without_covid_shock_2 <- auto.arima(after_2008_forecasting_without_covid_shock_data)
+
+```
+
+```{r}
+
+from_2007_to_2017 <- window(Can_month_housing_sell.ts, start= c(2007,1), end= c(2017, 1))
 
 from_2007_to_2017_1 <- auto.arima(from_2007_to_2017,
                                   approximation = FALSE, parallel = TRUE, stepwise = FALSE,
@@ -186,6 +221,11 @@ from_2007_to_2017_1 <- auto.arima(from_2007_to_2017,
 from_2007_to_2017_2 <- auto.arima(from_2007_to_2017)
 
 
+
+```
+
+
+```{R}
 ####################
 # Create a data frame with the names and ARIMA models
 models_table <- data.frame(
@@ -197,8 +237,10 @@ models_table <- data.frame(
             as.character(The_before_during_after_Covid_model_2), 
             as.character(test_model_one_after_2008_forecasting_without_covid_shock_1),
             as.character(test_model_one_after_2008_forecasting_without_covid_shock_2),
-            as.character(entil_data_without_covid_shock_1), as.character(entil_data_without_covid_shock_2),
-            as.character(from_2007_to_2017_1), as.character(from_2007_to_2017_2))
+            as.character(entil_data_without_covid_shock_1), 
+            as.character(entil_data_without_covid_shock_2),
+            as.character(from_2007_to_2017_1), 
+            as.character(from_2007_to_2017_2))
 )
 
 # Print the table
@@ -210,7 +252,7 @@ Trying to do the ARIMA with dummy variable
 (its work! but no idea how to do cross validation of it)
 give up on it
 
-```{r}
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 
 
 #generate the random noise
@@ -229,8 +271,6 @@ The_covid_dummy.raw <- ts(The_covid_dummy$Covid_dummy, start = c(2007, 1), end =
 The_covid_dummy.ts <- (error_evil.ts + The_covid_dummy.raw )
 
 
-#draw the graphy
-plot(cd.ts)
 
 
 ARIMA_with_Covid_dummy <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy.ts,  approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10, d = 1)
@@ -258,14 +298,17 @@ autoplot(model_dummy_forecast)
 
 ```{R echo=FALSE, message=FALSE, warning=FALSE}
 model_table_2 <- data.frame(
-  Model = c("ARIMA(2,1,0)", "ARIMA(0,1,1)", "ARIMA(2,1,2)(0,0,1)[12]", "ARIMA(0,1,0)")
+  Model = c("ARIMA(2,1,0)",
+            "ARIMA(0,1,1)", 
+            "ARIMA(2,1,2)(0,0,1)[12]",
+            "ARIMA(0,1,0)")
 )
 print(model_table_2)
 
 ```
 
 
-Compare the AIC and BIC on time data iwhtout covid impact
+Compare the AIC and BIC on data without covid_19 impact
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 #fit the model into the entire data.
 Can_month_housing_sell_without_Covid.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
@@ -339,27 +382,33 @@ The training set 2007 - 2015
 the test set 2016 - 2018
 ```{r}
 
+#put the data here so i will not forget!
 Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
 
 #(2023 - 2018)
-n.end <- 2016
-n_test <- 12 * 3
-n_models <- 4
-h.val <- 1 
+n.end <- 2016 #when the training set end
+n_test <- 12 * 3 
+# the training set end + how many month 
+#这个要算上结束的年份！ n.end = 2016 意思的是测试是2016年开始。
+
+n_models <- 4 #
+h.val <- 1 # how many step forcast
 
 #set the martix pred
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
+#建立一个matrix，全部填NA，test行数和model列数。 
 
 # the for loop
 for (i in 1: n_test ) {
   tmp0 <- 2007 #the training start at 2007 
   tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
+  
   tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
   #the training data set from 2007 to the date to its en
   #2007 to 2016 + (observation windos)
 
   
-#The acutally value
+#The real value
   pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
   
 #moding time!
@@ -378,7 +427,14 @@ for (i in 1: n_test ) {
 #calculate the error
 
 error <- (pred[, -1] - pred[, 1])
+#pred[.-1] 除了第一列的所有减去第一列
+#note here: pred[, -2] does not mean using all the value expect second one...
+  #it mean delete all the second col!
+  #I love matrix and matrix makes me happy
+
 mse <- colMeans(error)
+#reture the mean of coln
+
 rmse <- sqrt(colMeans(error^2))
 mae <- colMeans(abs(error))
 mpe <- colMeans((error/ pred[, 1]) * 100)
@@ -409,22 +465,27 @@ Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c
 #(2023 - 2018)
 n.end <- 2019
 n_test <- 12 * 4#the times we need go
-n_models <- 4  
-h.val <- 1 
+# the training set end + how many month 
+#这个要算上结束的年份！ n.end = 2016 意思的是测试是2016年开始。
+
+n_models <- 4 #
+h.val <- 1 # how many step forcast
 
 #set the martix pred
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
+#建立一个matrix，全部填NA，test行数和model列数。 
 
 # the for loop
 for (i in 1: n_test ) {
   tmp0 <- 2007 #the training start at 2007 
   tmp1 <- n.end + (i - 2) * (1/12) #the end of training windows 
+  
   tmp <- window(Can_month_housing_sell_test.ts, start=tmp0, end=tmp1) 
-  #the training data set from 2007 to the date to its end
+  #the training data set from 2007 to the date to its en
   #2007 to 2016 + (observation windos)
 
   
-#The acutally value
+#The real value
   pred[i, 1] <- window(Can_month_housing_sell.ts, start=tmp1 + (1/12), end=tmp1 + (1/12))
   
 #moding time!
@@ -443,7 +504,14 @@ for (i in 1: n_test ) {
 #calculate the error
 
 error <- (pred[, -1] - pred[, 1])
+#pred[.-1] 除了第一列的所有减去第一列
+#note here: pred[, -2] does not mean using all the value expect second one...
+  #it mean delete all the second col!
+  #I love matrix and matrix makes me happy
+
 mse <- colMeans(error)
+#reture the mean of coln
+
 rmse <- sqrt(colMeans(error^2))
 mae <- colMeans(abs(error))
 mpe <- colMeans((error/ pred[, 1]) * 100)
@@ -462,18 +530,22 @@ The_evil_df <- data.frame(
 print(The_evil_df)
 
 
+
 ```
 
 
 
 ```{R echo=FALSE, message=TRUE, warning=TRUE}
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
-model1_forecast <- forecast( model1, h = 12)
+model1_forecast <- forecast(model1, h = 12)
 autoplot(model1_forecast) + 
   theme_fivethirtyeight() +
-  labs(title = "Canadian housing resales", x = "Year", y = "housing sales") +
-  labs(subtitle = "12 month forceast of model ARIMA (2,1,0)") + 
+  labs(title = "12-Month Forecast of Canadian Housing Resales",
+       x = "Year",
+       y = "Housing Sales") +
+  labs(subtitle = "Forecasting Canadian Housing Resales Using ARIMA (2,1,0)") + 
   theme(axis.title = element_text())
+
 
 ```
 
@@ -482,11 +554,7 @@ autoplot(model1_forecast) +
 The conditional forecasting 1 the bank 
 ```{r The_conditional_forecasting_1, message=FALSE, warning=FALSE, paged.print=FALSE}
 
-# I did not using this one? 
-# Because no idea how to deal with policy rate.....
 
-#The conditional forecast one: The bank rate with Canadian housing resale.
-#################The bank rate
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
 
 
@@ -536,6 +604,8 @@ Housing_sell_Stationary_CPI.ts <- cbind(Stationary_housing_resale_ARIMA.ts, Bank
 
 
 
+
+
 Try the lag test
 ```{r}
 # The_lage_test
@@ -557,6 +627,7 @@ fit4 <- auto.arima(Housing_sell_Stationary_CPI.ts[4:40, 1], xreg=BankRate[4:40, 
 cat("AICc values:", fit1[["aicc"]], fit2[["aicc"]], fit3[["aicc"]], fit4[["aicc"]], "\n")
 
 #only lag one? 
+#I spend 40 min it is only lag one? 
 ```
 
 
@@ -565,9 +636,12 @@ cat("AICc values:", fit1[["aicc"]], fit2[["aicc"]], fit3[["aicc"]], fit4[["aicc"
 now is generate the dynamatic regression's acutally arima model.
 ```{r}
 
-The_conditional_forecasting_2 <- auto.arima(Stationary_housing_resale_ARIMA.ts, xreg = Bank_rate_ARIMA.ts,  approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10)
+The_conditional_forecasting_2 <- auto.arima(Stationary_housing_resale_ARIMA.ts, xreg = Bank_rate_ARIMA.ts, stationary = T, approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10)
 
+print(The_conditional_forecasting_2)
 ```
+
+
 
 
 What if the policy rate remain 4.5 for next 12 month
@@ -576,24 +650,28 @@ What if the policy rate remain 4.5 for next 12 month
 Stationary_Bank_ARIMA_forecasting_1.ts <- matrix(rep(4.5, times = 12), ncol = 1)
 
 
+Stationary_Bank_ARIMA_forecast_1.ts <- matrix(rep(4.5, times = 12), ncol = 1)
+
 autoplot(forecast(The_conditional_forecasting_2, 
                  h = 12, 
-                 xreg = Stationary_Bank_ARIMA_forecasting_1.ts)) +
+                 xreg = Stationary_Bank_ARIMA_forecast_1.ts)) +
   theme_fivethirtyeight() +
   xlab("Year") +
   ylab("Percentage") +
-  ggtitle("Forecasting of Canadian Housing Resales") +
-  labs(subtitle = "If the policy rate stay at 4.5% current level for 12 months") +
+  ggtitle("Forecasting Year-over-Year Change") +
+  labs(subtitle = "What Happens If the Policy Rate Stays at the Current Level of 4.5% for 12 Months?") +
   theme(axis.title = element_text())
+#why is it not performing well?
+
 
 #it not working very good?
 #but why?
 ```
 
-What if the policy rate remain 1.75 for next 12 month (the average in 2019)
+What if the policy rate remain 2 for next 12 month (the average in 2019)
 
 ```{r}
-Stationary_Bank_ARIMA_forecasting_2.ts <- matrix(rep(1.75, times = 12), ncol = 1)
+Stationary_Bank_ARIMA_forecasting_2.ts <- matrix(rep(2, times = 12), ncol = 1)
 
 
 autoplot(forecast(The_conditional_forecasting_2, 
@@ -602,8 +680,8 @@ autoplot(forecast(The_conditional_forecasting_2,
   theme_fivethirtyeight() +
   xlab("Year") +
   ylab("Percentage") +
-  ggtitle("Forecasting of Canadian Housing Resales") +
-  labs(subtitle = "If the policy rate stay at 4.5% current level for 12 months") +
+  ggtitle("Forecasting Year-over-Year Change") +
+  labs(subtitle = "What Happens If the Policy Rate Stays at the Current Level of 2% for 12 Months?") +
   theme(axis.title = element_text())
 
 #it not working very good?
@@ -731,7 +809,7 @@ stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell_var.
   #stationary the housing price index 
   The_housing_price_VAR_stationary.raw <-100* diff(log(The_housing_price_raw.ts), lag = 12)
   #cut to the suitable size
-  HPI <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
+    HPI <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
   
 
   #The prime rate 
@@ -749,7 +827,6 @@ why? because var model crashed....
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 
 
-
 #stationary_Can_month_housing_sell.ts
 
 # Transfer data into the df
@@ -757,15 +834,16 @@ Best_subselect<- cbind(stationary_CA_GDP.ts, Stationary_CPI.ts, HPI, new_housing
 
 all_data_df <- data.frame(Best_subselect)
 
+
 # Select specific columns from all_data_df
+# need to using short verson of name...
+# in case 
 x <- all_data_df %>%
   dplyr::select(
    SGDP = stationary_CA_GDP.ts,
    SCPI =  Stationary_CPI.ts,
-   NHPI = new_housing_price_index_VAR.ts,
    HPI,
    unemployment_rate.ts,
-   Bank_rate.ts
   ) %>%
   data.matrix()
 
@@ -777,7 +855,6 @@ data2 <- data.frame(x, stationary_Can_month_housing_sell.ts)
 regfit.all <- regsubsets(stationary_Can_month_housing_sell.ts~ ., data = data2, nvmax = 100, method = "exhaustive")
 reg.summary <- summary(regfit.all)
 print(reg.summary)
-
 
 
 # Plot results
@@ -794,33 +871,41 @@ points(m.cp, reg.summary$cp[m.cp], col = "green", cex = 2, pch = 20)
 layout(1)
 
 # Plot the regfit.all object with BIC
-plot(regfit.all, scale = "bic")
+plot(regfit.all, scale = "bic", title = "best subset selection") 
 #not working?
 
 
-#transfer the data into number becasue time series does not
+#transfer the data into number because time series does not working with it....
+#妈耶救救孩子
 
 y_numeric <- as.numeric(stationary_Can_month_housing_sell.ts)
 
 
+# Fit lasso model
+# Why lasso? 
+# Because it can forcase some variable to zero...
 
-
-
-# Fit Lasso model with a range of lambda values
 lasso.mod <- glmnet(x, y_numeric, alpha = 1, lambda = 100^seq(3, -3, length = 1000))
 
-# Plot Lasso path
-plot(lasso.mod, xvar = "lambda", label = TRUE)
+# graphy time?
+#I have no idea why we need this grpahy? 
+#所以为啥要这个图？
+#autoplot(lasso.mod, xvar = "lambda", label = TRUE)
 
-# Perform cross-validation with 5 folds
+# 5 fold cross validation for lasso...
 lasso.cv <- cv.glmnet(x, y_numeric, alpha = 1, nfolds = 5)
 
-# Fit Lasso model with the optimal lambda value from cross-validation
+#using the the smalled to fit thegrahy....
 model3 <- glmnet(x, y_numeric, alpha = 1, lambda = lasso.cv$lambda.min)
 
-# Extract coefficients from the Lasso model
+# lasso! lasso! lasso!
 coef3 <- coef(model3)
+
+
 print(coef3)
+# only one variable? 
+# only one? 
+
 
 
 
@@ -838,7 +923,9 @@ print(coef3)
 #set a new data series just for fit the model
 
 #the Var data
-Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts)
+Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts, unemploymnet 
+                      
+                      )
 
 ##
 The_covid_dummy <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/The covid dummy.xlsx", 
