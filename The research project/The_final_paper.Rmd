@@ -1,16 +1,23 @@
 ---
 output:
-  word_document: default
+  pdf_document: default
   html_document: default
   latex_engine: xelatex
-  pdf_document: default
+  word_document: default
 fontsize: 12pt
 mainfont: Times New Roman
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=FALSE)
+alist( message=FALSE, warning=FALSE, paged.print=FALSE, echo=FALSE )
+alist(message=FALSE, warning=FALSE, paged.print=FALSE, echo=FALSE)
+
+
+```
 
 loding the package
-```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 library(ggplot2)
 library(fpp2)
 library(glmnet)
@@ -41,7 +48,7 @@ library(leaps)
 
 
 loading the data
-```{r message=FALSE, include=FALSE, paged.print=FALSE}
+```{r message=FALSE, paged.print=FALSE}
 #1.import the data
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 
@@ -50,7 +57,7 @@ Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007
 ```
 
 #The overall data and seasonal plot
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 
 autoplot(Can_month_housing_sell.ts) +
 theme_fivethirtyeight() +
@@ -73,21 +80,14 @@ labs(subtitle = "Housing resales are higher in the summer") +
 theme(axis.title = element_text())
 
 
-#stationary_CA_GDP.ts
 
-#autoplot(stationary_CA_GDP.ts) +
-#   theme_fivethirtyeight() + 
-#   xlab("Year") +
-#  ylab("percentage") +
-#  ggtitle("Canadian norminal GDP growth rate (2002 = 100)") +
- #  theme(axis.title = element_text())
-
+#plot the bank rate. 
 
  Bank_rate_1_ARIMA_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
  Bank_rate_1_ARIMA.st <- get_cansim_vector( Bank_rate_1_ARIMA_raw, start_time = "2007/01/01")
  Bank_rate_1_ARIMA_year.st <- year( Bank_rate_1_ARIMA.st$REF_DATE[1])
  Bank_rate_1_ARIMA_month.st <- month( Bank_rate_1_ARIMA.st$REF_DATE[1])
-c( Bank_rate_1_ARIMA_year.st,  Bank_rate_1_ARIMA_month.st)
+ c(Bank_rate_1_ARIMA_year.st,  Bank_rate_1_ARIMA_month.st)
 
  Bank_rate_1_ARIMA.ts<- ts( Bank_rate_1_ARIMA.st$VALUE, start = c( Bank_rate_1_ARIMA_year.st,  Bank_rate_1_ARIMA_month.st), freq = 12)
  
@@ -97,32 +97,29 @@ ylab("Policy rate") +
 theme_fivethirtyeight() +
 xlab("Month") +
 ylab("rate") +
-ggtitle("Policy rate set by ") +
+ggtitle("Policy rate set by Bank of Canada ") +
 labs(subtitle = "from 2007 to 2023") +
 theme(axis.title = element_text())
 
 
-
-
-
 ```
 
+The part one: ARIMA
 Lode all ARIMA combination data 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 
 ##### covid start at 2019/12 
 ##### 2008 recession end in 2008/07
 
-#excel is way better on doing the dummy variable
+#excel is way better on doing the covid dummy variable
 The_covid_dummy <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/The covid dummy.xlsx", 
     col_types = c("skip", "numeric"))
-
 ```
 
 
 ```{r}
 #construed model
-#note: first I realize its may help them I realize this is waste of time....
+#note: first I realize with those fancy settingmay help them I realize this is waste of time....
 
 ######## all data model
 #The entire data
@@ -185,12 +182,16 @@ past_2008_dummy_2 <- auto.arima(after_2008_forecasting_data, xreg = The_covid_du
 #print(past_2008_dummy_2)
 #Regression with ARIMA(0,1,1) errors 
 
+#I did do the ARIMA with Covid dummy variable but it does not including in the paper becuase cross validation does not work.
+#it just keep tell me it cannot found model :(
+#the three years before and after does not included within the paper..
+
 
 ```
 
 ```{r}
 
-########## entire data without covid shocl
+########## entire data without covid shock
 
 #The data from 2007 to 2019 (the entire data without Covid shock)
 Can_month_housing_sell_without_covid_shock.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
@@ -247,7 +248,7 @@ from_2007_to_2017_2 <- auto.arima(from_2007_to_2017)
 ```{R}
 ####################
 # Create a data frame with the names and ARIMA models
-models_table <- data.frame(
+ARIMA_models_table <- data.frame(
   ARIMA = c(as.character(all_data_model_1), 
             as.character(all_data_model_2), 
             as.character(after_2008_forecasting_model_1), 
@@ -263,7 +264,7 @@ models_table <- data.frame(
 )
 
 # Print the table
-print(models_table)
+print(ARIMA_models_table)
 ```
 
 
@@ -273,7 +274,7 @@ give up on it
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 
-
+#maybe put some noise?
 #generate the random noise
 set.seed(123)
 error <- rnorm(196, mean = 0, sd = 1)
@@ -290,13 +291,10 @@ The_covid_dummy.raw <- ts(The_covid_dummy$Covid_dummy, start = c(2007, 1), end =
 The_covid_dummy.ts <- (error_evil.ts + The_covid_dummy.raw )
 
 
-
-
 ARIMA_with_Covid_dummy <- auto.arima(Can_month_housing_sell.ts, xreg = The_covid_dummy.ts,  approximation = FALSE, parallel = TRUE, stepwise = FALSE, num.cores = 10, d = 1)
 print(ARIMA_with_Covid_dummy)
 
-
-
+# ARIMA(2,1,0).......
 # Create future covid dummy for the next 12 months
 covid_dummy_future <- numeric(length = 12)
 for (i in 1:12) {
@@ -306,23 +304,21 @@ for (i in 1:12) {
 # Convert covid_dummy_future to a time series object
 covid_dummy_future.ts <- ts(covid_dummy_future, start = c(2023, 3), frequency = 12)
 
-
 model_dummy_forecast <- forecast(ARIMA_with_Covid_dummy, xreg = covid_dummy_future.ts, h = 12)
 
 autoplot(model_dummy_forecast)
+#It does not make things better.
 ```
 
 
-
-
 ```{R echo=FALSE, message=FALSE, warning=FALSE}
-model_table_2 <- data.frame(
+ARIMA_model_table_2 <- data.frame(
   Model = c("ARIMA(2,1,0)",
             "ARIMA(0,1,1)", 
             "ARIMA(2,1,2)(0,0,1)[12]",
             "ARIMA(0,1,0)")
 )
-print(model_table_2)
+print(ARIMA_model_table_2)
 
 ```
 
@@ -341,7 +337,7 @@ model2_Without_Covid<- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,
 # Fit the ARIMA(2,1,2)(0,0,1)[12] model with zero mean
 model3_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(2,1,2), seasonal=list(order=c(0,0,1), period=12))
 
-# Fit the ARIMA(0,1,0) model
+# Fit the ARIMA(0,1,0) mod
 model4_Without_Covid <- Arima(Can_month_housing_sell_without_Covid.ts, order=c(0,1,0))
 
 
@@ -553,7 +549,7 @@ print(The_evil_df)
 ```
 
 
-
+ARIMA (210) and ARIMA (011)
 ```{R echo=FALSE, message=TRUE, warning=TRUE}
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 model1_forecast <- forecast(model1, h = 12)
@@ -580,22 +576,23 @@ autoplot(model1_forecast) +
 
 
 
-The conditional forecasting 1 the bank 
+from here to part 2 var forecasting are unused code.
+you can just jump to part 2 var model....
+
+The conditional forecasting 1 base on ARIMA but give up on it due to the frecasting almost same
 ```{r The_conditional_forecasting_1, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
 
-
  #V80691311
-
  Bank_rate_ARIMA_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly
  Bank_rate_ARIMA.st <- get_cansim_vector( Bank_rate_ARIMA_raw, start_time = "2008/01/01", end_time = "2022/12/31")
  Bank_rate_ARIMA_year.st <- year( Bank_rate_ARIMA.st$REF_DATE[1])
  Bank_rate_ARIMA_month.st <- month( Bank_rate_ARIMA.st$REF_DATE[1])
 c( Bank_rate_ARIMA_year.st,  Bank_rate_ARIMA_month.st)
 
- Bank_rate_ARIMA.ts<- ts( Bank_rate_ARIMA.st$VALUE, start = c( Bank_rate_ARIMA_year.st,  Bank_rate_ARIMA_month.st), freq = 12)
+ Bank_rate_ARIMA.ts<- ts( Bank_rate_ARIMA.st$VALUE, start = c( Bank_rate_ARIMA_year.st, Bank_rate_ARIMA_month.st), freq = 12)
 ################
  
  
@@ -603,8 +600,7 @@ c( Bank_rate_ARIMA_year.st,  Bank_rate_ARIMA_month.st)
 ```
 
 
-
-The conditional forecasting 2: The CPI with the bank rate
+The conditional forecasting 2: The CPI with the bank rate (The plane B for the ARIMA forecasting)
 ```{r}
 
 #we are assuming we are in no late 2023/1/17  
@@ -634,9 +630,6 @@ Housing_sell_Stationary_CPI.ts <- cbind(Stationary_housing_resale_ARIMA.ts, Bank
 ```
 
 
-
-
-
 Try the lag test
 ```{r}
 # The_lage_test
@@ -662,8 +655,6 @@ cat("AICc values:", fit1[["aicc"]], fit2[["aicc"]], fit3[["aicc"]], fit4[["aicc"
 ```
 
 
-
-
 now is generate the dynamatic regression's acutally arima model.
 ```{r}
 
@@ -671,8 +662,6 @@ The_conditional_forecasting_2 <- auto.arima(Stationary_housing_resale_ARIMA.ts, 
 
 print(The_conditional_forecasting_2)
 ```
-
-
 
 
 What if the policy rate remain 4.5 for next 12 month
@@ -700,7 +689,6 @@ autoplot(forecast(The_conditional_forecasting_2,
 ```
 
 What if the policy rate remain 2 for next 12 month (the average in 2019)
-
 ```{r}
 Stationary_Bank_ARIMA_forecasting_2.ts <- matrix(rep(2, times = 12), ncol = 1)
 
@@ -722,23 +710,14 @@ autoplot(forecast(The_conditional_forecasting_2,
 
 
 
-
-
 Part 2 VAR model 
-
-For better understand and forecasting the reltionahup between the canadian housing relase and other macro economic data relative to the business cycle. I contrucede model include the bank rate, gdp and infaltion and unmpleotymenr rate
-
-
 
 First: data collection
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 
 #Statistics Canada is pure evil!
-
-
 Evil.begain <- "2007/01/01"
 Evil.end <- "2022/12/31"
-
 
 #The GDP data Canada [11124]; Seasonally adjusted at annual rates; 2012 constant prices; All industries
 CA_GDP_raw <- "v65201483"
@@ -804,7 +783,6 @@ New_housing_price_index.ts<- ts(New_housing_price_index.st$VALUE, start = c(New_
 New_housing_price_index_VAR.raw <- 100* diff(log(New_housing_price_index.ts), lag = 12)
 new_housing_price_index_VAR.ts <- window(New_housing_price_index_VAR.raw, start= c(2008,1), end= c(2022,12))
 
-#########
 
 
 #####
@@ -821,6 +799,7 @@ The_housing_price_raw.ts <- ts(The_housing_price$`MLS® HPI Aggregate Composite 
 
 adf.test(The_housing_price_VAR_stationary.raw)
 
+#the housing price graphy!
 autoplot(The_housing_price_raw.ts) +
  theme_fivethirtyeight() +
   xlab("Year") +
@@ -837,7 +816,6 @@ autoplot(The_housing_price_raw.ts) +
 ```{r echo=FALSE}
 
 #Variable Transformation########################################
-
   #5.2.1 stationary CA_GDP.ts 
 stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
   #5.2.2 leacve unemployment rate as it is 
@@ -948,13 +926,6 @@ print(coef3)
 # only one variable? 
 # only one? 
 
-
-
-
-
-
-
-
 ```
 
 #The backward search suggest that SCPIand HP are variable been picked
@@ -970,7 +941,7 @@ Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, H
 
 #leg selection
 #VARselect(Var_all_data, type="const", lag.max = 11)
-#var_model_test <- VAR(Var_all_data, p = 3, type="const")
+var_model_test <- VAR(Var_all_data, p = 3, type="const")
 #roots(var_model)
 #serial.test(var_model_test, lags.pt = 10, type = "PT.asymptotic")
 
@@ -1005,9 +976,6 @@ print(pv_matrix)
 ```{r echo=FALSE}
 
 Var_final_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts)
-
-
-
 
 #The covid dummy variable
 The_covid_dummy_VAR.ts <- ts(The_covid_dummy$Covid_dummy, start = c(2008, 1), end = c(2022, 12), frequency = 12)
@@ -1077,10 +1045,7 @@ autoplot(Var_forecasting_two$forecast$stationary_Can_month_housing_sell.ts)+
   theme(axis.title = element_text())
 
 
-
-
 ```
-
 
 
 
