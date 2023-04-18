@@ -1,23 +1,13 @@
 ---
-output:
-  pdf_document: default
-  html_document: default
-  latex_engine: xelatex
-  word_document: default
 fontsize: 12pt
 mainfont: Times New Roman
+output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE, eval=FALSE)
-alist( message=FALSE, warning=FALSE, paged.print=FALSE, echo=FALSE )
-alist(message=FALSE, warning=FALSE, paged.print=FALSE, echo=FALSE)
-
-
-```
 
 loding the package
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+```{r echo=F, include=FALSE}
+library(jquerylib)
 library(ggplot2)
 library(fpp2)
 library(glmnet)
@@ -41,14 +31,14 @@ library(wesanderson)
 library(writexl)
 library(gridExtra)
 library(vars)
-library("ggthemes")
+library(ggthemes)
 library(leaps)
 ```
 
 
 
 loading the data
-```{r message=FALSE, paged.print=FALSE}
+```{r}
 #1.import the data
 Can_housing_sell_data.raw <- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", sheet = "Chart A", col_types = c("date",  "numeric", "numeric", "skip", "skip"))
 
@@ -57,7 +47,7 @@ Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007
 ```
 
 #The overall data and seasonal plot
-```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r}
 
 autoplot(Can_month_housing_sell.ts) +
 theme_fivethirtyeight() +
@@ -106,8 +96,7 @@ theme(axis.title = element_text())
 
 The part one: ARIMA
 Lode all ARIMA combination data 
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-
+```{r}
 ##### covid start at 2019/12 
 ##### 2008 recession end in 2008/07
 
@@ -245,7 +234,7 @@ from_2007_to_2017_2 <- auto.arima(from_2007_to_2017)
 ```
 
 
-```{R}
+```{r}
 ####################
 # Create a data frame with the names and ARIMA models
 ARIMA_models_table <- data.frame(
@@ -253,8 +242,6 @@ ARIMA_models_table <- data.frame(
             as.character(all_data_model_2), 
             as.character(after_2008_forecasting_model_1), 
             as.character(after_2008_forecasting_model_2),
-            as.character(The_before_during_after_Covid_model_1), 
-            as.character(The_before_during_after_Covid_model_2), 
             as.character(test_model_one_after_2008_forecasting_without_covid_shock_1),
             as.character(test_model_one_after_2008_forecasting_without_covid_shock_2),
             as.character(entil_data_without_covid_shock_1), 
@@ -272,7 +259,7 @@ Trying to do the ARIMA with dummy variable
 (its work! but no idea how to do cross validation of it)
 give up on it
 
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+```{r}
 
 #maybe put some noise?
 #generate the random noise
@@ -311,7 +298,7 @@ autoplot(model_dummy_forecast)
 ```
 
 
-```{R echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
 ARIMA_model_table_2 <- data.frame(
   Model = c("ARIMA(2,1,0)",
             "ARIMA(0,1,1)", 
@@ -324,7 +311,7 @@ print(ARIMA_model_table_2)
 
 
 Compare the AIC and BIC on data without covid_19 impact
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r}
 #fit the model into the entire data.
 Can_month_housing_sell_without_Covid.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2019, 1), frequency = 12)
 
@@ -360,7 +347,7 @@ print(AIC_and_BIC_Matrix_for_without_covid)
 
 
 Compare the AIC and BIC on time data with covid impact
-```{r echo=FALSE}
+```{r}
 #fit the model into the entire data.
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023, 2), frequency = 12)
 
@@ -404,14 +391,12 @@ Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c
 n.end <- 2016 #when the training set end
 n_test <- 12 * 3 
 # the training set end + how many month 
-#这个要算上结束的年份！ n.end = 2016 意思的是测试是2016年开始。
 
 n_models <- 4 #
 h.val <- 1 # how many step forcast
 
 #set the martix pred
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
-#建立一个matrix，全部填NA，test行数和model列数。 
 
 # the for loop
 for (i in 1: n_test ) {
@@ -442,7 +427,7 @@ for (i in 1: n_test ) {
 #calculate the error
 
 error <- (pred[, -1] - pred[, 1])
-#pred[.-1] 除了第一列的所有减去第一列
+#pred[.-1]
 #note here: pred[, -2] does not mean using all the value expect second one...
   #it mean delete all the second col!
   #I love matrix and matrix makes me happy
@@ -469,11 +454,10 @@ print(The_evil_df)
 
 ```
 
-
 Cross validation two
 The training set: 2007 - 2020
 The test set: 2020 - 2022
-```{r echo=FALSE, paged.print=FALSE}
+```{r}
 
 Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2023,1), frequency = 12)
 
@@ -481,15 +465,12 @@ Can_month_housing_sell_test.ts <- ts(Can_housing_sell_data.raw$Canada, start = c
 n.end <- 2019
 n_test <- 12 * 4#the times we need go
 # the training set end + how many month 
-#这个要算上结束的年份！ n.end = 2016 意思的是测试是2016年开始。
 
 n_models <- 4 #
 h.val <- 1 # how many step forcast
 
 #set the martix pred
 pred <- matrix(rep(NA, n_test * (n_models + 1)), nrow=n_test, ncol=(n_models + 1)) 
-#建立一个matrix，全部填NA，test行数和model列数。 
-
 # the for loop
 for (i in 1: n_test ) {
   tmp0 <- 2007 #the training start at 2007 
@@ -519,7 +500,7 @@ for (i in 1: n_test ) {
 #calculate the error
 
 error <- (pred[, -1] - pred[, 1])
-#pred[.-1] 除了第一列的所有减去第一列
+#pred[.-1]
 #note here: pred[, -2] does not mean using all the value expect second one...
   #it mean delete all the second col!
   #I love matrix and matrix makes me happy
@@ -550,7 +531,7 @@ print(The_evil_df)
 
 
 ARIMA (210) and ARIMA (011)
-```{R echo=FALSE, message=TRUE, warning=TRUE}
+```{R}
 model1<- Arima(Can_month_housing_sell.ts, order=c(2,1,0))
 model1_forecast <- forecast(model1, h = 12)
 autoplot(model1_forecast) + 
@@ -570,17 +551,352 @@ autoplot(model1_forecast) +
        y = "Housing Sales") +
   labs(subtitle = "Forecasting Canadian Housing Resales Using ARIMA (0,1,1)") + 
   theme(axis.title = element_text())
+```
+
+
+Part 2 VAR model 
+
+First: data collection
+```{r}
+#Statistics Canada is pure evil!
+Evil.begain <- "2007/01/01"
+Evil.end <- "2022/12/31"
+
+#The GDP data Canada [11124]; Seasonally adjusted at annual rates; 2012 constant prices; All industries
+CA_GDP_raw <- "v65201483"
+CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time =  "2007/01/01", end_time = "2022/12/31")
+CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
+CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
+#transfer data to the time series time
+c(CA_GDP_year.st, CA_GDP_month.st)
+CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
+plot(CA_GDP.ts)
+#autoplot(CA_GDP.ts)
+
+#get the data form statistic Canada
+unemployment_rate_raw <- "v2062815" #Unemployment rate (Percentage); Both sexes; 15 years and over; Estimate; SA, Monthly.
+unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
+unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
+unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
+#transfer data to the time series time
+c(unemployment_rate_year.st, unemployment_rate_month.st)
+unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
+#now its time series data!
+#plot(unemployment_rate.ts)
+
+#we are assuming we are in no late 2023/1/17 
+#Consumer Price Index (CPI)
+CPI_raw <- "v41690914" #Consumer Price Index, monthly, seasonally adjusted, monthly (2002=100) 
+CPI.st <- get_cansim_vector(CPI_raw, start_time = "2007/01/01", end_time = "2022/12/31")
+CPI_year.st <- year(CPI.st$REF_DATE[1])
+CPI_month.st <- month(CPI.st$REF_DATE[1])
+#transfer data to the time series time
+c(CPI_year.st, CPI_month.st)
+CPI.ts<- ts(CPI.st$VALUE, start = c(CPI_year.st, CPI_month.st), freq = 12)
+#now its time series data!
+#plot(CPI.ts)
+
+####
+#The bank rate 
+Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
+Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
+Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
+Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
+
+#transfer data to the time series time
+c(Bank_rate_year.st, Bank_rate_month.st)
+Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_month.st), freq = 12)
+#now its time series data!
+#plot(Bank_rate.ts)
+
+Can_month_housing_sell_var<- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
+
+#########
+#we are assuming we are in no late 2023/1/17 
+#New housing price index, monthly, monthly (Index, 201612=100) 
+#New_housing_price_index_raw <- "v111955442" 
+#New_housing_price_index.st <- get_cansim_vector(New_housing_price_index_raw, start_time = "2006/01/01", end_time = Evil.end)
+#New_housing_price_index_year.st <- year(New_housing_price_index.st$REF_DATE[1])
+#New_housing_price_index_month.st <- month(New_housing_price_index.st$REF_DATE[1])
+##transfer data to the time series time
+#c(New_housing_price_index_year.st, New_housing_price_index_month.st)
+#New_housing_price_index.ts<- ts(New_housing_price_index.st$VALUE, start = c(New_housing_price_index_year.st, New_housing_price_index_month.st), freq = 12)
+#now its time series data!
+#autoplot()
+#New_housing_price_index_VAR.raw <- 100* diff(log(New_housing_price_index.ts), lag = 12)
+# <- window(New_housing_price_index_VAR.raw, start= c(2008,1), end= c(2022,12))
+
+
+
+#####
+Can_month_housing_sell_var.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
+##########
+
+#### The housing price index
+
+The_housing_price<- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", 
+    sheet = "Chart 4", col_types = c("date", "skip",  "numeric", "numeric", "text"))
+
+The_housing_price_raw.ts <- ts(The_housing_price$`MLS® HPI Aggregate Composite Benchmark†`, start = c(2005, 1), end = c(2023, 2), frequency = 12)
+
+
+#the housing price graphy!
+autoplot(The_housing_price_raw.ts) +
+ theme_fivethirtyeight() +
+  xlab("Year") +
+  ylab("Percentage") +
+  ggtitle("Housing price index") +
+  labs(subtitle = "MLS® HPI Aggregate Composite Benchmark") +
+  theme(axis.title = element_text())
+
 
 
 ```
 
 
+```{r}
 
+#Variable Transformation########################################
+  #5.2.1 stationary CA_GDP.ts 
+stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
+  #5.2.2 leacve unemployment rate as it is 
+      #unemployment_rate.ts
+  #5.2.3 stationary CPI.ts
+  Stationary_CPI.ts<- 100 * diff(log(CPI.ts), lag = 12)
+  #5.2.4 leave bank rate as it is
+  #5.2.5 stationary the housing sell 
+stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell_var.ts), lag = 12)
+  #stationary the housing price index 
+  The_housing_price_VAR_stationary.raw <-100* diff(log(The_housing_price_raw.ts), lag = 12)
+  #cut to the suitable size
+    HPI <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
+  
+
+  #The prime rate 
+    #note: something went wrong on it
+   # 
+    
+    
+#5.2.5 put all data together
+all_data <- cbind(stationary_CA_GDP.ts, Stationary_CPI.ts, HPI, Bank_rate.ts, unemployment_rate.ts)
+
+```
+
+
+doing the best subselection
+why? because var model crashed....
+```{r}
+
+
+#stationary_Can_month_housing_sell.ts
+
+# Transfer data into the df
+Best_subselect<- cbind(stationary_CA_GDP.ts, Stationary_CPI.ts, HPI, unemployment_rate.ts, Bank_rate.ts)
+
+all_data_df <- data.frame(Best_subselect)
+
+
+# Select specific columns from all_data_df
+# need to using short verson of name...
+
+x <- all_data_df %>%
+  dplyr::select(
+   SGDP = stationary_CA_GDP.ts,
+   SCPI =  Stationary_CPI.ts,
+   HPI,
+   UI = unemployment_rate.ts,
+   BK =  Bank_rate.ts
+  ) %>%
+  data.matrix()
+
+data2 <- data.frame(x, stationary_Can_month_housing_sell.ts)
+
+
+
+#best subset selection time!
+regfit.all <- regsubsets(stationary_Can_month_housing_sell.ts~ ., data = data2, nvmax = 100, method = "exhaustive")
+reg.summary <- summary(regfit.all)
+print(reg.summary)
+
+
+# Plot results
+par(mfrow = c(1, 3))
+plot(reg.summary$rss, xlab = "Number of Variables", ylab = "SSR", type = "l")
+m.rss <- which.min(reg.summary$rss)
+points(m.rss, reg.summary$rss[m.rss], col = "green", cex = 2, pch = 20)
+plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+m.bic <- which.min(reg.summary$bic)
+points(m.bic, reg.summary$bic[m.bic], col = "green", cex = 2, pch = 20)
+plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+m.cp <- which.min(reg.summary$cp)
+points(m.cp, reg.summary$cp[m.cp], col = "green", cex = 2, pch = 20)
+layout(1)
+
+plot(regfit.all, scale = "bic", title = "best subset selection") 
+#not working?
+
+
+#transfer the data into number because time series does not working with it....
+y_numeric <- as.numeric(stationary_Can_month_housing_sell.ts)
+
+
+# Fit lasso model
+# Why lasso? 
+# Because it can forcase some variable to zero...
+
+lasso.mod <- glmnet(x, y_numeric, alpha = 1, lambda = 100^seq(3, -3, length = 1000))
+
+# graphy time?
+#I have no idea why we need this grpahy? 
+#autoplot(lasso.mod, xvar = "lambda", label = TRUE)
+
+# 5 fold cross validation for lasso...
+lasso.cv <- cv.glmnet(x, y_numeric, alpha = 1, nfolds = 5)
+
+#using the the smalled to fit thegrahy....
+model3 <- glmnet(x, y_numeric, alpha = 1, lambda = lasso.cv$lambda.min)
+
+# lasso! lasso! lasso!
+coef3 <- coef(model3)
+
+
+print(coef3)
+# only one variable? 
+# only one? 
+
+```
+
+#The backward search suggest that SCPIand HP are variable been picked
+
+
+```{r}
+
+#base on the cauality test pick the best variable for further evoluation.
+
+#the Var data
+Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts, unemployment_rate.ts)
+
+
+#leg selection
+#VARselect(Var_all_data, type="const", lag.max = 11)
+var_model_test <- VAR(Var_all_data, p = 3, type="const")
+#roots(var_model)
+#serial.test(var_model_test, lags.pt = 10, type = "PT.asymptotic")
+
+
+
+# doing the granger test....
+housing_CPI_pvalue <- causality(var_model_test, cause = "Stationary_CPI.ts")$Granger$p.value
+housing_houing_price_pvalue <- causality(var_model_test, cause = "HPI")$Granger$p.value
+housing_gdp_pvalue <- causality(var_model_test, cause = "stationary_CA_GDP.ts")$Granger$p.value
+housing_unemployment_pvalue <- causality(var_model_test, cause = "unemployment_rate.ts")$Granger$p.value
+
+# put the p value into the matrix
+pv_matrix <- matrix(c(housing_CPI_pvalue, 
+                      housing_houing_price_pvalue, 
+                      housing_gdp_pvalue, 
+                      housing_unemployment_pvalue), 
+                    nrow = 1, ncol = 4, byrow = TRUE)
+
+# Set the column names of the matrix
+colnames(pv_matrix) <- c("CPI", "HPI", "GDP", "Unemployment")
+rownames(pv_matrix) <- c("p-value")
+
+# Print the matrix
+print(pv_matrix)
+
+
+
+
+```
+
+
+```{r}
+
+Var_final_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts)
+
+#The covid dummy variable
+The_covid_dummy_VAR.ts <- ts(The_covid_dummy$Covid_dummy, start = c(2008, 1), end = c(2022, 12), frequency = 12)
+ 
+#put bank rate with covid dummy variable together.
+exogen_variable <- cbind(The_covid_dummy_VAR.ts, Bank_rate.ts)
+
+#we can see how the bank rate and covid dummy variable impact on the entire housing resale market.
+
+
+VARselect(Var_final_data, exogen = exogen_variable,  type="const", lag.max = 11)
+
+var_final <- VAR(Var_final_data, exogen = exogen_variable, p = 3, type="const")
+
+serial.test(var_final, lags.pt = 10, type = "PT.asymptotic")
+
+
+
+###ready for the dummy varialbe
+
+### The forecasting
+The_future_covid_dummy.ts <-ts(rep(0, 12), start = c(2022, 12), frequency = 12)
+
+#The bank rate set at 2% 
+Bank_rate_1  <-ts(rep(2, 12), start = c(2022, 12), frequency = 12)
+
+#The bank rate set at 4.5%
+Bank_rate_2  <-ts(rep(4.5, 12), start = c(2022, 12), frequency = 12)
+
+
+##########
+Var_exogen_one <- as.matrix(cbind(The_future_covid_dummy.ts, Bank_rate_1)) 
+
+##########
+Var_exogen_two <- cbind(The_future_covid_dummy.ts, Bank_rate_2)
+
+
+######## now its conditonal forecasting
+#forget to change the colname
+
+colnames(Var_exogen_one) <- colnames(exogen_variable)
+colnames(Var_exogen_two) <- colnames(exogen_variable)
+
+
+#forecasting_Time!
+Var_forecasting_one <- forecast(var_final, dumvar = Var_exogen_one , h = 12 )
+
+Var_forecasting_two <- forecast(var_final, dumvar = Var_exogen_two , h = 12)
+
+# Print the results
+autoplot(Var_forecasting_one$forecast$stationary_Can_month_housing_sell.ts) +
+  theme_fivethirtyeight() +
+  xlab("Year") +
+  ylab("Percentage") +
+  ggtitle("VAR Forecasting Year-over-Year Change") +
+  labs(subtitle = "What Happens If the Policy Rate Stays at of 2% for 12 Months?") +
+  theme(axis.title = element_text())
+
+
+
+autoplot(Var_forecasting_two$forecast$stationary_Can_month_housing_sell.ts)+
+ theme_fivethirtyeight() +
+  xlab("Year") +
+  ylab("Percentage") +
+  ggtitle("VAR Forecasting Year-over-Year Change") +
+  labs(subtitle = "What Happens If the Policy Rate Stays at the Current Level of 4.5% for 12 Months?") +
+  theme(axis.title = element_text())
+
+
+```
+
+now, I can finally rest in the peace
+
+Tie Ma
+2023/04/15
+
+
+The additional part not included in the paper
 from here to part 2 var forecasting are unused code.
 you can just jump to part 2 var model....
 
 The conditional forecasting 1 base on ARIMA but give up on it due to the frecasting almost same
-```{r The_conditional_forecasting_1, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r}
 
 
 Can_month_housing_sell.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
@@ -707,353 +1023,6 @@ autoplot(forecast(The_conditional_forecasting_2,
 #but why?
 
 ```
-
-
-
-Part 2 VAR model 
-
-First: data collection
-```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-
-#Statistics Canada is pure evil!
-Evil.begain <- "2007/01/01"
-Evil.end <- "2022/12/31"
-
-#The GDP data Canada [11124]; Seasonally adjusted at annual rates; 2012 constant prices; All industries
-CA_GDP_raw <- "v65201483"
-CA_GDP.st <- get_cansim_vector(CA_GDP_raw, start_time =  "2007/01/01", end_time = "2022/12/31")
-CA_GDP_year.st <- year(CA_GDP.st$REF_DATE[1])
-CA_GDP_month.st <- month(CA_GDP.st$REF_DATE[1])
-#transfer data to the time series time
-c(CA_GDP_year.st, CA_GDP_month.st)
-CA_GDP.ts <-ts(CA_GDP.st$VALUE, start = c(CA_GDP_year.st, CA_GDP_month.st), freq = 12)
-plot(CA_GDP.ts)
-#autoplot(CA_GDP.ts)
-
-#get the data form statistic Canada
-unemployment_rate_raw <- "v2062815" #Unemployment rate (Percentage); Both sexes; 15 years and over; Estimate; SA, Monthly.
-unemployment.st <- get_cansim_vector(unemployment_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
-unemployment_rate_year.st <- year(unemployment.st$REF_DATE[1])
-unemployment_rate_month.st <- month(unemployment.st$REF_DATE[1])
-#transfer data to the time series time
-c(unemployment_rate_year.st, unemployment_rate_month.st)
-unemployment_rate.ts<- ts(unemployment.st$VALUE, start = c(unemployment_rate_year.st, unemployment_rate_month.st), freq = 12)
-#now its time series data!
-#plot(unemployment_rate.ts)
-
-#we are assuming we are in no late 2023/1/17 
-#Consumer Price Index (CPI)
-CPI_raw <- "v41690914" #Consumer Price Index, monthly, seasonally adjusted, monthly (2002=100) 
-CPI.st <- get_cansim_vector(CPI_raw, start_time = "2007/01/01", end_time = "2022/12/31")
-CPI_year.st <- year(CPI.st$REF_DATE[1])
-CPI_month.st <- month(CPI.st$REF_DATE[1])
-#transfer data to the time series time
-c(CPI_year.st, CPI_month.st)
-CPI.ts<- ts(CPI.st$VALUE, start = c(CPI_year.st, CPI_month.st), freq = 12)
-#now its time series data!
-#plot(CPI.ts)
-
-####
-#The bank rate 
-Bank_rate_raw <- "v122530" #Financial market statistics, last Wednesday unless otherwise stated, Bank of Canada, monthly 
-Bank_rate.st <- get_cansim_vector(Bank_rate_raw, start_time = "2008/01/01", end_time = "2022/12/31")
-Bank_rate_year.st <- year(Bank_rate.st$REF_DATE[1])
-Bank_rate_month.st <- month(Bank_rate.st$REF_DATE[1])
-
-#transfer data to the time series time
-c(Bank_rate_year.st, Bank_rate_month.st)
-Bank_rate.ts<- ts(Bank_rate.st$VALUE, start = c(Bank_rate_year.st, Bank_rate_month.st), freq = 12)
-#now its time series data!
-#plot(Bank_rate.ts)
-
-Can_month_housing_sell_var<- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
-
-#########
-#we are assuming we are in no late 2023/1/17 
-#New housing price index, monthly, monthly (Index, 201612=100) 
-New_housing_price_index_raw <- "v111955442" 
-New_housing_price_index.st <- get_cansim_vector(New_housing_price_index_raw, start_time = "2006/01/01", end_time = Evil.end)
-New_housing_price_index_year.st <- year(New_housing_price_index.st$REF_DATE[1])
-New_housing_price_index_month.st <- month(New_housing_price_index.st$REF_DATE[1])
-#transfer data to the time series time
-c(New_housing_price_index_year.st, New_housing_price_index_month.st)
-New_housing_price_index.ts<- ts(New_housing_price_index.st$VALUE, start = c(New_housing_price_index_year.st, New_housing_price_index_month.st), freq = 12)
-#now its time series data!
-#autoplot()
-New_housing_price_index_VAR.raw <- 100* diff(log(New_housing_price_index.ts), lag = 12)
-new_housing_price_index_VAR.ts <- window(New_housing_price_index_VAR.raw, start= c(2008,1), end= c(2022,12))
-
-
-
-#####
-Can_month_housing_sell_var.ts <- ts(Can_housing_sell_data.raw$Canada, start = c(2007, 1), end = c(2022, 12), frequency = 12)
-##########
-
-#### The housing price index
-
-The_housing_price<- read_excel("/Users/tie/Documents/GitHub/ECON-493-forcasting-economy/The research project/News_release_chart_data_mar_2023.xlsx", 
-    sheet = "Chart 4", col_types = c("date", "skip",  "numeric", "numeric", "text"))
-
-The_housing_price_raw.ts <- ts(The_housing_price$`MLS® HPI Aggregate Composite Benchmark†`, start = c(2005, 1), end = c(2023, 2), frequency = 12)
-
-
-adf.test(The_housing_price_VAR_stationary.raw)
-
-#the housing price graphy!
-autoplot(The_housing_price_raw.ts) +
- theme_fivethirtyeight() +
-  xlab("Year") +
-  ylab("Percentage") +
-  ggtitle("Housing price index") +
-  labs(subtitle = "MLS® HPI Aggregate Composite Benchmark") +
-  theme(axis.title = element_text())
-
-
-
-```
-
-
-```{r echo=FALSE}
-
-#Variable Transformation########################################
-  #5.2.1 stationary CA_GDP.ts 
-stationary_CA_GDP.ts <- 100 *diff(log(CA_GDP.ts), lag = 12)
-  #5.2.2 leacve unemployment rate as it is 
-      #unemployment_rate.ts
-  #5.2.3 stationary CPI.ts
-  Stationary_CPI.ts<- 100 * diff(log(CPI.ts), lag = 12)
-  #5.2.4 leave bank rate as it is
-  #5.2.5 stationary the housing sell 
-stationary_Can_month_housing_sell.ts <- 100*diff(log(Can_month_housing_sell_var.ts), lag = 12)
-  #stationary the housing price index 
-  The_housing_price_VAR_stationary.raw <-100* diff(log(The_housing_price_raw.ts), lag = 12)
-  #cut to the suitable size
-    HPI <- window(The_housing_price_VAR_stationary.raw, start= c(2008,1), end= c(2022,12))
-  
-
-  #The prime rate 
-    #note: something went wrong on it
-    
-
-#5.2.5 put all data together
-all_data <- cbind(stationary_CA_GDP.ts, Stationary_CPI.ts, HPI, new_housing_price_index_VAR.ts, Bank_rate.ts, unemployment_rate.ts)
-
-```
-
-
-doing the best subselection
-why? because var model crashed....
-```{r message=FALSE, warning=FALSE, paged.print=FALSE， echo=FALSE}
-
-
-#stationary_Can_month_housing_sell.ts
-
-# Transfer data into the df
-Best_subselect<- cbind(stationary_CA_GDP.ts, Stationary_CPI.ts, HPI, new_housing_price_index_VAR.ts, unemployment_rate.ts, Bank_rate.ts)
-
-all_data_df <- data.frame(Best_subselect)
-
-
-# Select specific columns from all_data_df
-# need to using short verson of name...
-
-x <- all_data_df %>%
-  dplyr::select(
-   SGDP = stationary_CA_GDP.ts,
-   SCPI =  Stationary_CPI.ts,
-   HPI,
-   UI = unemployment_rate.ts,
-   BK =  Bank_rate.ts
-  ) %>%
-  data.matrix()
-
-data2 <- data.frame(x, stationary_Can_month_housing_sell.ts)
-
-
-
-#best subset selection time!
-regfit.all <- regsubsets(stationary_Can_month_housing_sell.ts~ ., data = data2, nvmax = 100, method = "exhaustive")
-reg.summary <- summary(regfit.all)
-print(reg.summary)
-
-
-# Plot results
-par(mfrow = c(1, 3))
-plot(reg.summary$rss, xlab = "Number of Variables", ylab = "SSR", type = "l")
-m.rss <- which.min(reg.summary$rss)
-points(m.rss, reg.summary$rss[m.rss], col = "green", cex = 2, pch = 20)
-plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
-m.bic <- which.min(reg.summary$bic)
-points(m.bic, reg.summary$bic[m.bic], col = "green", cex = 2, pch = 20)
-plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
-m.cp <- which.min(reg.summary$cp)
-points(m.cp, reg.summary$cp[m.cp], col = "green", cex = 2, pch = 20)
-layout(1)
-
-# Plot the regfit.all object with BIC
-plot(regfit.all, scale = "bic", title = "best subset selection") 
-#not working?
-
-
-#transfer the data into number because time series does not working with it....
-#妈耶救救孩子
-
-y_numeric <- as.numeric(stationary_Can_month_housing_sell.ts)
-
-
-# Fit lasso model
-# Why lasso? 
-# Because it can forcase some variable to zero...
-
-lasso.mod <- glmnet(x, y_numeric, alpha = 1, lambda = 100^seq(3, -3, length = 1000))
-
-# graphy time?
-#I have no idea why we need this grpahy? 
-#所以为啥要这个图？
-#autoplot(lasso.mod, xvar = "lambda", label = TRUE)
-
-# 5 fold cross validation for lasso...
-lasso.cv <- cv.glmnet(x, y_numeric, alpha = 1, nfolds = 5)
-
-#using the the smalled to fit thegrahy....
-model3 <- glmnet(x, y_numeric, alpha = 1, lambda = lasso.cv$lambda.min)
-
-# lasso! lasso! lasso!
-coef3 <- coef(model3)
-
-
-print(coef3)
-# only one variable? 
-# only one? 
-
-```
-
-#The backward search suggest that SCPIand HP are variable been picked
-
-
-```{r echo=FALSE}
-
-#base on the cauality test pick the best variable for further evoluation.
-
-#the Var data
-Var_all_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts, unemployment_rate.ts)
-
-
-#leg selection
-#VARselect(Var_all_data, type="const", lag.max = 11)
-var_model_test <- VAR(Var_all_data, p = 3, type="const")
-#roots(var_model)
-#serial.test(var_model_test, lags.pt = 10, type = "PT.asymptotic")
-
-
-
-# doing the granger test....
-housing_CPI_pvalue <- causality(var_model_test, cause = "Stationary_CPI.ts")$Granger$p.value
-housing_houing_price_pvalue <- causality(var_model_test, cause = "HPI")$Granger$p.value
-housing_gdp_pvalue <- causality(var_model_test, cause = "stationary_CA_GDP.ts")$Granger$p.value
-housing_unemployment_pvalue <- causality(var_model_test, cause = "unemployment_rate.ts")$Granger$p.value
-
-# put the p value into the matrix
-pv_matrix <- matrix(c(housing_CPI_pvalue, 
-                      housing_houing_price_pvalue, 
-                      housing_gdp_pvalue, 
-                      housing_unemployment_pvalue), 
-                    nrow = 1, ncol = 4, byrow = TRUE)
-
-# Set the column names of the matrix
-colnames(pv_matrix) <- c("CPI", "HPI", "GDP", "Unemployment")
-rownames(pv_matrix) <- c("p-value")
-
-# Print the matrix
-print(pv_matrix)
-
-
-
-
-```
-
-
-```{r echo=FALSE}
-
-Var_final_data <- cbind(stationary_Can_month_housing_sell.ts, Stationary_CPI.ts, HPI, stationary_CA_GDP.ts)
-
-#The covid dummy variable
-The_covid_dummy_VAR.ts <- ts(The_covid_dummy$Covid_dummy, start = c(2008, 1), end = c(2022, 12), frequency = 12)
- 
-#put bank rate with covid dummy variable together.
-exogen_variable <- cbind(The_covid_dummy_VAR.ts, Bank_rate.ts)
-
-#we can see how the bank rate and covid dummy variable impact on the entire housing resale market.
-
-
-VARselect(Var_final_data, exogen = exogen_variable,  type="const", lag.max = 11)
-
-var_final <- VAR(Var_final_data, exogen = exogen_variable, p = 3, type="const")
-
-serial.test(var_final, lags.pt = 10, type = "PT.asymptotic")
-
-
-
-###ready for the dummy varialbe
-
-### The forecasting
-The_future_covid_dummy.ts <-ts(rep(0, 12), start = c(2022, 12), frequency = 12)
-
-#The bank rate set at 2% 
-Bank_rate_1  <-ts(rep(2, 12), start = c(2022, 12), frequency = 12)
-
-#The bank rate set at 4.5%
-Bank_rate_2  <-ts(rep(4.5, 12), start = c(2022, 12), frequency = 12)
-
-
-##########
-Var_exogen_one <- as.matrix(cbind(The_future_covid_dummy.ts, Bank_rate_1)) 
-
-##########
-Var_exogen_two <- cbind(The_future_covid_dummy.ts, Bank_rate_2)
-
-
-######## now its conditonal forecasting
-#forget to change the colname
-
-colnames(Var_exogen_one) <- colnames(exogen_variable)
-colnames(Var_exogen_two) <- colnames(exogen_variable)
-
-
-#forecasting_Time!
-Var_forecasting_one <- forecast(var_final, dumvar = Var_exogen_one , h = 12 )
-
-Var_forecasting_two <- forecast(var_final, dumvar = Var_exogen_two , h = 12)
-
-# Print the results
-autoplot(Var_forecasting_one$forecast$stationary_Can_month_housing_sell.ts) +
-  theme_fivethirtyeight() +
-  xlab("Year") +
-  ylab("Percentage") +
-  ggtitle("VAR Forecasting Year-over-Year Change") +
-  labs(subtitle = "What Happens If the Policy Rate Stays at of 2% for 12 Months?") +
-  theme(axis.title = element_text())
-
-
-
-autoplot(Var_forecasting_two$forecast$stationary_Can_month_housing_sell.ts)+
- theme_fivethirtyeight() +
-  xlab("Year") +
-  ylab("Percentage") +
-  ggtitle("VAR Forecasting Year-over-Year Change") +
-  labs(subtitle = "What Happens If the Policy Rate Stays at the Current Level of 4.5% for 12 Months?") +
-  theme(axis.title = element_text())
-
-
-```
-
-
-
-
-now, I can finally rest in the peace
-
-Tie Ma
-2023/04/15
 
 
 
